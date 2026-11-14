@@ -9,7 +9,7 @@ export class RewardScene extends Phaser.Scene {
   preload() { preloadArt(this); }
   create() {
     if (!this.mission) { this.scene.start('Build', { design: this.design }); return; }
-    addArt(this);
+    addArt(this, this.design);
     const m = this.mission, s = stats(catalog, this.design), success = m.delivered >= 2;
     const ui = mount(this, success ? '¡Misión <span>cumplida!</span>' : 'Cada prueba <span>enseña algo.</span>', 'Descubrí qué funcionó y cómo mejorar tu satélite.', 2);
     ui.root.querySelector('.assembly-zone').hidden = true;

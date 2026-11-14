@@ -35,7 +35,7 @@ La integración convierte las reglas del borrador de TypeScript a JavaScript. No
 
 La interfaz de construcción mantiene la dirección visual del borrador anterior. Respeta el formato 1920 × 1080 con escalado FIT del esqueleto; la primera prueba está orientada a computadora o tablet horizontal. En teléfonos puede resultar pequeña y falta validar accesibilidad y lectura con Super Kids. Los controles de selección son HTML y permiten teclado; Menu y Station todavía usan los botones originales de Phaser.
 
-La ilustración del satélite es común a todas las combinaciones; el tamaño general distingue paneles compactos de extendidos, pero no representa ensamblaje geométrico de piezas individuales. Las elecciones sí cambian los recursos y los resultados. El hallazgo del bosque se explica con texto simulado, sin imágenes ambientales reales ni visor comparativo.
+El satélite se compone de piezas visuales independientes en `src/ui/satellite.js`, tomadas de un atlas generado con IA. La cámara cambia de una a dos lentes, los paneles cambian de longitud, la batería de uno a dos módulos y la antena de varilla a plato. Al seleccionar una pieza se anima su montaje y aparece un realce breve, respetando movimiento reducido. La misma configuración visual se conserva en Build, Test y Reward. Las proporciones son ilustrativas y no corresponden a hardware real. Las elecciones también cambian los recursos y los resultados. El hallazgo del bosque se explica con texto simulado, sin imágenes ambientales reales ni visor comparativo.
 
 Las ilustraciones son generadas con IA. Los valores del catálogo son didácticos. Consultar [fuentes, atribuciones y reglas](public/FUENTES.md). Todavía falta validar el balance y la experiencia con usuarios del público objetivo.
 

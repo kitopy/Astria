@@ -8,7 +8,7 @@ export class BuildScene extends Phaser.Scene {
   init(data = {}) { this.design = readDesign(data.design ?? this.registry.get('satelliteDesign')); }
   preload() { preloadArt(this); }
   create() {
-    this.art = addArt(this);
+    this.art = addArt(this, this.design);
     this.ui = mount(this, 'Tu satélite. <span>Tu misión.</span>', 'Construí, probá y descubrí qué cambia en la Tierra.', 0);
     this.ui.bind({
       launch: () => { if (stats(catalog, this.design).valid) this.scene.start('Test', { design: { ...this.design } }); },
@@ -36,18 +36,17 @@ export class BuildScene extends Phaser.Scene {
     if (!kinds.includes(kind)) return;
     const part = catalog[kind].options.find(option => option.id === id);
     if (!part) return;
-    this.design[kind] = id; this.persist(); this.render();
+    this.design[kind] = id; this.persist(); this.render(kind);
     this.ui.root.querySelector(`input[name="${kind}"]:checked`)?.focus({ preventScroll: true });
     this.ui.say(`${part.name}: ${part.benefit.toLowerCase()}, pero ${part.tradeoff.toLowerCase()}. ${stats(catalog, this.design).valid ? 'Probá cómo se combina con las otras piezas.' : 'Revisá los límites antes de lanzar.'}`);
   }
-  render() {
+  render(changedKind = null) {
     const s = stats(catalog, this.design);
     this.ui.area('left').innerHTML = `<h2>Taller del satélite</h2><p class="panel-intro">Elegí una pieza por tipo. Cada ventaja tiene un desafío.</p>${kinds.map(kind => `<fieldset class="part-group"><legend>${catalog[kind].label}</legend><div class="part-options">${catalog[kind].options.map(part => `<label class="part-choice ${this.design[kind] === part.id ? 'selected' : ''}" draggable="true" data-kind="${kind}" data-part="${part.id}"><span class="part-title"><input type="radio" name="${kind}" value="${part.id}" ${this.design[kind] === part.id ? 'checked' : ''}>${part.name}</span><span class="part-benefit">+ ${part.benefit}</span><span class="part-tradeoff">− ${part.tradeoff}</span><small>${part.cost} créditos · ${part.mass} kg</small></label>`).join('')}</div></fieldset>`).join('')}`;
     resources(this.ui, s);
     this.ui.area('actions').innerHTML = actionButton('menu', 'Menú') + actionButton('reset', 'Reiniciar') + actionButton('launch', 'Probar mi satélite →', true, !s.valid);
     const p = selected(catalog, this.design);
     this.ui.area('caption-detail').textContent = `${p.camera.name} · Paneles ${p.solar.name.toLowerCase()} · Batería ${p.battery.name.toLowerCase()}`;
-    const width = this.design.solar === 'large' ? 720 : 650;
-    this.art.setDisplaySize(width, width * 2 / 3);
+    this.art.applyDesign(this.design, changedKind);
   }
 }

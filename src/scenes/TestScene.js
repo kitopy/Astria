@@ -13,7 +13,7 @@ export class TestScene extends Phaser.Scene {
   preload() { preloadArt(this); }
   create() {
     if (!this.mission) { this.scene.start('Build', { design: this.design }); return; }
-    this.art = addArt(this);
+    this.art = addArt(this, this.design);
     this.ui = mount(this, 'Poné tu diseño <span>a prueba.</span>', 'Observá, administrá la energía y enviá tus descubrimientos.', 1);
     this.ui.root.querySelector('.assembly-zone').hidden = true;
     this.ui.bind({ capture: () => this.perform('capture'), transmit: () => this.perform('transmit'),

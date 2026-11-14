@@ -1,13 +1,14 @@
 import { limits } from '../game/model.js';
+import { SatelliteAssembly } from './satellite.js';
 
 export function preloadArt(scene) {
-  for (const key of ['earth', 'satellite']) {
+  for (const key of ['earth', 'satellite-modules']) {
     if (!scene.textures.exists(key)) scene.load.image(key, `${import.meta.env.BASE_URL}assets/${key}.png`);
   }
 }
-export function addArt(scene) {
+export function addArt(scene, design) {
   scene.add.image(1050, 550, 'earth').setDisplaySize(1000, 800);
-  const satellite = scene.add.image(1050, 510, 'satellite').setDisplaySize(690, 460).setAngle(-5);
+  const satellite = new SatelliteAssembly(scene, 1050, 510, design);
   return satellite;
 }
 export function mount(scene, title, subtitle, step) {
