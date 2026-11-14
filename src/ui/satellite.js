@@ -47,6 +47,7 @@ export class SatelliteAssembly extends Phaser.GameObjects.Container {
       this.scene.tweens.killTweensOf(part);
       part.setFrame(config.frame).setDisplaySize(config.size, config.height).setPosition(config.x, config.y).setAlpha(1);
     }
+    this.setPlaced(this.placed ?? ['camera', 'solar', 'battery', 'antenna']);
     this.scene.tweens.killTweensOf(this.highlight);
     this.highlight.clear().setAlpha(0);
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -62,6 +63,22 @@ export class SatelliteAssembly extends Phaser.GameObjects.Container {
     };
     this.highlight.lineStyle(3, COLORS.glow, .9).strokeEllipse(spot.x, spot.y, spot.w, spot.h).setAlpha(1);
     this.scene.tweens.add({ targets: this.highlight, alpha: 0, duration: 650, ease: 'Sine.easeOut' });
+  }
+
+  // Which part types are mounted on the satellite. The body is always there; the others appear
+  // only once placed (the workshop builds the satellite piece by piece). Default: all of them.
+  setPlaced(kinds) {
+    this.placed = new Set(kinds);
+    this.wings.forEach(wing => wing.setVisible(this.placed.has('solar')));
+    for (const [kind, part] of Object.entries(this.components)) part.setVisible(this.placed.has(kind));
+    return this;
+  }
+
+  // Where a part type is mounted, in the satellite's own coordinates (before scaling).
+  // Solar panels have two spots, one per wing. Used to draw the "empty slot" marker.
+  slots(kind) {
+    if (kind === 'solar') return this.wings.map(wing => ({ x: wing.x, y: 0, w: 200, h: 130 }));
+    return [{ x: 0, y: { camera: 25, battery: 160, antenna: -160 }[kind], w: 150, h: 130 }];
   }
 
   setTint(value) {

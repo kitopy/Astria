@@ -36,7 +36,7 @@ export class TestScene extends Phaser.Scene {
     this.ui.bind({
       capture: () => this.perform('capture'),
       transmit: () => this.perform('transmit'),
-      workshop: () => this.scene.start('Build', { design: this.design }),
+      workshop: () => this.scene.start('Build', { design: this.design, focus: 'review' }),
       next: () => {
         if (this.mission.phase === 3) {
           this.scene.start('Reward', { design: this.design, mission: this.mission });
@@ -73,7 +73,7 @@ export class TestScene extends Phaser.Scene {
     const sent = taken && m.sent && !m.photos.some((photo) => photo.phase === n);
     const state = sent ? 'sent' : taken ? 'taken' : '';
     const text = sent ? 'En la Tierra ✓' : taken ? 'A bordo' : 'Pendiente';
-    return `<div class="ws-photo ${state}"><b>${sent ? '🌍' : taken ? '📷' : '·'}</b>Foto ${n}<br>${text}</div>`;
+    return `<div class="ws-photo ${state}"><b>Foto ${n}</b>${text}</div>`;
   }
 
   render() {
@@ -86,14 +86,14 @@ export class TestScene extends Phaser.Scene {
 
     let taskButton = '';
     if (isPhotoPhase) {
-      const label = m.captured.includes(m.phase) ? 'Foto tomada ✓' : `📷 Tomar foto · −${s.cameraPower}`;
+      const label = m.captured.includes(m.phase) ? 'Foto tomada ✓' : `Tomar foto (−${s.cameraPower})`;
       taskButton = actionButton('capture', label, true, !canCapture).replace('ws-btn', 'ws-btn ws-wide');
     } else if (m.phase === 3) {
-      const label = m.sent ? 'Envío realizado ✓' : `📡 Enviar fotos · −${s.antennaPower}`;
+      const label = m.sent ? 'Envío realizado ✓' : `Enviar fotos (−${s.antennaPower})`;
       taskButton = actionButton('transmit', label, true, !canTransmit).replace('ws-btn', 'ws-btn ws-wide');
     }
 
-    let hint = 'Tomar una foto y enviarla son dos acciones distintas.';
+    let hint = ''; // only shown when something is wrong
     if (isPhotoPhase && !m.captured.includes(m.phase) && !canCapture) hint = 'No alcanza la energía para la cámara. Podés seguir y mejorar el diseño al final.';
     if (m.phase === 3 && !m.sent && m.energy < s.antennaPower) hint = 'No alcanza la energía para enviar. Lo revisaremos en los resultados.';
 
@@ -103,10 +103,9 @@ export class TestScene extends Phaser.Scene {
         .map((p, i) => `<li class="${i < m.phase ? 'done' : i === m.phase ? 'current' : ''}"><span>${i < m.phase ? '✓' : i + 1}</span>${p.title}</li>`)
         .join('')}</ol>
       <div class="ws-task">
-        <span class="ws-chip">${phase.sun ? '☀️ Con luz del Sol' : '🌑 En sombra'}</span>
-        <p>${phase.task}</p>
+        <span class="ws-chip">${phase.sun ? 'Con luz del Sol' : 'En sombra'}</span>
         ${taskButton}
-        <p class="ws-hint">${hint}</p>
+        ${hint ? `<p class="ws-hint">${hint}</p>` : ''}
       </div>`;
 
     this.ui.area('right').innerHTML = `
@@ -114,12 +113,11 @@ export class TestScene extends Phaser.Scene {
       ${meter('Energía', m.energy, s.capacity)}
       <div class="ws-photos">${this.photoSlot(1)}${this.photoSlot(2)}</div>
       <dl class="ws-specs">
-        <div><dt>☀️ Recarga con luz</dt><dd>+${s.generation}</dd></div>
-        <div><dt>📷 Cada foto usa</dt><dd>−${s.cameraPower}</dd></div>
-        <div><dt>📡 Enviar usa</dt><dd>−${s.antennaPower}</dd></div>
+        <div><dt>Recarga con luz</dt><dd>+${s.generation}</dd></div>
+        <div><dt>Cada foto usa</dt><dd>−${s.cameraPower}</dd></div>
+        <div><dt>Enviar usa</dt><dd>−${s.antennaPower}</dd></div>
       </dl>`;
 
-    this.ui.area('center').innerHTML = `<div class="ws-caption"><strong>${phase.title}</strong>${m.captured.length}/2 fotos tomadas · ${m.delivered}/2 en la Tierra</div>`;
 
     this.ui.area('actions').innerHTML =
       actionButton('workshop', 'Volver al taller') +

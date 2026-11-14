@@ -67,7 +67,7 @@ export class RewardScene extends Phaser.Scene {
       : actionButton('improve', 'Mejorar mi satélite ›', true);
 
     ui.bind({
-      improve: () => this.scene.start('Build', { design: this.design }),
+      improve: () => this.scene.start('Build', { design: this.design, focus: 'review' }),
       observe: () => this.scene.start('Observe'),
     });
 
