@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { DESIGN, addCoverBackground, centerDesignArea } from '../ui/layout.js';
 import { addStarfield } from '../ui/starfield.js';
+import { COLORS } from '../ui/palette.js';
 
 // Title screen: the first thing the player sees.
 // Layout and colors come from the GDevelop scene "MENU PRINCIPAL".
@@ -51,12 +52,12 @@ export class MenuScene extends Phaser.Scene {
 
     // Fill layer: starts squashed to zero width (scaleX 0), grows to 1 on hover.
     const fill = this.add.graphics();
-    fill.fillStyle(0x6b3fc4, 0.9).fillPoints(shape, true);
+    fill.fillStyle(COLORS.violet, 0.9).fillPoints(shape, true);
     fill.scaleX = 0;
 
     const border = this.add.graphics();
-    border.lineStyle(10, 0xb98cff, 0.25).strokePoints(shape, true); // soft outer glow
-    border.lineStyle(3, 0xe6d2ff, 1).strokePoints(shape, true); // sharp neon line
+    border.lineStyle(10, COLORS.orchid, 0.3).strokePoints(shape, true); // soft outer glow
+    border.lineStyle(3, COLORS.glow, 1).strokePoints(shape, true); // sharp neon line
 
     const label = this.add
       .text(0, 0, 'COMENZAR MISIÓN', { fontFamily: 'Audiowide', fontSize: '44px', color: '#ffffff' })

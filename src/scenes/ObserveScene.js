@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { preloadArt } from '../ui/mission-ui.js';
 import { speakIfEnabled } from '../ui/noahVoice.js';
 import { addCoverBackground, centerDesignArea } from '../ui/layout.js';
+import { COLORS, CSS } from '../ui/palette.js';
 
 // Region of earth.png used as the "photo" taken by the satellite (forest, river, mountain).
 const PHOTO_CROP = { x: 420, y: 730, width: 454, height: 294 };
@@ -50,7 +51,7 @@ export class ObserveScene extends Phaser.Scene {
     });
 
     this.continueButton = this.add
-      .text(1450, 905, 'CONTINUAR ›', { fontFamily: 'Audiowide', fontSize: '30px', color: '#b9f566' })
+      .text(1450, 905, 'CONTINUAR ›', { fontFamily: 'Audiowide', fontSize: '30px', color: CSS.glow })
       .setOrigin(1, 1)
       .setInteractive({ useHandCursor: true })
       .setVisible(false)
@@ -126,7 +127,7 @@ export class ObserveScene extends Phaser.Scene {
   highlightChange(photo) {
     const circle = this.add
       .circle(photo.x + CHANGE.x * photo.w, photo.y + CHANGE.y * photo.h, 95)
-      .setStrokeStyle(6, 0xb9f566);
+      .setStrokeStyle(6, COLORS.gold); // gold = discovery
     this.tweens.add({ targets: circle, scale: 1.12, duration: 600, yoyo: true, repeat: -1 });
   }
 

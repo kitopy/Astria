@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
+import { COLORS } from './palette.js';
 
 // Rectángulos medidos en el atlas (coordenadas normalizadas a 1280 × 1280).
-const frames = {
+export const frames = {
   body: [50, 50, 340, 350], 'solar-small': [440, 110, 350, 230], 'solar-large': [800, 105, 450, 240],
   'camera-simple': [70, 460, 300, 330], 'camera-detail': [425, 470, 395, 320], 'battery-light': [900, 470, 240, 320],
   'battery-long': [35, 885, 380, 340], 'antenna-basic': [500, 870, 240, 350], 'antenna-fast': [820, 835, 430, 390]
@@ -59,7 +60,7 @@ export class SatelliteAssembly extends Phaser.GameObjects.Container {
     const spot = changedKind === 'solar' ? { x: 0, y: 0, w: 730, h: 180 } : {
       x: layout[changedKind].x, y: layout[changedKind].y, w: layout[changedKind].size * .9, h: layout[changedKind].size * .85
     };
-    this.highlight.lineStyle(3, 0xb9f566, .9).strokeEllipse(spot.x, spot.y, spot.w, spot.h).setAlpha(1);
+    this.highlight.lineStyle(3, COLORS.glow, .9).strokeEllipse(spot.x, spot.y, spot.w, spot.h).setAlpha(1);
     this.scene.tweens.add({ targets: this.highlight, alpha: 0, duration: 650, ease: 'Sine.easeOut' });
   }
 
