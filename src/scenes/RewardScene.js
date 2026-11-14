@@ -17,8 +17,15 @@ export class RewardScene extends Phaser.Scene {
     ui.area('right').innerHTML = `<h2>${success ? 'Tu hallazgo simulado' : 'Un nuevo intento'}</h2><p class="result-story">${success ? 'Las observaciones simuladas indican una zona con menor cobertura de árboles. Detectar ese cambio es el comienzo de una investigación.' : 'El resultado depende de tus elecciones. Podés volver al taller con el mismo diseño y cambiar una pieza para comparar qué sucede.'}</p><h3>Lo que aprendimos</h3><p class="result-story">La cámara necesita energía, la batería tiene una capacidad y las imágenes deben llegar a la Tierra. Las piezas trabajan juntas.</p><p class="science-note">Explicar la causa de un cambio requiere más evidencias. Este bosque y sus observaciones son ficticios.</p>`;
     ui.area('caption').textContent = success ? 'Diseñaste. Probaste. Descubriste.' : 'Tu siguiente idea puede cambiar el resultado';
     ui.area('caption-detail').textContent = `Detalle elegido: ${s.quality === 2 ? 'alto' : 'general'} · Diseño conservado para volver a probar`;
-    ui.area('actions').innerHTML = actionButton('menu', 'Menú') + actionButton('improve', 'Volver al taller y mejorar →', true);
-    ui.bind({ menu: () => this.scene.start('Menu'), improve: () => this.scene.start('Build', { design: this.design }) });
+    // On success the images reached Earth, so the player can go look at them.
+    ui.area('actions').innerHTML = success
+      ? actionButton('menu', 'Menú') + actionButton('improve', 'Volver al taller') + actionButton('observe', 'Ver mis imágenes →', true)
+      : actionButton('menu', 'Menú') + actionButton('improve', 'Volver al taller y mejorar →', true);
+    ui.bind({
+      menu: () => this.scene.start('Menu'),
+      improve: () => this.scene.start('Build', { design: this.design }),
+      observe: () => this.scene.start('Observe'),
+    });
     ui.say(success ? '¡Lo lograste! Tu satélite obtuvo y entregó las dos imágenes. Si querés, intentá conseguir más detalle con otra combinación.' : 'Los resultados nos ayudan a diseñar mejor. Conservamos tus piezas para que puedas ajustar tu satélite.');
   }
 }
