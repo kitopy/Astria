@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { speakIfEnabled } from '../ui/noahVoice.js';
-import { DESIGN, addCoverBackground, centerDesignArea } from '../ui/layout.js';
+import { DESIGN, addCoverBackground, centerDesignArea, visibleArea } from '../ui/layout.js';
 
 // What the player did, and which real job does that work.
 const ACHIEVEMENTS = [
@@ -81,7 +81,7 @@ export class FinaleScene extends Phaser.Scene {
   // Celebration: small golden stars (the "anomaly" art) falling and spinning across the screen.
   addFallingStars() {
     // Starts above the top of the visible area, which can be above y=0 on taller windows.
-    const top = this.cameras.main.worldView.y;
+    const top = visibleArea(this).y;
     this.add.particles(0, top - 40, 'star-anomaly', {
       x: { min: -400, max: DESIGN.width + 400 }, // wider than 1920 to cover wide windows
       lifespan: 6000,

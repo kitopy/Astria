@@ -17,6 +17,16 @@ export function centerDesignArea(scene) {
   onResize(scene, () => scene.cameras.main.centerOn(DESIGN.width / 2, DESIGN.height / 2));
 }
 
+// The part of the world the camera shows right now, as { x, y, right, bottom }.
+// (camera.worldView would be simpler, but Phaser only updates it on the next frame,
+// so it's still empty inside create().)
+export function visibleArea(scene) {
+  const cam = scene.cameras.main;
+  const width = cam.width / cam.zoom;
+  const height = cam.height / cam.zoom;
+  return { x: cam.scrollX, y: cam.scrollY, width, height, right: cam.scrollX + width, bottom: cam.scrollY + height };
+}
+
 // Full-screen background image that always covers the whole window (like CSS "background-size: cover").
 export function addCoverBackground(scene, key) {
   const bg = scene.add.image(DESIGN.width / 2, DESIGN.height / 2, key);

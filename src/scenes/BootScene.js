@@ -29,7 +29,6 @@ export class BootScene extends Phaser.Scene {
     this.load.image('sky-observation', 'images/sky-observation.png');
     this.load.image('star-anomaly', 'images/star-anomaly.png');
     this.load.image('panel-dialog', 'images/panel-dialog.png');
-    this.load.image('button-start', 'images/button-start.png');
 
     // For fonts, the key is the font-family name used later in text styles.
     this.load.font('Cinzel', 'fonts/Cinzel-VariableFont_wght.ttf');
