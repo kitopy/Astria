@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { DESIGN, addCoverBackground, centerDesignArea } from '../ui/layout.js';
+import { addStarfield } from '../ui/starfield.js';
 
 // Title screen: the first thing the player sees.
 // Layout and colors come from the GDevelop scene "MENU PRINCIPAL".
@@ -13,6 +14,7 @@ export class MenuScene extends Phaser.Scene {
     const { width } = DESIGN;
 
     addCoverBackground(this, 'bg-menu');
+    addStarfield(this); // drawn after the background, before the title, so it stays behind the text
 
     this.add
       .text(width / 2, 455, 'ASTRION', {
