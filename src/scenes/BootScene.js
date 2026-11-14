@@ -39,6 +39,8 @@ export class BootScene extends Phaser.Scene {
 
   create() {
     prepareEarth(); // starts loading the 3D Earth in the background; it's ready by the workshop
+    // NOAH's voice starts ON: it helps players who read more slowly. The toggle can turn it off.
+    if (this.registry.get('noahVoice') === undefined) this.registry.set('noahVoice', true);
     this.scene.start('Menu');
   }
 }

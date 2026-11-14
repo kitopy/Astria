@@ -8,7 +8,7 @@ import { CSS } from '../ui/palette.js';
 // the details of each part are explained later, inside the workshop.
 const BRIEFING = 'Hola, exploradora. Soy NOAH. El bosque del Chaco paraguayo está cambiando: vamos a construir un satélite para fotografiarlo desde el espacio.';
 
-const TYPE_SPEED_MS = 12; // delay between letters in the typewriter effect
+const TYPE_SPEED_MS = 30; // delay between letters in the typewriter effect
 
 export class StationScene extends Phaser.Scene {
   constructor() {

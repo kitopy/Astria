@@ -35,5 +35,16 @@ export class MenuScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     addNeonButton(this, width / 2, 845, 'COMENZAR MISIÓN', () => this.scene.start('Station'));
+
+    // Always available (first visit or not): skips the mission briefing, straight to the workshop.
+    const skip = this.add
+      .text(width / 2, 965, 'Saltar intro ›', { fontFamily: 'Quicksand', fontSize: '28px', fontStyle: 'bold', color: '#e9defc' })
+      .setOrigin(0.5)
+      .setPadding(12)
+      .setShadow(0, 2, '#1c0a33', 8, false, true)
+      .setInteractive({ useHandCursor: true });
+    skip.on('pointerover', () => skip.setColor('#ffffff').setScale(1.05));
+    skip.on('pointerout', () => skip.setColor('#e9defc').setScale(1));
+    skip.on('pointerup', () => this.scene.start('Build'));
   }
 }

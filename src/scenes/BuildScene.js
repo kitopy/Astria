@@ -22,6 +22,7 @@ const REVIEW = kinds.length; // step index of the final review (after the 4 part
 const SATELLITE = { x: 960, y: 555, scale: 1, reviewX: 720 };
 const OPTION_X = [330, 1590]; // the two options float left and right of the satellite
 const SNAP_DISTANCE = 300; // dropping a piece closer than this to the satellite mounts it
+const AUTO_NEXT_MS = 1500; // after mounting a part for the first time, go to the next one by itself
 
 // The number that matters for each part type, plus mass and cost (shown under an option on hover).
 function partNumbers(kind, part) {
@@ -253,7 +254,17 @@ export class BuildScene extends Phaser.Scene {
         this.drawSlot();
         this.options.forEach((o) => o.list[0].setStrokeStyle(3, COLORS.glow, o === option ? 1 : 0));
         this.renderHud();
-        this.ui.say(`${wasPlaced ? '¡Cambiada!' : '¡Montada!'} ${part.name}: ${part.benefit.toLowerCase()}, pero ${part.tradeoff.toLowerCase()}.`);
+        // First time this part is mounted: move on by itself (the "Siguiente" button is there to go faster).
+        // Changing a part that was already mounted doesn't advance, so the player can compare calmly.
+        // When it advances, this line stays silent: the next part's spoken intro would cut it anyway.
+        const autoNext = !wasPlaced;
+        this.ui.say(`${wasPlaced ? '¡Cambiada!' : '¡Montada!'} ${part.name}: ${part.benefit.toLowerCase()}, pero ${part.tradeoff.toLowerCase()}.`, { silent: autoNext });
+        if (autoNext) {
+          const stepAtMount = this.step;
+          this.time.delayedCall(AUTO_NEXT_MS, () => {
+            if (this.step === stepAtMount) this.goTo(this.step + 1); // unless she already moved on
+          });
+        }
       },
     });
   }
