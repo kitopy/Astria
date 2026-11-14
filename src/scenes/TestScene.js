@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { advance, capture, launch, stats, transmit } from '../game/model.js';
 import { catalog, readDesign } from '../game/design.js';
-import { atGate, changeSpeed, initialFlight, pauseFlight, startFlight, tickFlight } from '../game/chaco-flight.js';
+import { atGate, changeSpeed, initialFlight, pauseFlight, startFlight } from '../game/chaco-flight.js';
+import { beginReframe, cloudCover, initialVisibility, tickVisibility } from '../game/chaco-visibility.js';
 import { preloadArt } from '../ui/mission-ui.js';
 import { createChacoHUD, satellitePreview } from '../ui/chaco-hud.js';
 import { ChacoMap } from '../ui/chaco-map.js';
@@ -15,6 +16,8 @@ export class TestScene extends Phaser.Scene {
     this.specs = stats(catalog, this.design);
     this.mission = this.specs.valid ? launch(this.specs) : null;
     this.flight = initialFlight(); this.mapClock = 0; this.sensorShots=[];this.sensorFootprintGate=-1;
+    this.visibility = initialVisibility();
+    this.sensorTime = 0;
   }
   preload() { preloadArt(this); }
   create() {
@@ -36,10 +39,16 @@ export class TestScene extends Phaser.Scene {
     this.render();
   }
   handleAction(action) {
-    if (action === 'travel' && this.hud.ready) {
+    if (action === 'travel' && this.hud.ready && !['blocked','adjusting'].includes(this.visibility.status)) {
       const gate = this.flight.gate;
       this.flight = startFlight(this.flight);
       this.hud.say(gate === 0 ? '¡En marcha! Seguí tu satélite hasta el bosque del Chaco paraguayo.' : 'Seguimos el recorrido. Las observaciones se obtienen en pasos separados, con el tiempo acelerado para este juego.');
+    } else if (action === 'reframe' && this.hud.ready) {
+      try {
+        const next = beginReframe(this.mission, this.visibility);
+        this.mission = next.mission; this.visibility = next.visibility;
+        this.hud.say('Ajustando la cámara hacia un claro. Usamos 6 de energía para mover y estabilizar el encuadre.');
+      } catch (error) { this.hud.say(error.message); }
     } else if (action === 'pause') {
       this.flight = pauseFlight(this.flight); this.hud.say('Vuelo en pausa. Podés revisar la batería y los datos con calma. Reanudá cuando quieras.');
     } else if (action === 'speed') this.flight = changeSpeed(this.flight);
@@ -51,7 +60,7 @@ export class TestScene extends Phaser.Scene {
     else if (['capture', 'transmit'].includes(action)) {
       if (!atGate(this.flight)) return;
       try {
-        this.sensor.update(this.flight.progress);
+        this.updateSensor();
         const shot=action==='capture'?this.sensor.capture(this.mission.phase):null;
         this.mission = action === 'capture' ? capture(this.mission, this.specs) : transmit(this.mission, this.specs);
         if(shot)this.sensorShots.push(shot);
@@ -66,14 +75,32 @@ export class TestScene extends Phaser.Scene {
     }
     this.render();
   }
-  render() { this.hud?.update(this.mission, this.specs, this.flight); }
+  render() { this.hud?.update(this.mission, this.specs, this.flight, this.visibility); }
+  updateSensor() {
+    this.sensor.update(this.flight.progress, {
+      clouds: cloudCover(this.flight, this.visibility),
+      adjustment: this.visibility.adjustment, time: this.sensorTime
+    });
+  }
   update(_time, delta) {
     if (!this.hud || !this.hud.ready) return;
     const before = this.flight.gate;
-    this.flight = tickFlight(this.flight, Math.min(delta / 1000, .08));
+    const previousVisibility = this.visibility.status;
+    const seconds = Math.min(delta / 1000, .08);
+    const next = tickVisibility(this.flight, this.visibility, document.hidden || this.hud.caseOpen ? 0 : seconds);
+    this.flight = next.flight; this.visibility = next.visibility;
+    if (!document.hidden && !this.hud.caseOpen) this.sensorTime += delta;
+    if (previousVisibility !== this.visibility.status) {
+      this.updateSensor();
+      this.missionMap.setFootprint(this.sensor.footprint);
+      this.hud.say(this.visibility.status === 'blocked'
+        ? '¡Nubes en la zona! Pausamos el recorrido. Buscá un claro: ajustar la cámara cuesta 6 de energía. Las nubes tapan el terreno, no golpean al satélite.'
+        : '¡Visibilidad recuperada! El nuevo encuadre está listo. Te quedan menos reservas: cuidalas para las fotos y la transmisión. Podés continuar el recorrido.');
+      this.render();
+    }
     if (this.flight.gate !== before) {
       this.mission = advance(this.mission, this.specs);
-      this.sensor.update(this.flight.progress);
+      this.updateSensor();
       this.missionMap.setFootprint(this.sensor.footprint);
       const phase = this.flight.gate;
       const message = phase === 1
@@ -88,6 +115,15 @@ export class TestScene extends Phaser.Scene {
       this.hud.say(message); this.render();
     }
     this.mapClock += delta;
-    if (this.mapClock >= 45) { this.mapClock = 0; this.missionMap.update(this.flight);this.sensor.update(this.flight.progress);if(this.flight.running||this.sensorFootprintGate!==this.flight.gate){this.sensorFootprintGate=this.flight.gate;this.missionMap.setFootprint(this.sensor.footprint);} }
+    if (this.mapClock >= 45) {
+      this.mapClock = 0;
+      this.missionMap.update(this.flight);
+      this.updateSensor();
+      this.hud.updateWeather(this.flight, this.visibility);
+      if (this.flight.running || this.visibility.status === 'adjusting' || this.sensorFootprintGate !== this.flight.gate) {
+        this.sensorFootprintGate = this.flight.gate;
+        this.missionMap.setFootprint(this.sensor.footprint);
+      }
+    }
   }
 }

@@ -17,6 +17,8 @@ Guardianes de la Tierra es una simulación educativa para participantes de Super
 
 El visor de cámara toma un recorte del mosaico NASA Blue Marble en la posición geográfica del satélite. El rectángulo del mapa representa ese recorte ilustrativo; no calcula cobertura óptica real. Las dos pasadas usan el mismo mosaico, sin fechas de adquisición distintas. Las miniaturas y la galería de resultados conservan los fotogramas del visor y el estado de envío durante el intento. No demuestran pérdida de bosque. La cámara Exploradora amplía el encuadre y genera una imagen de más píxeles; no añade información científica que no exista en el mosaico original.
 
+El desafío de visibilidad añade nubes generadas por el juego entre las observaciones. No corresponden a una medición meteorológica ni modifican la imagen original de NASA. Buscar un claro consume 6 unidades didácticas de energía para representar la orientación y estabilización de la cámara; no elimina nubes ni simula maniobras orbitales. El desplazamiento de encuadre y su duración son ilustrativos.
+
 ## Fuentes de referencia
 
 - Challenge elegido: https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/?tab=details
