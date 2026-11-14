@@ -5,6 +5,7 @@ import { atGate, changeSpeed, initialFlight, pauseFlight, startFlight, tickFligh
 import { preloadArt } from '../ui/mission-ui.js';
 import { createChacoHUD, satellitePreview } from '../ui/chaco-hud.js';
 import { ChacoMap } from '../ui/chaco-map.js';
+import { SatelliteSensor } from '../ui/satellite-sensor.js';
 import { centerDesignArea } from '../ui/layout.js';
 
 export class TestScene extends Phaser.Scene {
@@ -13,23 +14,24 @@ export class TestScene extends Phaser.Scene {
     this.design = readDesign(data.design ?? this.registry.get('satelliteDesign'));
     this.specs = stats(catalog, this.design);
     this.mission = this.specs.valid ? launch(this.specs) : null;
-    this.flight = initialFlight(); this.mapClock = 0;
+    this.flight = initialFlight(); this.mapClock = 0; this.sensorShots=[];this.sensorFootprintGate=-1;
   }
   preload() { preloadArt(this); }
   create() {
     centerDesignArea(this);
     if (!this.mission) { this.scene.start('Build', { design: this.design }); return; }
     this.hud = createChacoHUD(this, this.design, action => this.handleAction(action));
+    this.sensor=new SatelliteSensor(this.hud.sensorCanvas,this.design,()=>{if(this.hud){this.hud.ready=!!this.missionMap?.ready;this.render();}});
     this.hud.say('Estamos en Paraguay. Prepará tu misión para observar dos veces una zona del Chaco. Al llegar al bosque, el vuelo se pausará para que puedas decidir.');
     this.missionMap = new ChacoMap(this.hud.mapElement,
-      () => { this.hud.ready = true; this.render(); this.missionMap.update(this.flight); },
+      () => { this.hud.ready = this.sensor.ready; this.render(); this.missionMap.update(this.flight); },
       () => { this.hud.say('No se pudo preparar una parte del mapa. Podés volver al taller o recargar la página.'); },
       satellitePreview(this.design));
     const visibility = () => { if (document.hidden) { this.flight = pauseFlight(this.flight); this.render(); } };
     document.addEventListener('visibilitychange', visibility);
     this.events.once('shutdown', () => {
       document.removeEventListener('visibilitychange', visibility);
-      this.missionMap.destroy(); this.hud.destroy(); this.hud = null;
+      this.missionMap.destroy(); this.sensor.destroy();this.hud.destroy(); this.hud = null;
     });
     this.render();
   }
@@ -45,11 +47,17 @@ export class TestScene extends Phaser.Scene {
     else if (action === 'case') { this.flight = pauseFlight(this.flight); this.hud.showCase(); }
     else if (action === 'close-case') this.hud.closeCase();
     else if (action === 'workshop') { this.scene.start('Build', { design: this.design }); return; }
-    else if (action === 'finish' && this.flight.gate === 3) { this.scene.start('Reward', { design: this.design, mission: this.mission, caseStudy: 'chaco-paraguay' }); return; }
+    else if (action === 'finish' && this.flight.gate === 3) { this.scene.start('Reward', { design: this.design, mission: this.mission, captures:this.sensorShots, caseStudy: 'chaco-paraguay' }); return; }
     else if (['capture', 'transmit'].includes(action)) {
       if (!atGate(this.flight)) return;
       try {
+        this.sensor.update(this.flight.progress);
+        const shot=action==='capture'?this.sensor.capture(this.mission.phase):null;
         this.mission = action === 'capture' ? capture(this.mission, this.specs) : transmit(this.mission, this.specs);
+        if(shot)this.sensorShots.push(shot);
+        this.sensorShots.forEach((photo,i)=>{photo.delivered=i<this.mission.delivered;});
+        this.hud.showShots(this.sensorShots);
+        if(shot){const panel=this.hud.root.querySelector('.sensor-window');panel.classList.remove('taking-photo');void panel.offsetWidth;panel.classList.add('taking-photo');}
         this.missionMap.effect(action, this.flight);
         this.hud.say(action === 'capture'
           ? `¡Imagen obtenida! La cámara usó ${this.specs.cameraPower} de energía y generó ${this.specs.data} ${this.specs.data === 1 ? 'bloque' : 'bloques'} de datos. Ahora necesitamos llevar esa información a la Tierra.`
@@ -65,6 +73,8 @@ export class TestScene extends Phaser.Scene {
     this.flight = tickFlight(this.flight, Math.min(delta / 1000, .08));
     if (this.flight.gate !== before) {
       this.mission = advance(this.mission, this.specs);
+      this.sensor.update(this.flight.progress);
+      this.missionMap.setFootprint(this.sensor.footprint);
       const phase = this.flight.gate;
       const message = phase === 1
         ? 'Llegamos al bosque del Chaco. El recorrido se detuvo: activá Observar para obtener la primera imagen.'
@@ -78,6 +88,6 @@ export class TestScene extends Phaser.Scene {
       this.hud.say(message); this.render();
     }
     this.mapClock += delta;
-    if (this.mapClock >= 45) { this.mapClock = 0; this.missionMap.update(this.flight); }
+    if (this.mapClock >= 45) { this.mapClock = 0; this.missionMap.update(this.flight);this.sensor.update(this.flight.progress);if(this.flight.running||this.sensorFootprintGate!==this.flight.gate){this.sensorFootprintGate=this.flight.gate;this.missionMap.setFootprint(this.sensor.footprint);} }
   }
 }

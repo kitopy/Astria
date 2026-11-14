@@ -24,6 +24,7 @@ export function createChacoHUD(scene, design, onAction) {
   <aside class="chaco-objective hud-panel"><h2>Dos imágenes del Chaco</h2><div><span>Obtenidas</span><strong data-hud="captured">0/2</strong></div><div><span>Enviadas</span><strong data-hud="delivered">0/2</strong></div><p data-hud="status" role="status">Preparando mapa…</p></aside>
   <aside class="chaco-telemetry hud-panel"><div><span>Batería</span><strong data-hud="energy"></strong><progress data-hud="battery" aria-label="Energía disponible"></progress></div><div><span>Datos a bordo</span><strong data-hud="data">0</strong></div><div><span data-hud="sun">Con luz solar</span><small>Energía por acción y por etapa</small></div></aside>
   <aside class="chaco-design hud-panel"><h2>Tu satélite</h2>${satellitePreview(design)}<p>${catalog.camera.options.find(p=>p.id===design.camera).name} · ${catalog.battery.options.find(p=>p.id===design.battery).name}</p></aside>
+  <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2><span data-hud="sensor-state">Preparando</span></div><div class="sensor-window"><canvas aria-label="Terreno que está viendo la cámara"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record">VISTA DEL SENSOR</span></div><p>Mosaico NASA de archivo · sensor simulado</p><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
   <div class="chaco-map-tools"><button data-flight="recenter" aria-label="Volver a centrar Paraguay">Centrar Paraguay</button><button data-flight="speed">Velocidad ×1</button></div>
   <section class="chaco-bottom"><div class="chaco-noah hud-panel"><span class="chaco-noah-icon" aria-hidden="true">N</span><div><strong>NOAH</strong><p data-hud="noah" aria-live="polite"></p></div><button data-flight="listen" aria-label="Escuchar el mensaje de NOAH">Escuchar</button></div>
   <div class="chaco-controls"><button data-flight="travel" class="flight-primary" disabled>Iniciar recorrido</button><button data-flight="capture" disabled>Observar</button><button data-flight="transmit" disabled>Transmitir</button><button data-flight="pause" disabled>Pausar</button><button data-flight="finish" hidden>Ver resultados →</button></div>
@@ -47,11 +48,14 @@ export function createChacoHUD(scene, design, onAction) {
   dialog.addEventListener('close',()=>root.querySelector('video').pause());
   if(!window.speechSynthesis)root.querySelectorAll('[data-flight="voice"],[data-flight="listen"]').forEach(button=>button.disabled=true);
   return {
-    root, mapElement:root.querySelector('.chaco-map'), ready:false,
+    root, mapElement:root.querySelector('.chaco-map'), sensorCanvas:root.querySelector('.sensor-window canvas'), ready:false,
+    showShots(shots){const tray=root.querySelector('.sensor-thumbnails');tray.replaceChildren();for(const [i,shot]of shots.entries()){const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=shot.image;img.alt=`Captura ${i+1} de la vista simulada`;caption.textContent=`Foto ${i+1}${shot.delivered?' · enviada':' · a bordo'}`;figure.append(img,caption);tray.append(figure);}},
     say(text){message=text;get('noah').textContent=text;if(voice)speak();},
     showCase(){dialog.showModal();}, closeCase(){dialog.close();},
     update(mission,specs,flight){
       const gate=atGate(flight), phase=flight.gate;
+      get('sensor-state').textContent=flight.running?'Explorando':gate&&[1,2].includes(phase)?'Sobre el bosque':'En espera';
+      root.classList.toggle('panels-deployed',flight.progress>0||flight.running);
       get('captured').textContent=`${mission.captured.length}/2`;get('delivered').textContent=`${mission.delivered}/2`;
       get('energy').textContent=`${mission.energy}/${specs.capacity}`;get('battery').max=specs.capacity;get('battery').value=mission.energy;
       get('data').textContent=mission.photos.reduce((sum,p)=>sum+p.remaining,0);
