@@ -1,138 +1,93 @@
 import Phaser from 'phaser';
-import { advance, capture, launch, phases, stats, transmit } from '../game/model.js';
+import { advance, capture, launch, stats, transmit } from '../game/model.js';
 import { catalog, readDesign } from '../game/design.js';
-import { actionButton, addArt, meter, mount, preloadArt } from '../ui/mission-ui.js';
+import { atGate, changeSpeed, initialFlight, pauseFlight, startFlight, tickFlight } from '../game/chaco-flight.js';
+import { preloadArt } from '../ui/mission-ui.js';
+import { createChacoHUD, satellitePreview } from '../ui/chaco-hud.js';
+import { ChacoMap } from '../ui/chaco-map.js';
+import { SatelliteSensor } from '../ui/satellite-sensor.js';
 import { centerDesignArea } from '../ui/layout.js';
-import { setEarthDaylight } from '../ui/earth3d.js';
 
-// Satellite x position for each phase: it "travels" a little across the screen.
-const ORBIT_X = [930, 970, 1020, 960];
-
-// Step 2: fly the mission phase by phase, managing energy, photos and data.
 export class TestScene extends Phaser.Scene {
-  constructor() {
-    super('Test');
-  }
-
+  constructor() { super('Test'); }
   init(data = {}) {
     this.design = readDesign(data.design ?? this.registry.get('satelliteDesign'));
     this.specs = stats(catalog, this.design);
     this.mission = this.specs.valid ? launch(this.specs) : null;
+    this.flight = initialFlight(); this.mapClock = 0; this.sensorShots=[];this.sensorFootprintGate=-1;
   }
-
-  preload() {
-    preloadArt(this);
-  }
-
+  preload() { preloadArt(this); }
   create() {
     centerDesignArea(this);
-    if (!this.mission) {
-      this.scene.start('Build', { design: this.design });
-      return;
-    }
-
-    this.art = addArt(this, this.design);
-    this.ui = mount(this, 1);
-    this.ui.bind({
-      capture: () => this.perform('capture'),
-      transmit: () => this.perform('transmit'),
-      workshop: () => this.scene.start('Build', { design: this.design, focus: 'review' }),
-      next: () => {
-        if (this.mission.phase === 3) {
-          this.scene.start('Reward', { design: this.design, mission: this.mission });
-        } else {
-          this.mission = advance(this.mission, this.specs);
-          this.render();
-          this.ui.say(phases[this.mission.phase].task);
-        }
-      },
+    if (!this.mission) { this.scene.start('Build', { design: this.design }); return; }
+    this.hud = createChacoHUD(this, this.design, action => this.handleAction(action));
+    this.sensor=new SatelliteSensor(this.hud.sensorCanvas,this.design,()=>{if(this.hud){this.hud.ready=!!this.missionMap?.ready;this.render();}});
+    this.hud.say('Estamos en Paraguay. Prepará tu misión para observar dos veces una zona del Chaco. Al llegar al bosque, el vuelo se pausará para que puedas decidir.');
+    this.missionMap = new ChacoMap(this.hud.mapElement,
+      () => { this.hud.ready = this.sensor.ready; this.render(); this.missionMap.update(this.flight); },
+      () => { this.hud.say('No se pudo preparar una parte del mapa. Podés volver al taller o recargar la página.'); },
+      satellitePreview(this.design));
+    const visibility = () => { if (document.hidden) { this.flight = pauseFlight(this.flight); this.render(); } };
+    document.addEventListener('visibilitychange', visibility);
+    this.events.once('shutdown', () => {
+      document.removeEventListener('visibilitychange', visibility);
+      this.missionMap.destroy(); this.sensor.destroy();this.hud.destroy(); this.hud = null;
     });
-
     this.render();
-    this.ui.say(phases[0].task);
   }
-
-  perform(action) {
-    try {
-      this.mission = action === 'capture' ? capture(this.mission, this.specs) : transmit(this.mission, this.specs);
-      this.render();
-      this.ui.say(
-        action === 'capture'
-          ? `¡Foto tomada! Usaste ${this.specs.cameraPower} de energía. Todavía hay que enviarla a la Tierra.`
-          : `Llegaron ${this.mission.delivered} fotos completas a la Tierra. ${this.mission.photos.length ? 'Quedaron datos a bordo: veremos cómo mejorar el envío.' : '¡Tus observaciones llegaron!'}`,
-      );
-    } catch (error) {
-      this.ui.say(error.message);
+  handleAction(action) {
+    if (action === 'travel' && this.hud.ready) {
+      const gate = this.flight.gate;
+      this.flight = startFlight(this.flight);
+      this.hud.say(gate === 0 ? '¡En marcha! Seguí tu satélite hasta el bosque del Chaco paraguayo.' : 'Seguimos el recorrido. Las observaciones se obtienen en pasos separados, con el tiempo acelerado para este juego.');
+    } else if (action === 'pause') {
+      this.flight = pauseFlight(this.flight); this.hud.say('Vuelo en pausa. Podés revisar la batería y los datos con calma. Reanudá cuando quieras.');
+    } else if (action === 'speed') this.flight = changeSpeed(this.flight);
+    else if (action === 'recenter') this.missionMap.recenter();
+    else if (action === 'case') { this.flight = pauseFlight(this.flight); this.hud.showCase(); }
+    else if (action === 'close-case') this.hud.closeCase();
+    else if (action === 'workshop') { this.scene.start('Build', { design: this.design }); return; }
+    else if (action === 'finish' && this.flight.gate === 3) { this.scene.start('Reward', { design: this.design, mission: this.mission, captures:this.sensorShots, caseStudy: 'chaco-paraguay' }); return; }
+    else if (['capture', 'transmit'].includes(action)) {
+      if (!atGate(this.flight)) return;
+      try {
+        this.sensor.update(this.flight.progress);
+        const shot=action==='capture'?this.sensor.capture(this.mission.phase):null;
+        this.mission = action === 'capture' ? capture(this.mission, this.specs) : transmit(this.mission, this.specs);
+        if(shot)this.sensorShots.push(shot);
+        this.sensorShots.forEach((photo,i)=>{photo.delivered=i<this.mission.delivered;});
+        this.hud.showShots(this.sensorShots);
+        if(shot){const panel=this.hud.root.querySelector('.sensor-window');panel.classList.remove('taking-photo');void panel.offsetWidth;panel.classList.add('taking-photo');}
+        this.missionMap.effect(action, this.flight);
+        this.hud.say(action === 'capture'
+          ? `¡Imagen obtenida! La cámara usó ${this.specs.cameraPower} de energía y generó ${this.specs.data} ${this.specs.data === 1 ? 'bloque' : 'bloques'} de datos. Ahora necesitamos llevar esa información a la Tierra.`
+          : `En Asunción recibimos ${this.mission.delivered} imágenes completas. ${this.mission.photos.length ? 'Quedaron datos a bordo. Una antena de mayor capacidad puede ayudar en otro intento.' : '¡Lograste entregar tus observaciones!'}`);
+      } catch (error) { this.hud.say(error.message); }
     }
+    this.render();
   }
-
-  // State of photo n (1 or 2): not taken yet, taken (on board), or received on Earth.
-  photoSlot(n) {
-    const m = this.mission;
-    const taken = m.captured.includes(n);
-    const sent = taken && m.sent && !m.photos.some((photo) => photo.phase === n);
-    const state = sent ? 'sent' : taken ? 'taken' : '';
-    const text = sent ? 'En la Tierra ✓' : taken ? 'A bordo' : 'Pendiente';
-    return `<div class="ws-photo ${state}"><b>Foto ${n}</b>${text}</div>`;
-  }
-
-  render() {
-    const m = this.mission;
-    const s = this.specs;
-    const phase = phases[m.phase];
-    const isPhotoPhase = [1, 2].includes(m.phase);
-    const canCapture = isPhotoPhase && !m.captured.includes(m.phase) && m.energy >= s.cameraPower;
-    const canTransmit = m.phase === 3 && !m.sent && m.photos.length > 0 && m.energy >= s.antennaPower;
-
-    let taskButton = '';
-    if (isPhotoPhase) {
-      const label = m.captured.includes(m.phase) ? 'Foto tomada ✓' : `Tomar foto (−${s.cameraPower})`;
-      taskButton = actionButton('capture', label, true, !canCapture).replace('ws-btn', 'ws-btn ws-wide');
-    } else if (m.phase === 3) {
-      const label = m.sent ? 'Envío realizado ✓' : `Enviar fotos (−${s.antennaPower})`;
-      taskButton = actionButton('transmit', label, true, !canTransmit).replace('ws-btn', 'ws-btn ws-wide');
+  render() { this.hud?.update(this.mission, this.specs, this.flight); }
+  update(_time, delta) {
+    if (!this.hud || !this.hud.ready) return;
+    const before = this.flight.gate;
+    this.flight = tickFlight(this.flight, Math.min(delta / 1000, .08));
+    if (this.flight.gate !== before) {
+      this.mission = advance(this.mission, this.specs);
+      this.sensor.update(this.flight.progress);
+      this.missionMap.setFootprint(this.sensor.footprint);
+      const phase = this.flight.gate;
+      const message = phase === 1
+        ? 'Llegamos al bosque del Chaco. El recorrido se detuvo: activá Observar para obtener la primera imagen.'
+        : phase === 2
+          ? this.mission.energy >= this.specs.cameraPower
+            ? 'Segunda pasada. En este paso ilustramos al satélite en sombra: no hay recarga solar. La cámara funciona con la batería.'
+            : 'Llegamos a la segunda pasada, pero la batería no alcanza para esta cámara. Podés continuar hasta la estación y revisar el diseño al terminar.'
+          : this.mission.energy >= this.specs.antennaPower
+            ? 'Estamos en la ventana de comunicación con nuestra estación ficticia de Asunción. Transmití las imágenes antes de ver los resultados.'
+            : 'Llegamos al contacto terrestre, pero falta energía para la antena. Los resultados te ayudarán a mejorar el diseño.';
+      this.hud.say(message); this.render();
     }
-
-    let hint = ''; // only shown when something is wrong
-    if (isPhotoPhase && !m.captured.includes(m.phase) && !canCapture) hint = 'No alcanza la energía para la cámara. Podés seguir y mejorar el diseño al final.';
-    if (m.phase === 3 && !m.sent && m.energy < s.antennaPower) hint = 'No alcanza la energía para enviar. Lo revisaremos en los resultados.';
-
-    this.ui.area('left').innerHTML = `
-      <h2 class="ws-title">Plan de vuelo</h2>
-      <ol class="ws-phases">${phases
-        .map((p, i) => `<li class="${i < m.phase ? 'done' : i === m.phase ? 'current' : ''}"><span>${i < m.phase ? '✓' : i + 1}</span>${p.title}</li>`)
-        .join('')}</ol>
-      <div class="ws-task">
-        <span class="ws-chip">${phase.sun ? 'Con luz del Sol' : 'En sombra'}</span>
-        ${taskButton}
-        ${hint ? `<p class="ws-hint">${hint}</p>` : ''}
-      </div>`;
-
-    this.ui.area('right').innerHTML = `
-      <h2 class="ws-title">Tu satélite</h2>
-      ${meter('Energía', m.energy, s.capacity)}
-      <div class="ws-photos">${this.photoSlot(1)}${this.photoSlot(2)}</div>
-      <dl class="ws-specs">
-        <div><dt>Recarga con luz</dt><dd>+${s.generation}</dd></div>
-        <div><dt>Cada foto usa</dt><dd>−${s.cameraPower}</dd></div>
-        <div><dt>Enviar usa</dt><dd>−${s.antennaPower}</dd></div>
-      </dl>`;
-
-
-    this.ui.area('actions').innerHTML =
-      actionButton('workshop', 'Volver al taller') +
-      actionButton('next', m.phase === 3 ? 'Ver resultados ›' : 'Siguiente etapa ›', true);
-
-    // In the shadow phase, darken the satellite and dim the Sun on the Earth.
-    this.art.setTint(phase.sun ? 0xffffff : 0x8a90c8);
-    setEarthDaylight(phase.sun);
-
-    this.tweens.killTweensOf(this.art);
-    this.tweens.add({
-      targets: this.art,
-      x: ORBIT_X[m.phase],
-      angle: m.phase === 2 ? 4 : -5,
-      duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 450,
-    });
+    this.mapClock += delta;
+    if (this.mapClock >= 45) { this.mapClock = 0; this.missionMap.update(this.flight);this.sensor.update(this.flight.progress);if(this.flight.running||this.sensorFootprintGate!==this.flight.gate){this.sensorFootprintGate=this.flight.gate;this.missionMap.setFootprint(this.sensor.footprint);} }
   }
 }

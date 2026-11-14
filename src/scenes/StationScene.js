@@ -7,7 +7,7 @@ import { CSS } from '../ui/palette.js';
 // Adapted from the GDevelop scene "ESTACION PRINCIPAL" to the forest mission.
 const LINES = [
   'NOAH // CONEXIÓN ESTABLECIDA\nBienvenida a bordo, exploradora.\nSoy NOAH, tu asistente de misión.',
-  'NOAH // ALERTA DESDE LA TIERRA\nEn un bosque de la Tierra algo está cambiando.\nDesde el espacio podemos verlo mejor que nadie.',
+  'NOAH // ALERTA DESDE PARAGUAY\nEl bosque del Chaco paraguayo está cambiando.\nDesde el espacio podemos investigar qué ocurre.',
   'NOAH // TU MISIÓN\nVas a diseñar un satélite que tome dos fotos del bosque\ny las envíe a la Tierra.',
   'NOAH // ¿ESTÁS LISTA?\nCada pieza del satélite tiene ventajas y desafíos.\nVamos al taller a construir el tuyo.',
 ];

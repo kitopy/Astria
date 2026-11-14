@@ -1,0 +1,33 @@
+{
+  "retrievedAt": "2026-11-14T20:08:29.701Z",
+  "boundaries": {
+    "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson",
+    "license": "Public domain",
+    "provider": "Natural Earth",
+    "scale": "1:50m",
+    "sha256": "9dc25dacf6a6b70b1cc8594d92ccba6692e52ad036ab7e976b3e130fa9801eb0"
+  },
+  "raster": {
+    "url": "https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=BlueMarble_ShadedRelief_Bathymetry&STYLES=&FORMAT=image%2Fjpeg&SRS=EPSG%3A3857&BBOX=-8348961.809495518%2C-4163881.1440642932%2C-4786738.104110763%2C-1345708.4084091098&WIDTH=2048&HEIGHT=1664",
+    "layer": "BlueMarble_ShadedRelief_Bathymetry",
+    "extent": [
+      -75,
+      -35,
+      -43,
+      -12
+    ],
+    "projection": "EPSG:3857",
+    "sha256": "325ae09aed60791b6a9434ab17928d8a8acc4e2f439c83e3ac8f2d80cabe87b8"
+  },
+  "caseStudy": {
+    "title": "Deforestation in Paraguay’s Gran Chaco",
+    "page": "https://svs.gsfc.nasa.gov/15026/",
+    "asset": "https://svs.gsfc.nasa.gov/vis/a010000/a015000/a015026/Chaco_Region%2C_Paraguay_-_Web_-_1.mp4",
+    "years": [
+      1985,
+      2025
+    ],
+    "credit": "NASA’s Goddard Space Flight Center; Ross K. Walter (SSAI)",
+    "sha256": "879cd86d60fbe6b336508c2d858d1f3e4b6ec3a044cf87d47adf1e5bbcb32fd5"
+  }
+}

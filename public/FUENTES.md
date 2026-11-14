@@ -1,6 +1,21 @@
 # Fundamentos del borrador Astria
 
+## Guardianes del Chaco
+
+La operación se desarrolla sobre cartografía real de Paraguay. El punto de observación del Chaco y la estación terrestre ficticia de Asunción son elementos del juego. El recorrido y los tiempos son ilustrativos: no se calcula una órbita, cobertura de sensor, posición solar ni una ventana real de comunicaciones. La sombra del HUD es pedagógica. Los consumos se aplican por acción o etapa, no por segundo de vuelo.
+
+Recursos geográficos y científicos incorporados localmente:
+
+- Límites regionales: Natural Earth, 1:50m, selección de Paraguay, Bolivia, Brasil, Argentina, Uruguay y Chile. Dominio público. Fuente y condiciones: https://www.naturalearthdata.com/about/terms-of-use/ . Geometría original: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson .
+- Imagen base: NASA Global Imagery Browse Services (GIBS), capa BlueMarble_ShadedRelief_Bathymetry. Mosaico de archivo servido por WMS en EPSG:3857, descargado para el encuadre oeste -75, sur -35, este -43, norte -12. No es una imagen en vivo ni un mapa de pérdida de bosque. Información: https://nasa-gibs.github.io/gibs-api-docs/ . Créditos: NASA GIBS, parte de ESDIS.
+- Caso histórico: “Deforestation in Paraguay’s Gran Chaco”, NASA SVS, ID 15026, publicado el 6 de mayo de 2026. Serie natural-color Landsat de 1985 a 2025. Créditos: NASA’s Goddard Space Flight Center; Ross K. Walter (SSAI). Fuente: https://svs.gsfc.nasa.gov/15026/ . El video se conserva localmente y se muestra con reproductor y créditos.
+- Motor cartográfico: MapLibre GL JS 6.18.0, licencia BSD-3-Clause. https://maplibre.org/projects/gl-js/ .
+
+`data/sources.json` registra las URL exactas y hashes de los recursos NASA descargados. La región de observación del juego no identifica la huella exacta de la secuencia Landsat. El video histórico se presenta como un caso externo real; las imágenes obtenidas durante la misión y el comparador Observe son simulaciones y no se presentan como adquisiciones reales del dispositivo del jugador.
+
 Guardianes de la Tierra es una simulación educativa para participantes de Super Kids de 9 a 13 años. Objetivo: obtener y transmitir dos observaciones de un bosque simulado. No predice el rendimiento de hardware ni de órbitas reales.
+
+El visor de cámara toma un recorte del mosaico NASA Blue Marble en la posición geográfica del satélite. El rectángulo del mapa representa ese recorte ilustrativo; no calcula cobertura óptica real. Las dos pasadas usan el mismo mosaico, sin fechas de adquisición distintas. Las miniaturas y la galería de resultados conservan los fotogramas del visor y el estado de envío durante el intento. No demuestran pérdida de bosque. La cámara Exploradora amplía el encuadre y genera una imagen de más píxeles; no añade información científica que no exista en el mosaico original.
 
 ## Fuentes de referencia
 
@@ -26,16 +41,16 @@ Todos los valores del catálogo son elegidos para balancear el juego, no fichas 
 
 Hay una observación por etapa y una transmisión por contacto. Una imagen sólo se recibe al transmitir todos sus bloques. Se necesitan dos imágenes completas. La calidad detallada aporta más detalle, sin alterar el objetivo básico. La simulación ofrece tanto diseños exitosos como diseños inviables o insuficientes.
 
-Las ilustraciones del satélite y de la Tierra con el bosque se generaron con IA para este proyecto. No son imágenes NASA ni observaciones satelitales reales. La excepción es el globo 3D del fondo, descrito en la sección "Imagen real de la Tierra". El hallazgo de pérdida de cobertura es narrativo y simulado; en este borrador se explica mediante texto. No se han integrado datos ambientales, API NASA, fechas, coordenadas ni pares de imágenes reales. Una causa de cambio no se infiere automáticamente de dos imágenes.
+El arte del satélite y la ilustración de Tierra utilizada en el comparador Observe se generaron con IA. La Tierra 3D del taller y de resultados usa la textura real descrita en "Imagen real de la Tierra". El mapa de la operación y el video de archivo usan los recursos reales identificados arriba. El hallazgo del comparador es narrativo y simulado: no se realiza detección automática de deforestación ni se adquieren imágenes en vivo. El video Landsat conserva sus años históricos y no representa las dos fotos obtenidas por el jugador. Una causa de cambio no se infiere automáticamente de dos imágenes.
 
 NOAH usa mensajes preparados y, opcionalmente, la síntesis de voz local del navegador. No utiliza un servicio de IA conversacional. No se solicitan cuentas ni datos personales; sólo se conserva el diseño en el almacenamiento local del navegador. No se ha realizado todavía validación con usuarios de Super Kids.
 
 ## Imagen real de la Tierra (fondo 3D)
 
-En las pantallas de la misión (Construir, Probar, Descubrir) la Tierra que gira detrás del satélite es un globo 3D con una textura real de la NASA:
+En Construir y en los resultados de Descubrir, la Tierra que gira detrás del satélite es un globo 3D con una textura real de la NASA. Durante Probar se muestra el mapa georreferenciado del Chaco y el visor de cámara:
 
 - Textura: "Equirectangular Projected Earth for LARGEST", NASA/Goddard Space Flight Center Scientific Visualization Studio. https://svs.gsfc.nasa.gov/3615
 - Datos Blue Marble Next Generation: cortesía de Reto Stöckli (NASA/GSFC) y NASA's Earth Observatory. Nubes: CPC (Climate Prediction Center) Cloud Composite.
 - Se usa en 8192 × 4096 píxeles (o 4096 × 2048 si la tarjeta gráfica no admite más). La vista imita la de un satélite en órbita baja que avanza hacia el este, empezando sobre Sudamérica; la velocidad y el encuadre están elegidos para el juego, no calculados.
 
-Las fotos del bosque en la etapa "Descubrir" siguen siendo ilustraciones simuladas.
+La galería de resultados conserva las capturas del visor sobre el mosaico NASA de archivo. Las fotos del bosque del ejercicio posterior Observe siguen siendo ilustraciones simuladas.

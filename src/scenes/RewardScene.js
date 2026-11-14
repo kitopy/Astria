@@ -15,6 +15,7 @@ export class RewardScene extends Phaser.Scene {
   init(data = {}) {
     this.design = readDesign(data.design);
     this.mission = data.mission ?? null;
+    this.captures=(data.captures??[]).filter(shot=>typeof shot.image==='string'&&shot.image.startsWith('data:image/jpeg;base64,'));
   }
 
   preload() {
@@ -61,9 +62,16 @@ export class RewardScene extends Phaser.Scene {
       <h1 class="ws-headline">${success ? '¡Misión cumplida!' : 'Cada prueba enseña algo'}</h1>
       <p>${success ? 'Diseñaste. Probaste. Descubriste.' : 'Tu próxima idea puede cambiar el resultado.'}</p>`;
 
-    // On success the photos reached Earth, so the player can go look at them.
+    if(this.captures.length){
+      const right=ui.area('right');
+      right.innerHTML='<h2 class="ws-title">Lo que capturó tu cámara</h2><div class="saved-sensor-photos"></div><p class="ws-story">Estas fotos guardan la vista de tu sensor sobre el mosaico de archivo de NASA. No representan fechas distintas ni demuestran cambios reales del bosque.</p>';
+      const tray=right.querySelector('.saved-sensor-photos');
+      this.captures.forEach((shot,i)=>{const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=shot.image;img.alt=`Captura ${i+1} del visor`;caption.textContent=`Foto ${i+1} · ${shot.delivered?'recibida en Tierra':'a bordo'}`;figure.append(img,caption);tray.append(figure);});
+    }
+
+    // The saved frames are shown above; Observe remains a separate comparison exercise.
     ui.area('actions').innerHTML = success
-      ? actionButton('improve', 'Volver al taller') + actionButton('observe', 'Ver mis fotos ›', true)
+      ? actionButton('improve', 'Volver al taller') + actionButton('observe', this.captures.length?'Ejercicio de comparación ›':'Ver mis fotos ›', true)
       : actionButton('improve', 'Mejorar mi satélite ›', true);
 
     ui.bind({
@@ -72,7 +80,9 @@ export class RewardScene extends Phaser.Scene {
     });
 
     ui.say(success
-      ? '¡Lo lograste! Tu satélite tomó y envió las dos fotos. Vamos a ver qué descubriste.'
+      ? this.captures.length
+        ? '¡Lo lograste! Las dos fotos llegaron a la Tierra. Revisalas y después practicá cómo comparar imágenes.'
+        : '¡Lo lograste! Tu satélite tomó y envió las dos fotos. Vamos a ver qué descubriste.'
       : 'Los resultados nos ayudan a diseñar mejor. Guardé tus piezas para que puedas ajustar tu satélite.');
   }
 }
