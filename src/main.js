@@ -1,24 +1,9 @@
 import Phaser from 'phaser';
-
-// A Scene is one "screen" of the game. For now there is only this one.
-class HelloScene extends Phaser.Scene {
-  constructor() {
-    super('Hello'); // unique key used to start/switch scenes
-  }
-
-  // create() runs once when the scene starts: build what appears on screen here.
-  create() {
-    const { width, height } = this.scale;
-
-    this.add
-      .text(width / 2, height / 2, 'ASTRION', {
-        fontFamily: 'sans-serif',
-        fontSize: '96px',
-        color: '#d9b8ff',
-      })
-      .setOrigin(0.5); // anchor at the text's center instead of its top-left
-  }
-}
+import { MenuScene } from './scenes/MenuScene.js';
+import { StationScene } from './scenes/StationScene.js';
+import { BuildScene } from './scenes/BuildScene.js';
+import { TestScene } from './scenes/TestScene.js';
+import { RewardScene } from './scenes/RewardScene.js';
 
 new Phaser.Game({
   type: Phaser.AUTO, // WebGL if available, otherwise Canvas
@@ -30,5 +15,6 @@ new Phaser.Game({
     mode: Phaser.Scale.FIT, // ...and scaled to fit any screen keeping proportions
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [HelloScene],
+  // The first scene in the list is the one that starts.
+  scene: [MenuScene, StationScene, BuildScene, TestScene, RewardScene],
 });
