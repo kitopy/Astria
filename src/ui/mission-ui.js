@@ -60,9 +60,10 @@ export function actionButton(action, label, primary = false, disabled = false) {
 //   ui.area(name)   → the element to fill: 'left' | 'right' | 'center' | 'actions'
 //   ui.say(text)    → NOAH message (read aloud if the voice is on)
 //   ui.bind({...})  → click handlers by data-action
-export function mount(scene, step) {
+// options.wizard: step-by-step layout (narrow summary on the left, the current task on the right).
+export function mount(scene, step, options = {}) {
   const root = document.createElement('div');
-  root.className = 'ws';
+  root.className = options.wizard ? 'ws ws--wizard' : 'ws';
   root.innerHTML = `
     <header class="ws-top">
       <button class="ws-btn ws-small" data-action="menu">‹ Menú</button>
@@ -78,13 +79,16 @@ export function mount(scene, step) {
       <div class="ws-noah">
         <span class="ws-noah-name">NOAH</span>
         <p data-area="noah" role="status" aria-live="polite"></p>
-        <button class="ws-listen" data-action="listen" aria-label="Escuchar a NOAH">🔊</button>
+        <button class="ws-listen" data-action="listen">Escuchar</button>
       </div>
       <div class="ws-actions" data-area="actions"></div>
     </footer>`;
 
   // Phaser places the HTML over the canvas and scales it with the game.
   const dom = scene.add.dom(0, 0, root).setOrigin(0);
+  // Phaser forces pointer-events:auto on DOM elements it manages. 'none' lets clicks and drags on
+  // empty areas reach the game canvas; panels and buttons turn it back on in workshop.css.
+  dom.pointerEvents = 'none';
 
   const voiceButton = root.querySelector('[data-action="voice"]');
   const hasSpeech = 'speechSynthesis' in window;
@@ -95,10 +99,11 @@ export function mount(scene, step) {
     voice: !!scene.registry.get('noahVoice'),
     area: (name) => root.querySelector(`[data-area="${name}"]`),
 
-    say(text) {
+    // silent: show the text without reading it aloud (e.g. hover details).
+    say(text, { silent = false } = {}) {
       this.message = text;
       this.area('noah').textContent = text;
-      if (this.voice) this.speak();
+      if (this.voice && !silent) this.speak();
     },
 
     speak() {
@@ -130,7 +135,7 @@ export function mount(scene, step) {
         } else if (action === 'listen') {
           this.speak();
         } else {
-          all[action]?.();
+          all[action]?.(button); // the button is passed so handlers can read data-* attributes
         }
       });
     },
