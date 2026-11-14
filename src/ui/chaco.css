@@ -18,3 +18,7 @@
 @keyframes camera-jitter{25%{transform:translate(calc(var(--obstacle-strength,0) * 4px),calc(var(--obstacle-strength,0) * -2px))}75%{transform:translate(calc(var(--obstacle-strength,0) * -4px),calc(var(--obstacle-strength,0) * 2px))}}
 @media(max-height:500px){.signal-bars{height:28px;margin-bottom:8px}.signal-bars span{max-height:28px}}
 .chaco-game[data-obstacle=signal][data-visibility=adjusting] .preview-antenna{transform-origin:50% 100%;animation:antenna-search .7s ease-in-out infinite alternate}@keyframes antenna-search{from{transform:rotate(-16deg)}to{transform:rotate(16deg)}}
+@media(min-width:1201px){.sensor-panel{width:360px}.historical-sensor-photos img{max-height:170px}}
+@media(min-width:1201px) and (max-height:850px){.sensor-panel{width:300px}}
+@media(min-width:801px) and (max-width:1200px) and (min-height:501px){.sensor-panel{top:270px;width:270px}}
+.sensor-record{padding:4px 6px;border-radius:4px;background:#0f1b2ac9;font-weight:800;letter-spacing:1px}

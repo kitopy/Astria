@@ -1,7 +1,7 @@
 ﻿import Phaser from 'phaser';
 import { createChacoComparison } from '../ui/chaco-comparison.js';
 
-// After a successful mission, investigate a separate historical NASA case.
+// Investigate the historical NASA pair recreated during the mission.
 export class ObserveScene extends Phaser.Scene {
   constructor() { super('Observe'); }
   init(data = {}) { this.result = data; }

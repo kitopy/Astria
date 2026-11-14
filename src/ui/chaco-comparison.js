@@ -20,7 +20,7 @@ export function createChacoComparison(scene, onAction) {
           <span class="cmp-divider" aria-hidden="true"></span><span class="cmp-hint-area" aria-hidden="true" hidden></span><span class="cmp-marker" aria-hidden="true" hidden></span><span class="cmp-cursor" aria-hidden="true" hidden></span>
         </button></div>
         <div class="cmp-slider"><label for="cmp-split">Mové la barra para comparar los años</label><input id="cmp-split" type="range" min="0" max="100" value="50" aria-label="Comparar 1985 con 2025"><div><button data-cmp="after">Ver ${mission.afterYear}</button><span>Arrastrá o usá las flechas</span><button data-cmp="before">Ver ${mission.beforeYear}</button></div></div>
-        <p class="cmp-caption">Imágenes históricas del mismo sector del Chaco. Este archivo es un caso de estudio distinto de las capturas de tu misión.</p>
+        <p class="cmp-caption">El mismo sector del Chaco en dos años. Tu misión recrea estas observaciones con imágenes históricas de NASA.</p>
       </section>
       <aside class="cmp-investigation" aria-label="Investigación guiada">
         <span class="cmp-eyebrow" data-cmp-step></span><h2 data-cmp-title></h2><p data-cmp-task></p>
