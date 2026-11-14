@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { BootScene } from './scenes/BootScene.js';
 import { MenuScene } from './scenes/MenuScene.js';
 import { StationScene } from './scenes/StationScene.js';
 import { BuildScene } from './scenes/BuildScene.js';
@@ -16,5 +17,5 @@ new Phaser.Game({
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   // The first scene in the list is the one that starts.
-  scene: [MenuScene, StationScene, BuildScene, TestScene, RewardScene],
+  scene: [BootScene, MenuScene,StationScene, BuildScene, TestScene, RewardScene],
 });
