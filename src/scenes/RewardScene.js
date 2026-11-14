@@ -71,12 +71,12 @@ export class RewardScene extends Phaser.Scene {
 
     // The saved frames are shown above; Observe remains a separate comparison exercise.
     ui.area('actions').innerHTML = success
-      ? actionButton('improve', 'Volver al taller') + actionButton('observe', this.captures.length?'Ejercicio de comparación ›':'Ver mis fotos ›', true)
+      ? actionButton('improve', 'Volver al taller') + actionButton('observe', 'Investigar el Chaco ›', true)
       : actionButton('improve', 'Mejorar mi satélite ›', true);
 
     ui.bind({
       improve: () => this.scene.start('Build', { design: this.design, focus: 'review' }),
-      observe: () => this.scene.start('Observe'),
+      observe: () => this.scene.start('Observe', { design: this.design, mission: this.mission, captures: this.captures }),
     });
 
     ui.say(success

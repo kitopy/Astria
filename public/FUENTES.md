@@ -11,7 +11,7 @@ Recursos geográficos y científicos incorporados localmente:
 - Caso histórico: “Deforestation in Paraguay’s Gran Chaco”, NASA SVS, ID 15026, publicado el 6 de mayo de 2026. Serie natural-color Landsat de 1985 a 2025. Créditos: NASA’s Goddard Space Flight Center; Ross K. Walter (SSAI). Fuente: https://svs.gsfc.nasa.gov/15026/ . El video se conserva localmente y se muestra con reproductor y créditos.
 - Motor cartográfico: MapLibre GL JS 6.18.0, licencia BSD-3-Clause. https://maplibre.org/projects/gl-js/ .
 
-`data/sources.json` registra las URL exactas y hashes de los recursos NASA descargados. La región de observación del juego no identifica la huella exacta de la secuencia Landsat. El video histórico se presenta como un caso externo real; las imágenes obtenidas durante la misión y el comparador Observe son simulaciones y no se presentan como adquisiciones reales del dispositivo del jugador.
+`data/sources.json` registra las URL exactas y hashes de los recursos NASA descargados. La región de observación del juego no identifica la huella exacta de la secuencia Landsat. El video y el comparador Observe presentan un caso histórico externo real. Las capturas obtenidas durante el vuelo son vistas simuladas de un mosaico; el archivo histórico no se presenta como adquisiciones del dispositivo del jugador.
 
 Guardianes de la Tierra es una simulación educativa para participantes de Super Kids de 9 a 13 años. Objetivo: obtener y transmitir dos observaciones de un bosque simulado. No predice el rendimiento de hardware ni de órbitas reales.
 
@@ -45,7 +45,7 @@ Todos los valores del catálogo son elegidos para balancear el juego, no fichas 
 
 Hay una observación por etapa y una transmisión por contacto. Una imagen sólo se recibe al transmitir todos sus bloques. Se necesitan dos imágenes completas. La calidad detallada aporta más detalle, sin alterar el objetivo básico. La simulación ofrece tanto diseños exitosos como diseños inviables o insuficientes.
 
-El arte del satélite y la ilustración de Tierra utilizada en el comparador Observe se generaron con IA. La Tierra 3D del taller y de resultados usa la textura real descrita en "Imagen real de la Tierra". El mapa de la operación y el video de archivo usan los recursos reales identificados arriba. El hallazgo del comparador es narrativo y simulado: no se realiza detección automática de deforestación ni se adquieren imágenes en vivo. El video Landsat conserva sus años históricos y no representa las dos fotos obtenidas por el jugador. Una causa de cambio no se infiere automáticamente de dos imágenes.
+El arte del satélite se generó con IA. La Tierra 3D del taller y de resultados usa la textura real descrita en "Imagen real de la Tierra". El mapa, el video y los fotogramas del comparador usan los recursos reales identificados arriba. Observe compara fotogramas etiquetados 1985 y 2025 de la misma secuencia Landsat, extraídos sin recorte en 0.05 y 7.25 segundos del video local. Son una selección provisional; la revisión final de imágenes queda pendiente. Las áreas del ejercicio son anotaciones manuales para enseñar a comparar, no una clasificación científica ni detección automática. No se adquieren imágenes en vivo. El archivo conserva sus años históricos y no representa las dos fotos obtenidas por el jugador. Una causa de cambio no se infiere automáticamente de dos imágenes.
 
 NOAH usa mensajes preparados y, opcionalmente, la síntesis de voz local del navegador. No utiliza un servicio de IA conversacional. No se solicitan cuentas ni datos personales; se conservan el diseño y el identificador del último imprevisto en el almacenamiento local del navegador. No se ha realizado todavía validación con usuarios de Super Kids.
 
@@ -57,4 +57,4 @@ En Construir y en los resultados de Descubrir, la Tierra que gira detrás del sa
 - Datos Blue Marble Next Generation: cortesía de Reto Stöckli (NASA/GSFC) y NASA's Earth Observatory. Nubes: CPC (Climate Prediction Center) Cloud Composite.
 - Se usa en 8192 × 4096 píxeles (o 4096 × 2048 si la tarjeta gráfica no admite más). La vista imita la de un satélite en órbita baja que avanza hacia el este, empezando sobre Sudamérica; la velocidad y el encuadre están elegidos para el juego, no calculados.
 
-La galería de resultados conserva las capturas del visor sobre el mosaico NASA de archivo. Las fotos del bosque del ejercicio posterior Observe siguen siendo ilustraciones simuladas.
+La galería de resultados conserva las capturas del visor sobre el mosaico NASA de archivo. El ejercicio posterior Observe usa los dos fotogramas históricos del Chaco descritos arriba.
