@@ -30,6 +30,7 @@ Se conserva el esqueleto JavaScript + Phaser 4 + Vite 8 y el recorrido Menu → 
 - `src/ui/chaco-map.js`: mapa MapLibre con datos locales; `chaco-hud.js` y `chaco.css`: controles y animaciones de la misión.
 - `src/ui/satellite-sensor.js`: visor Canvas 2D que recorta el mosaico georreferenciado en la posición del satélite y guarda el fotograma al observar.
 - `src/ui/earth3d.js`: fondo de Tierra giratoria con Three.js y textura NASA; visible en construcción y resultados. Se oculta durante la operación sobre el mapa del Chaco.
+- `src/game/chaco-visibility.js`: desafío de nubes entre las observaciones. Pausa el vuelo y cobra una sola vez 6 de energía para reencuadrar el sensor; el ajuste visual dura dos segundos y después se puede reanudar.
 - `public/data/`: cartografía Natural Earth de la región, imagen georreferenciada NASA GIBS Blue Marble y video histórico Landsat de NASA. `sources.json` registra las fuentes, el encuadre y los hashes de los recursos de NASA.
 - `src/ui/mission-ui.js` y `workshop.css`: interfaz compartida, propiedad de cada escena. Se monta sobre el contenedor DOM de Phaser y se destruye al salir para no duplicar controles.
 - `tests/model.test.js`: casos de éxito, fallo de energía, rediseño, datos incompletos y acciones inválidas.
@@ -49,6 +50,8 @@ El arte de satélite es generado con IA. El mapa base y el video histórico prov
 El punto de observación del Chaco es una ubicación didáctica elegida dentro de Paraguay; no es la huella exacta del video de NASA ni un sitio de monitoreo validado. La estación de Asunción es ficticia. El recorrido sobre el mapa es una traza ilustrativa, no la trayectoria física de un satélite. La sombra es una representación pedagógica, no un cálculo solar. Los valores del catálogo son didácticos y los cambios del bosque del minijuego Observe siguen siendo simulados. Consultar [fuentes, atribuciones y reglas](public/FUENTES.md).
 
 La pausa automática en cada oportunidad evita perder la misión por reflejos. La energía cambia al pasar de etapa o al observar/transmitir, sin consumo continuo durante esperas o pausas. El vuelo se pausa también al ocultar la pestaña o abrir el caso NASA. Se conserva el flujo posterior del compañero: Reward → Observe → Finale cuando la misión resulta exitosa.
+
+Entre las dos fotos, nubes procedurales reducen la visibilidad del visor y una bruma identifica el desafío en el mapa. El recorrido se detiene y el jugador elige **Buscar un claro · −6 energía**. El encuadre se desplaza de forma ilustrativa, su huella en el mapa se actualiza y las nubes salen de la vista. El gasto queda en la bitácora y reduce la reserva disponible para la segunda foto y el envío. No se cobra por segundo ni por pulsaciones repetidas. No son nubes meteorológicas reales ni se altera el clima: se simula un ajuste de orientación de cámara. Abrir el caso NASA u ocultar la pestaña pausa también ese ajuste. El diseño inicial sigue pudiendo completar la misión.
 
 Los recursos del mapa, las fuentes, el worker MapLibre y el video se sirven desde la aplicación local. La misión no requiere cuentas, claves ni servicios externos durante la partida; el enlace de consulta a NASA sí abre su sitio. Hace falta un navegador con WebGL para el mapa interactivo.
 

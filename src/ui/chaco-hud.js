@@ -1,6 +1,7 @@
 import { catalog } from '../game/design.js';
 import { phases } from '../game/model.js';
 import { atGate } from '../game/chaco-flight.js';
+import { cloudCover, REFRAME_ENERGY } from '../game/chaco-visibility.js';
 import './chaco.css';
 
 const base = import.meta.env.BASE_URL;
@@ -18,7 +19,7 @@ export function satellitePreview(design) {
 }
 export function createChacoHUD(scene, design, onAction) {
   const root = document.createElement('section'); root.className = 'chaco-game'; root.setAttribute('aria-label','Guardianes del Chaco: operación del satélite');
-  root.innerHTML = `<div class="chaco-map" aria-label="Mapa geográfico de Paraguay"></div><div class="chaco-shadow"></div>
+  root.innerHTML = `<div class="chaco-map" aria-label="Mapa geográfico de Paraguay"></div><div class="chaco-shadow"></div><div class="weather-fog" aria-hidden="true"></div>
   <header class="chaco-header"><strong>ASTRION<span>✦</span></strong><span>Guardianes del Chaco</span><button data-flight="case">Caso real NASA</button><button data-flight="voice" aria-pressed="false">Voz de NOAH: apagada</button></header>
   <div class="chaco-title"><h1>Tu misión <span>sobre Paraguay</span></h1><p>Observá el bosque. Cuidá la energía. Enviá tus descubrimientos.</p></div>
   <aside class="chaco-objective hud-panel"><h2>Dos imágenes del Chaco</h2><div><span>Obtenidas</span><strong data-hud="captured">0/2</strong></div><div><span>Enviadas</span><strong data-hud="delivered">0/2</strong></div><p data-hud="status" role="status">Preparando mapa…</p></aside>
@@ -26,6 +27,13 @@ export function createChacoHUD(scene, design, onAction) {
   <aside class="chaco-design hud-panel"><h2>Tu satélite</h2>${satellitePreview(design)}<p>${catalog.camera.options.find(p=>p.id===design.camera).name} · ${catalog.battery.options.find(p=>p.id===design.battery).name}</p></aside>
   <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2><span data-hud="sensor-state">Preparando</span></div><div class="sensor-window"><canvas aria-label="Terreno que está viendo la cámara"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record">VISTA DEL SENSOR</span></div><p>Mosaico NASA de archivo · sensor simulado</p><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
   <div class="chaco-map-tools"><button data-flight="recenter" aria-label="Volver a centrar Paraguay">Centrar Paraguay</button><button data-flight="speed">Velocidad ×1</button></div>
+  <aside class="visibility-challenge hud-panel" aria-label="Desafío de visibilidad" hidden>
+    <span class="weather-tag">DESAFÍO DEL TRAYECTO · NUBES SIMULADAS</span>
+    <h2 data-hud="weather-title">Buscá un claro</h2>
+    <p data-hud="weather-message">Las nubes tapan el terreno. Reorientá la cámara para recuperar la vista.</p>
+    <button data-flight="reframe" class="flight-primary">Buscar un claro · −${REFRAME_ENERGY} energía</button>
+    <progress data-hud="reframe-progress" max="1" value="0" aria-label="Ajuste del encuadre" hidden></progress>
+  </aside>
   <section class="chaco-bottom"><div class="chaco-noah hud-panel"><span class="chaco-noah-icon" aria-hidden="true">N</span><div><strong>NOAH</strong><p data-hud="noah" aria-live="polite"></p></div><button data-flight="listen" aria-label="Escuchar el mensaje de NOAH">Escuchar</button></div>
   <div class="chaco-controls"><button data-flight="travel" class="flight-primary" disabled>Iniciar recorrido</button><button data-flight="capture" disabled>Observar</button><button data-flight="transmit" disabled>Transmitir</button><button data-flight="pause" disabled>Pausar</button><button data-flight="finish" hidden>Ver resultados →</button></div>
   <ol class="chaco-timeline"><li>Preparación</li><li>Primera pasada</li><li>Segunda pasada</li><li>Contacto terrestre</li></ol></section>
@@ -49,21 +57,36 @@ export function createChacoHUD(scene, design, onAction) {
   if(!window.speechSynthesis)root.querySelectorAll('[data-flight="voice"],[data-flight="listen"]').forEach(button=>button.disabled=true);
   return {
     root, mapElement:root.querySelector('.chaco-map'), sensorCanvas:root.querySelector('.sensor-window canvas'), ready:false,
+    get caseOpen(){return dialog.open;},
     showShots(shots){const tray=root.querySelector('.sensor-thumbnails');tray.replaceChildren();for(const [i,shot]of shots.entries()){const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=shot.image;img.alt=`Captura ${i+1} de la vista simulada`;caption.textContent=`Foto ${i+1}${shot.delivered?' · enviada':' · a bordo'}`;figure.append(img,caption);tray.append(figure);}},
     say(text){message=text;get('noah').textContent=text;if(voice)speak();},
     showCase(){dialog.showModal();}, closeCase(){dialog.close();},
-    update(mission,specs,flight){
+    updateWeather(flight,visibility){
+      const cover=cloudCover(flight,visibility), status=visibility.status;
+      root.style.setProperty('--cloud-cover',String(cover));
+      root.dataset.visibility=status;
+      root.querySelector('.visibility-challenge').hidden=!(status==='blocked'||status==='adjusting'||cover>.1);
+      get('weather-title').textContent=status==='adjusting'?'Buscando un claro…':status==='blocked'?'¡La vista está cubierta!':'Visibilidad en descenso';
+      get('weather-message').textContent=status==='adjusting'?'La cámara cambia de orientación. Las nubes siguen sobre el terreno.':status==='blocked'?'Pausamos el viaje. Ajustá el encuadre y reservá energía para tus fotos.':'Se acerca una zona con nubes. Prepará la cámara.';
+      get('reframe-progress').hidden=status!=='adjusting';
+      get('reframe-progress').value=visibility.adjustment;
+    },
+    update(mission,specs,flight,visibility){
       const gate=atGate(flight), phase=flight.gate;
-      get('sensor-state').textContent=flight.running?'Explorando':gate&&[1,2].includes(phase)?'Sobre el bosque':'En espera';
+      const obstructed=['blocked','adjusting'].includes(visibility.status);
+      this.updateWeather(flight,visibility);
+      get('sensor-state').textContent=visibility.status==='blocked'?'Visibilidad baja':visibility.status==='adjusting'?'Reencuadrando':flight.running?'Explorando':gate&&[1,2].includes(phase)?'Sobre el bosque':'En espera';
       root.classList.toggle('panels-deployed',flight.progress>0||flight.running);
       get('captured').textContent=`${mission.captured.length}/2`;get('delivered').textContent=`${mission.delivered}/2`;
       get('energy').textContent=`${mission.energy}/${specs.capacity}`;get('battery').max=specs.capacity;get('battery').value=mission.energy;
       get('data').textContent=mission.photos.reduce((sum,p)=>sum+p.remaining,0);
       get('sun').textContent=phases[mission.phase].sun?'Con luz solar':'Satélite en sombra (simulada)';
       root.classList.toggle('in-shadow',!phases[mission.phase].sun);
-      get('status').textContent=!this.ready?'Preparando mapa…':flight.running?'En vuelo · seguimiento activo':gate?['Listo para salir','Oportunidad de observar','Segunda oportunidad de observar','Contacto con Asunción'][phase]:'Vuelo en pausa';
+      get('status').textContent=!this.ready?'Preparando mapa…':obstructed?'Desafío: recuperar la visibilidad':flight.running?'En vuelo · seguimiento activo':gate?['Listo para salir','Oportunidad de observar','Segunda oportunidad de observar','Contacto con Asunción'][phase]:'Vuelo en pausa';
       const control=action=>root.querySelector(`[data-flight="${action}"]`);
-      control('travel').hidden=phase===3;control('travel').disabled=!this.ready||flight.running;
+      control('travel').hidden=phase===3;control('travel').disabled=!this.ready||flight.running||obstructed;
+      control('reframe').disabled=!this.ready||visibility.status!=='blocked'||mission.energy<REFRAME_ENERGY;
+      control('reframe').textContent=visibility.status==='adjusting'?'Reencuadrando…':`Buscar un claro · −${REFRAME_ENERGY} energía`;
       control('travel').textContent=!gate?'Reanudar vuelo':phase===0?'Iniciar recorrido':'Continuar recorrido';
       control('pause').disabled=!flight.running;
       control('capture').disabled=!this.ready||!gate||![1,2].includes(phase)||mission.captured.includes(phase)||mission.energy<specs.cameraPower;
