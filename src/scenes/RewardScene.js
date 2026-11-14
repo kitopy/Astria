@@ -53,6 +53,7 @@ export class RewardScene extends Phaser.Scene {
       <details class="ws-details">
         <summary>¿Qué estamos simplificando?</summary>
         <p>La energía, el presupuesto y los datos usan unidades de juego. Las etapas no representan órbitas ni tiempos reales. El bosque y sus cambios son simulados.</p>
+        <p>La Tierra del fondo es real: imagen Blue Marble de NASA/Goddard Scientific Visualization Studio.</p>
         <a href="${BASE}FUENTES.md" target="_blank" rel="noopener">Fuentes y reglas</a>
       </details>`;
 

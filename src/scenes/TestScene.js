@@ -3,6 +3,7 @@ import { advance, capture, launch, phases, stats, transmit } from '../game/model
 import { catalog, readDesign } from '../game/design.js';
 import { actionButton, addArt, meter, mount, preloadArt } from '../ui/mission-ui.js';
 import { centerDesignArea } from '../ui/layout.js';
+import { setEarthDaylight } from '../ui/earth3d.js';
 
 // Satellite x position for each phase: it "travels" a little across the screen.
 const ORBIT_X = [930, 970, 1020, 960];
@@ -124,10 +125,9 @@ export class TestScene extends Phaser.Scene {
       actionButton('workshop', 'Volver al taller') +
       actionButton('next', m.phase === 3 ? 'Ver resultados ›' : 'Siguiente etapa ›', true);
 
-    // In the shadow phase, darken the satellite and the Earth.
-    const shade = phase.sun ? 0xffffff : 0x8a90c8;
-    this.art.setTint(shade);
-    this.background.setTint(phase.sun ? 0xffffff : 0x6a6fa8);
+    // In the shadow phase, darken the satellite and dim the Sun on the Earth.
+    this.art.setTint(phase.sun ? 0xffffff : 0x8a90c8);
+    setEarthDaylight(phase.sun);
 
     this.tweens.killTweensOf(this.art);
     this.tweens.add({

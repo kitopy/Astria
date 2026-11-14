@@ -26,6 +26,16 @@ Todos los valores del catálogo son elegidos para balancear el juego, no fichas 
 
 Hay una observación por etapa y una transmisión por contacto. Una imagen sólo se recibe al transmitir todos sus bloques. Se necesitan dos imágenes completas. La calidad detallada aporta más detalle, sin alterar el objetivo básico. La simulación ofrece tanto diseños exitosos como diseños inviables o insuficientes.
 
-Las ilustraciones de satélite y Tierra se generaron con IA para este proyecto. No son imágenes NASA ni observaciones satelitales reales. El hallazgo de pérdida de cobertura es narrativo y simulado; en este borrador se explica mediante texto. No se han integrado datos ambientales, API NASA, fechas, coordenadas ni pares de imágenes reales. Una causa de cambio no se infiere automáticamente de dos imágenes.
+Las ilustraciones del satélite y de la Tierra con el bosque se generaron con IA para este proyecto. No son imágenes NASA ni observaciones satelitales reales. La excepción es el globo 3D del fondo, descrito en la sección "Imagen real de la Tierra". El hallazgo de pérdida de cobertura es narrativo y simulado; en este borrador se explica mediante texto. No se han integrado datos ambientales, API NASA, fechas, coordenadas ni pares de imágenes reales. Una causa de cambio no se infiere automáticamente de dos imágenes.
 
 NOAH usa mensajes preparados y, opcionalmente, la síntesis de voz local del navegador. No utiliza un servicio de IA conversacional. No se solicitan cuentas ni datos personales; sólo se conserva el diseño en el almacenamiento local del navegador. No se ha realizado todavía validación con usuarios de Super Kids.
+
+## Imagen real de la Tierra (fondo 3D)
+
+En las pantallas de la misión (Construir, Probar, Descubrir) la Tierra que gira detrás del satélite es un globo 3D con una textura real de la NASA:
+
+- Textura: "Equirectangular Projected Earth for LARGEST", NASA/Goddard Space Flight Center Scientific Visualization Studio. https://svs.gsfc.nasa.gov/3615
+- Datos Blue Marble Next Generation: cortesía de Reto Stöckli (NASA/GSFC) y NASA's Earth Observatory. Nubes: CPC (Climate Prediction Center) Cloud Composite.
+- Se usa en 8192 × 4096 píxeles (o 4096 × 2048 si la tarjeta gráfica no admite más). La vista imita la de un satélite en órbita baja que avanza hacia el este, empezando sobre Sudamérica; la velocidad y el encuadre están elegidos para el juego, no calculados.
+
+Las fotos del bosque en la etapa "Descubrir" siguen siendo ilustraciones simuladas.
