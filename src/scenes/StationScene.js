@@ -1,18 +1,14 @@
 import Phaser from 'phaser';
 import { addCoverBackground, centerDesignArea } from '../ui/layout.js';
 import { speakIfEnabled } from '../ui/noahVoice.js';
+import { addNeonButton } from '../ui/neonButton.js';
 import { CSS } from '../ui/palette.js';
 
-// NOAH presents the mission, one line per "CONTINUAR".
-// Adapted from the GDevelop scene "ESTACION PRINCIPAL" to the forest mission.
-const LINES = [
-  'NOAH // CONEXIÓN ESTABLECIDA\nBienvenida a bordo, exploradora.\nSoy NOAH, tu asistente de misión.',
-  'NOAH // ALERTA DESDE PARAGUAY\nEl bosque del Chaco paraguayo está cambiando.\nDesde el espacio podemos investigar qué ocurre.',
-  'NOAH // TU MISIÓN\nVas a diseñar un satélite que tome dos fotos del bosque\ny las envíe a la Tierra.',
-  'NOAH // ¿ESTÁS LISTA?\nCada pieza del satélite tiene ventajas y desafíos.\nVamos al taller a construir el tuyo.',
-];
+// Mission briefing: one screen, one click. NOAH sums up who she is, the problem and the mission;
+// the details of each part are explained later, inside the workshop.
+const BRIEFING = 'Hola, exploradora. Soy NOAH. El bosque del Chaco paraguayo está cambiando: vamos a construir un satélite para fotografiarlo desde el espacio.';
 
-const TYPE_SPEED_MS = 28; // delay between letters in the typewriter effect
+const TYPE_SPEED_MS = 12; // delay between letters in the typewriter effect
 
 export class StationScene extends Phaser.Scene {
   constructor() {
@@ -21,65 +17,47 @@ export class StationScene extends Phaser.Scene {
 
   create() {
     centerDesignArea(this);
-    this.lineIndex = 0;
-
     addCoverBackground(this, 'bg-station');
 
-    // Big NOAH panel, like in GDevelop.
-    this.add.image(960, 560, 'panel-dialog').setDisplaySize(1700, 567);
-    this.message = this.add.text(250, 445, '', {
-      fontFamily: 'Audiowide',
-      fontSize: '38px',
-      color: '#ffffff',
-      lineSpacing: 18,
-    });
+    const title = this.add
+      .text(960, 260, 'MISIÓN CHACO', { fontFamily: 'Cinzel', fontSize: '120px', fontStyle: 'bold', color: CSS.pink })
+      .setOrigin(0.5)
+      .setPadding(48) // room for the shadow
+      .setShadow(0, 4, '#2a0f4d', 30, false, true); // dark shadow: this background is bright, a pink glow would vanish
+    const subtitle = this.add
+      .text(960, 360, 'Paraguay · Observación de la Tierra', { fontFamily: 'Quicksand', fontSize: '32px', fontStyle: 'bold', color: '#ffffff' })
+      .setOrigin(0.5)
+      .setPadding(10)
+      .setShadow(0, 2, '#1c0a33', 10, false, true);
 
-    this.continueButton = this.add
-      .text(1640, 735, '', { fontFamily: 'Audiowide', fontSize: '36px', color: CSS.glow })
-      .setOrigin(1, 1)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerup', () => this.advance());
+    // NOAH's line, typed quickly. The button is available right away: no need to wait for it.
+    this.add.image(960, 560, 'panel-dialog').setDisplaySize(1300, 300);
+    const message = this.add
+      .text(960, 560, '', {
+        fontFamily: 'Quicksand', fontSize: '34px', fontStyle: 'bold', color: '#ffffff', align: 'center',
+        lineSpacing: 10, wordWrap: { width: 1000 },
+      })
+      .setOrigin(0.5);
+    let shown = 0;
+    this.time.addEvent({
+      delay: TYPE_SPEED_MS,
+      repeat: BRIEFING.length - 1,
+      callback: () => message.setText(BRIEFING.slice(0, ++shown)),
+    });
+    speakIfEnabled(this, BRIEFING);
+
+    const start = () => this.scene.start('Build');
+    const button = addNeonButton(this, 960, 820, 'CONSTRUIR MI SATÉLITE', start, { width: 720, fontSize: 40 });
+    this.input.keyboard.once('keydown-ENTER', start);
+    this.input.keyboard.once('keydown-SPACE', start);
+
+    // Entrance: title, then subtitle, then the button.
+    [title, subtitle, button].forEach((item, i) => {
+      item.setAlpha(0);
+      this.tweens.add({ targets: item, alpha: 1, duration: 450, delay: i * 200 });
+    });
 
     this.addVoiceToggle();
-
-    // Keyboard shortcut: Space or Enter also advance.
-    this.input.keyboard.on('keydown-SPACE', () => this.advance());
-    this.input.keyboard.on('keydown-ENTER', () => this.advance());
-
-    this.showLine();
-  }
-
-  // Shows LINES[lineIndex] letter by letter, and reads it aloud if the voice is on.
-  showLine() {
-    const text = LINES[this.lineIndex];
-    const isLast = this.lineIndex === LINES.length - 1;
-
-    this.continueButton.setText(isLast ? 'IR AL TALLER ›' : 'CONTINUAR ›');
-    this.message.setText('');
-    speakIfEnabled(this, text);
-
-    this.typing?.remove();
-    this.typing = this.time.addEvent({
-      delay: TYPE_SPEED_MS,
-      repeat: text.length - 1,
-      callback: () => this.message.setText(text.slice(0, this.message.text.length + 1)),
-    });
-  }
-
-  advance() {
-    // First click while typing: show the whole line at once.
-    if (this.typing && this.typing.getRepeatCount() > 0) {
-      this.typing.remove();
-      this.message.setText(LINES[this.lineIndex]);
-      return;
-    }
-
-    this.lineIndex += 1;
-    if (this.lineIndex < LINES.length) {
-      this.showLine();
-    } else {
-      this.scene.start('Build');
-    }
   }
 
   // Top-right switch. Uses the same 'noahVoice' setting as the workshop screens.
@@ -100,7 +78,7 @@ export class StationScene extends Phaser.Scene {
       const on = !this.registry.get('noahVoice');
       this.registry.set('noahVoice', on);
       toggle.setText(label());
-      if (on) speakIfEnabled(this, LINES[this.lineIndex]);
+      if (on) speakIfEnabled(this, BRIEFING);
       else window.speechSynthesis?.cancel();
     });
   }
