@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { preloadArt } from '../ui/mission-ui.js';
+import { speakIfEnabled } from '../ui/noahVoice.js';
 
 // Region of earth.png used as the "photo" taken by the satellite (forest, river, mountain).
 const PHOTO_CROP = { x: 420, y: 730, width: 454, height: 294 };
@@ -129,7 +130,7 @@ export class ObserveScene extends Phaser.Scene {
 
   nextLine() {
     if (this.lineIndex >= FOUND_LINES.length) {
-      this.scene.start('Menu'); // TODO: go to the closing scene (next step)
+      this.scene.start('Finale');
       return;
     }
     this.say(FOUND_LINES[this.lineIndex]);
@@ -139,14 +140,6 @@ export class ObserveScene extends Phaser.Scene {
 
   say(text) {
     this.message.setText(text);
-
-    // Respect the "Voz de NOAH" toggle from the workshop screens.
-    if (this.registry.get('noahVoice') && 'speechSynthesis' in window) {
-      speechSynthesis.cancel();
-      const line = new SpeechSynthesisUtterance(text.replace(/^NOAH \/\/ .*\n/, ''));
-      line.lang = 'es-ES';
-      line.rate = 0.95;
-      speechSynthesis.speak(line);
-    }
+    speakIfEnabled(this, text);
   }
 }
