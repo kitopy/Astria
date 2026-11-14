@@ -14,7 +14,7 @@ new Phaser.Game({
   parent: 'game', // id of the div in index.html
   width: 1920, // the game is designed at 1920x1080...
   height: 1080,
-  backgroundColor: '#0b0618',
+  transparent: true, // lets the 3D Earth behind show through (scenes with images cover it anyway)
   dom: { createContainer: true }, // lets scenes place HTML elements over the canvas (used by the workshop UI)
   scale: {
     // ...always fully visible; the canvas expands to fill the rest of the window

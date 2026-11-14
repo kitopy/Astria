@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { DESIGN, centerDesignArea } from '../ui/layout.js';
+import { prepareEarth } from '../ui/earth3d.js';
 
 // Loads every image and font once, before the game starts.
 // Other scenes then just use the keys ('bg-menu', 'Cinzel', ...).
@@ -37,6 +38,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create() {
+    prepareEarth(); // starts loading the 3D Earth in the background; it's ready by the workshop
     this.scene.start('Menu');
   }
 }

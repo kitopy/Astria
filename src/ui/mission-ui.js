@@ -1,5 +1,5 @@
 import { SatelliteAssembly, frames } from './satellite.js';
-import { addCoverBackground } from './layout.js';
+import { hideEarth, showEarth } from './earth3d.js';
 
 // Shared screen layout for the three mission steps (Build, Test, Reward).
 // Phaser draws the background and the satellite; this module puts an HTML layer on top
@@ -19,9 +19,10 @@ export function preloadArt(scene) {
   }
 }
 
-// Earth fills the whole window; the satellite floats in the middle.
+// The real rotating Earth (behind the game) + the satellite floating in the middle.
 export function addArt(scene, design) {
-  scene.background = addCoverBackground(scene, 'earth');
+  showEarth();
+  scene.events.once('shutdown', hideEarth);
   return new SatelliteAssembly(scene, 960, 450, design);
 }
 

@@ -41,6 +41,16 @@ Todos los valores del catálogo son elegidos para balancear el juego, no fichas 
 
 Hay una observación por etapa y una transmisión por contacto. Una imagen sólo se recibe al transmitir todos sus bloques. Se necesitan dos imágenes completas. La calidad detallada aporta más detalle, sin alterar el objetivo básico. La simulación ofrece tanto diseños exitosos como diseños inviables o insuficientes.
 
-El arte del satélite y la ilustración de Tierra utilizada en el taller y el comparador Observe se generaron con IA. El mapa de la operación y el video de archivo usan los recursos reales identificados arriba. El hallazgo del comparador es narrativo y simulado: no se realiza detección automática de deforestación ni se adquieren imágenes en vivo. El video Landsat conserva sus años históricos y no representa las dos fotos obtenidas por el jugador. Una causa de cambio no se infiere automáticamente de dos imágenes.
+El arte del satélite y la ilustración de Tierra utilizada en el comparador Observe se generaron con IA. La Tierra 3D del taller y de resultados usa la textura real descrita en "Imagen real de la Tierra". El mapa de la operación y el video de archivo usan los recursos reales identificados arriba. El hallazgo del comparador es narrativo y simulado: no se realiza detección automática de deforestación ni se adquieren imágenes en vivo. El video Landsat conserva sus años históricos y no representa las dos fotos obtenidas por el jugador. Una causa de cambio no se infiere automáticamente de dos imágenes.
 
 NOAH usa mensajes preparados y, opcionalmente, la síntesis de voz local del navegador. No utiliza un servicio de IA conversacional. No se solicitan cuentas ni datos personales; sólo se conserva el diseño en el almacenamiento local del navegador. No se ha realizado todavía validación con usuarios de Super Kids.
+
+## Imagen real de la Tierra (fondo 3D)
+
+En Construir y en los resultados de Descubrir, la Tierra que gira detrás del satélite es un globo 3D con una textura real de la NASA. Durante Probar se muestra el mapa georreferenciado del Chaco y el visor de cámara:
+
+- Textura: "Equirectangular Projected Earth for LARGEST", NASA/Goddard Space Flight Center Scientific Visualization Studio. https://svs.gsfc.nasa.gov/3615
+- Datos Blue Marble Next Generation: cortesía de Reto Stöckli (NASA/GSFC) y NASA's Earth Observatory. Nubes: CPC (Climate Prediction Center) Cloud Composite.
+- Se usa en 8192 × 4096 píxeles (o 4096 × 2048 si la tarjeta gráfica no admite más). La vista imita la de un satélite en órbita baja que avanza hacia el este, empezando sobre Sudamérica; la velocidad y el encuadre están elegidos para el juego, no calculados.
+
+La galería de resultados conserva las capturas del visor sobre el mosaico NASA de archivo. Las fotos del bosque del ejercicio posterior Observe siguen siendo ilustraciones simuladas.

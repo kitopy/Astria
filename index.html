@@ -8,10 +8,13 @@
     <style>
       html, body { margin: 0; height: 100%; background: #0b0618; overflow: hidden; }
       /* Phaser's EXPAND mode sizes the game to this div, so it must fill the window. */
-      #game { width: 100vw; height: 100vh; }
+      #game { position: relative; z-index: 1; width: 100vw; height: 100vh; }
+      /* 3D Earth (src/ui/earth3d.js), behind the game. Hidden until a mission screen shows it. */
+      #earth-bg { position: fixed; inset: 0; z-index: 0; width: 100vw; height: 100vh; visibility: hidden; }
     </style>
   </head>
   <body>
+    <canvas id="earth-bg"></canvas>
     <!-- Phaser injects its <canvas> inside this div -->
     <div id="game"></div>
     <script type="module" src="/src/main.js"></script>

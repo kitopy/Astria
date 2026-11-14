@@ -29,6 +29,7 @@ Se conserva el esqueleto JavaScript + Phaser 4 + Vite 8 y el recorrido Menu → 
 - `src/game/chaco-flight.js`: ruta geográfica didáctica, reloj visual y detención en cada oportunidad. No es un propagador orbital.
 - `src/ui/chaco-map.js`: mapa MapLibre con datos locales; `chaco-hud.js` y `chaco.css`: controles y animaciones de la misión.
 - `src/ui/satellite-sensor.js`: visor Canvas 2D que recorta el mosaico georreferenciado en la posición del satélite y guarda el fotograma al observar.
+- `src/ui/earth3d.js`: fondo de Tierra giratoria con Three.js y textura NASA; visible en construcción y resultados. Se oculta durante la operación sobre el mapa del Chaco.
 - `public/data/`: cartografía Natural Earth de la región, imagen georreferenciada NASA GIBS Blue Marble y video histórico Landsat de NASA. `sources.json` registra las fuentes, el encuadre y los hashes de los recursos de NASA.
 - `src/ui/mission-ui.js` y `workshop.css`: interfaz compartida, propiedad de cada escena. Se monta sobre el contenedor DOM de Phaser y se destruye al salir para no duplicar controles.
 - `tests/model.test.js`: casos de éxito, fallo de energía, rediseño, datos incompletos y acciones inválidas.
