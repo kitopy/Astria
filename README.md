@@ -1,2 +1,2 @@
-# astria
+# Astrion
 Videojuego para hackaton.
