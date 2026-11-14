@@ -16,7 +16,7 @@ Abrir la dirección que indique Vite. Para compilar: `npm run build`. Para verif
 
 Se conserva el esqueleto JavaScript + Phaser 4 + Vite 8 y el recorrido Menu → Station → Build → Test → Reward.
 
-- Menu y Station conservan su implementación original.
+- Menu y Station conservan el flujo y el diseño del equipo; la introducción sitúa la misión en el Chaco paraguayo.
 - Build permite elegir o arrastrar una opción por categoría: cámara, paneles solares, batería y antena. Muestra costo, masa, capacidad de batería y consumo. El lanzamiento queda bloqueado si supera 100 créditos o 12 kg.
 - Test recibe una copia del diseño de Build y ejecuta **Guardianes del Chaco**, una misión sobre un mapa real de Paraguay. El satélite se mueve, deja una traza y se detiene automáticamente en las oportunidades de observar y transmitir. Se puede pausar, reanudar, centrar el mapa y cambiar la velocidad visual. Las piezas elegidas determinan consumo, recarga, detalle y capacidad de envío.
 - Reward recibe el resultado real de la simulación. Se necesitan dos imágenes completas recibidas en Tierra. Explica limitaciones y permite volver a Build conservando el diseño.

@@ -12,9 +12,11 @@ const line = coordinates => ({ type: 'Feature', properties: {}, geometry: { type
 export class ChacoMap {
   constructor(container, onReady, onError, markerHTML) {
     this.ready = false; this.follow = true; this.markers = []; this.effectUntil = 0;
+    const zoomForSize = () => Math.max(3.8, 5.25 + Math.log2(Math.min(1, container.clientHeight / 900, container.clientWidth / 1350)));
+    this.baseZoom = zoomForSize();
     this.map = new maplibregl.Map({
-      container, center: [-59.2, -23.3], zoom: 5.25, pitch: 18, bearing: -8,
-      minZoom: 4, maxZoom: 7, maxBounds: [[-67, -30], [-50, -17]],
+      container, center: [-59.2, -23.3], zoom: this.baseZoom, pitch: 18, bearing: -8,
+      minZoom: 3.5, maxZoom: 7, maxBounds: [[-75, -35], [-43, -12]],
       attributionControl: false, renderWorldCopies: false,
       style: { version: 8, sources: {
         terrain: { type: 'image', url: `${base}data/paraguay-bluemarble.jpg`, coordinates: [[-75, -12], [-43, -12], [-43, -35], [-75, -35]] },
@@ -33,6 +35,8 @@ export class ChacoMap {
         { id: 'downlink', type: 'line', source: 'downlink', paint: { 'line-color': '#b9f566', 'line-width': 4, 'line-dasharray': [1, 2], 'line-opacity': 0 } }
       ] }
     });
+    this.onResize = () => { this.baseZoom = zoomForSize(); if (this.follow) this.map.jumpTo({ zoom: this.baseZoom }); };
+    window.addEventListener('resize', this.onResize);
     this.map.dragRotate.disable(); this.map.touchZoomRotate.disableRotation();
     this.map.on('dragstart', () => { this.follow = false; });
     this.map.on('error', event => onError?.(event.error?.message ?? 'No se pudo cargar el mapa.'));
@@ -61,9 +65,12 @@ export class ChacoMap {
   update(flight) {
     if (!this.ready) return;
     const position = routePosition(flight.progress);
-    this.satelliteMarker.setLngLat(position);
-    const trail = [ROUTE[0], ...ROUTE.slice(1, Math.floor(flight.progress * (ROUTE.length - 1)) + 1), position];
-    this.map.getSource('trail').setData(line(trail));
+    if (this.lastProgress !== flight.progress) {
+      this.lastProgress = flight.progress;
+      this.satelliteMarker.setLngLat(position);
+      const trail = [ROUTE[0], ...ROUTE.slice(1, Math.floor(flight.progress * (ROUTE.length - 1)) + 1), position];
+      this.map.getSource('trail').setData(line(trail));
+    }
     this.satelliteElement.classList.toggle('flying', flight.running);
     this.targetElement.classList.toggle('active', !flight.running && [1, 2].includes(flight.gate));
     this.stationElement.classList.toggle('active', flight.gate === 3);
@@ -91,8 +98,8 @@ export class ChacoMap {
   }
   recenter() {
     this.follow = true;
-    this.map.easeTo({ center: [-59.2, -23.3], zoom: 5.25, pitch: 18, bearing: -8,
+    this.map.easeTo({ center: [-59.2, -23.3], zoom: this.baseZoom, pitch: 18, bearing: -8,
       duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 700 });
   }
-  destroy() { this.markers.forEach(marker => marker.remove()); this.map.remove(); }
+  destroy() { window.removeEventListener('resize', this.onResize); this.markers.forEach(marker => marker.remove()); this.map.remove(); }
 }
