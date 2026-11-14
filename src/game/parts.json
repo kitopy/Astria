@@ -1,0 +1,18 @@
+{
+  "camera": { "label": "Cámara", "options": [
+    { "id": "simple", "name": "Esencial", "benefit": "Menor consumo", "tradeoff": "Menos detalle", "cost": 16, "mass": 2, "power": 12, "quality": 1, "data": 1 },
+    { "id": "detail", "name": "Exploradora", "benefit": "Más detalle del bosque", "tradeoff": "Usa más energía y datos", "cost": 30, "mass": 3, "power": 24, "quality": 2, "data": 3 }
+  ]},
+  "solar": { "label": "Paneles solares", "options": [
+    { "id": "small", "name": "Compactos", "benefit": "Livianos y económicos", "tradeoff": "Recargan menos", "cost": 12, "mass": 2, "generation": 12 },
+    { "id": "large", "name": "Extendidos", "benefit": "Recargan más con luz", "tradeoff": "Más masa y costo", "cost": 23, "mass": 4, "generation": 22 }
+  ]},
+  "battery": { "label": "Batería", "options": [
+    { "id": "light", "name": "Ligera", "benefit": "Menor masa", "tradeoff": "Almacena 48 de energía", "cost": 12, "mass": 1, "capacity": 48 },
+    { "id": "long", "name": "De reserva", "benefit": "Almacena 96 de energía", "tradeoff": "Más masa y costo", "cost": 22, "mass": 3, "capacity": 96 }
+  ]},
+  "antenna": { "label": "Antena", "options": [
+    { "id": "basic", "name": "Básica", "benefit": "Transmite con menos energía", "tradeoff": "Envía 2 bloques de datos", "cost": 10, "mass": 1, "rate": 2, "power": 8 },
+    { "id": "fast", "name": "De alta capacidad", "benefit": "Envía 6 bloques de datos", "tradeoff": "Usa más energía", "cost": 22, "mass": 2, "rate": 6, "power": 18 }
+  ]}
+}
