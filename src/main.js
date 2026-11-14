@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import './ui/workshop.css';
 import { MenuScene } from './scenes/MenuScene.js';
 import { StationScene } from './scenes/StationScene.js';
 import { BuildScene } from './scenes/BuildScene.js';
@@ -11,6 +12,7 @@ new Phaser.Game({
   width: 1920, // the game is designed at 1920x1080...
   height: 1080,
   backgroundColor: '#0b0618',
+  dom: { createContainer: true },
   scale: {
     mode: Phaser.Scale.FIT, // ...and scaled to fit any screen keeping proportions
     autoCenter: Phaser.Scale.CENTER_BOTH,
