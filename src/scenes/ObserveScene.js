@@ -56,7 +56,7 @@ export class ObserveScene extends Phaser.Scene {
       .setVisible(false)
       .on('pointerup', () => this.nextLine());
 
-    this.say('NOAH // ANÁLISIS EN CURSO\nEstas son las fotos que envió tu satélite, en dos momentos distintos.\n¿Qué cambió? Tocá el lugar donde veas la diferencia.');
+    this.say('NOAH // ANÁLISIS EN CURSO\nEsta comparación representa dos observaciones. Las imágenes son simuladas.\n¿Qué cambió? Tocá el lugar donde veas la diferencia.');
   }
 
   // Draws one frame + photo. The second photo ("B") gets the forest change painted on it.
