@@ -6,30 +6,30 @@ import { centerDesignArea } from '../ui/layout.js';
 import { COLORS, CSS } from '../ui/palette.js';
 
 // What each part does in a space mission, with the name engineers use for it.
-// The role is the subtitle on screen; the text is what NOAH says.
+// The role is the subtitle on screen; the text is NOAH's one-line explanation.
 const PART_INFO = {
-  camera: { role: 'Carga útil', text: 'La cámara es el instrumento de la misión: la parte que hace la ciencia. Tiene que fotografiar el bosque dos veces.' },
-  solar: { role: 'Sistema de energía', text: 'Los paneles transforman la luz del Sol en electricidad y recargan la batería cuando hay luz.' },
-  battery: { role: 'Almacenamiento de energía', text: 'La batería guarda energía para cuando el satélite pasa por la sombra de la Tierra.' },
-  antenna: { role: 'Comunicaciones', text: 'La antena envía las fotos a la Tierra por ondas de radio.' },
+  camera: { role: 'Carga útil', text: 'La cámara es la que toma las fotos del bosque.' },
+  solar: { role: 'Sistema de energía', text: 'Los paneles dan energía con la luz del Sol.' },
+  battery: { role: 'Almacenamiento de energía', text: 'La batería guarda energía para cuando no hay sol.' },
+  antenna: { role: 'Comunicaciones', text: 'La antena envía las fotos a la Tierra.' },
 };
 
 const REVIEW = kinds.length; // step index of the final review (after the 4 parts)
 
 // Layout (in the 1920x1080 design area)
-const SATELLITE = { x: 960, y: 480, scale: 1.05, reviewX: 720 };
+const SATELLITE = { x: 960, y: 555, scale: 1, reviewX: 720 };
 const OPTION_X = [330, 1590]; // the two options float left and right of the satellite
 const SNAP_DISTANCE = 300; // dropping a piece closer than this to the satellite mounts it
 
-// The number that matters for each part type, plus mass and cost (shown in NOAH's line on hover).
+// The number that matters for each part type, plus mass and cost (shown under an option on hover).
 function partNumbers(kind, part) {
   const key = {
-    camera: `usa ${part.power} de energía y ${part.data} ${part.data === 1 ? 'bloque' : 'bloques'} por foto`,
-    solar: `recarga ${part.generation} de energía con luz`,
-    battery: `guarda ${part.capacity} de energía`,
-    antenna: `envía ${part.rate} bloques y usa ${part.power} de energía`,
+    camera: `${part.power} de energía por foto`,
+    solar: `+${part.generation} de energía con luz`,
+    battery: `Guarda ${part.capacity} de energía`,
+    antenna: `Envía ${part.rate} bloques`,
   }[kind];
-  return `${key}. ${part.mass} kg, ${part.cost} créditos.`;
+  return `${key} · ${part.mass} kg · ${part.cost} créditos`;
 }
 
 // Step 1 of the mission: assemble the satellite one part at a time, then review.
@@ -61,14 +61,18 @@ export class BuildScene extends Phaser.Scene {
     this.slotMarker = this.add.graphics();
     this.tweens.add({ targets: this.slotMarker, alpha: 0.25, duration: 700, yoyo: true, repeat: -1 });
 
-    this.title = this.add.text(960, 142, '', { fontFamily: 'Cinzel', fontSize: '60px', fontStyle: 'bold', color: CSS.pink }).setOrigin(0.5);
-    this.subtitle = this.add.text(960, 194, '', { fontFamily: 'Quicksand', fontSize: '24px', fontStyle: 'bold', color: '#c4a9e4' }).setOrigin(0.5);
+    // Part name: the main thing on screen. Big, with a soft pink glow.
+    this.title = this.add
+      .text(960, 168, '', { fontFamily: 'Cinzel', fontSize: '92px', fontStyle: 'bold', color: CSS.pink })
+      .setOrigin(0.5)
+      .setPadding(48) // room for the glow, otherwise it gets cut into a visible box
+      .setShadow(0, 0, CSS.glow, 28, false, true);
+    this.subtitle = this.add.text(960, 236, '', { fontFamily: 'Quicksand', fontSize: '24px', fontStyle: 'bold', color: '#c4a9e4' }).setOrigin(0.5);
     this.options = [];
 
     this.ui = mount(this, 0, { wizard: true });
     this.ui.bind({
       next: () => this.goTo(this.step + 1),
-      prev: () => this.goTo(this.step - 1),
       goto: (button) => this.goTo(button.dataset.kind === 'review' ? REVIEW : kinds.indexOf(button.dataset.kind)),
       launch: () => {
         if (stats(catalog, this.design).valid) this.scene.start('Test', { design: { ...this.design } });
@@ -126,16 +130,21 @@ export class BuildScene extends Phaser.Scene {
       this.title.setText(catalog[kind].label.toUpperCase());
       this.subtitle.setText(PART_INFO[kind].role);
       catalog[kind].options.forEach((part, i) => this.options.push(this.addOption(kind, part, OPTION_X[i], SATELLITE.y)));
-      this.ui.say(this.placed.has(kind)
-        ? `${PART_INFO[kind].text} Podés cambiarla por la otra opción.`
-        : `${PART_INFO[kind].text} Arrastrá una de las dos al satélite.`);
+      this.ui.say(`${PART_INFO[kind].text} ${this.placed.has(kind) ? 'Podés cambiarla por la otra.' : 'Arrastrá una al satélite.'}`);
     } else {
       this.title.setText('¿LISTA PARA DESPEGAR?');
       this.subtitle.setText('Revisá la cuenta antes del lanzamiento');
       this.ui.say(stats(catalog, this.design).valid
-        ? 'Hacé la cuenta: ¿alcanza la energía para dos fotos y para enviarlas? La segunda foto se toma en la sombra, sin recarga.'
-        : 'Tu satélite supera el límite del cohete. Tocá una pieza abajo y elegí una opción más liviana o más barata.');
+        ? 'Hacé la cuenta: ¿alcanza la energía para dos fotos y el envío?'
+        : 'Supera el límite del cohete. Tocá una pieza abajo para cambiarla.');
     }
+
+    // The title rises in on every new step, so the change of part is noticed.
+    this.tweens.killTweensOf([this.title, this.subtitle]);
+    this.title.setAlpha(0).setY(188);
+    this.subtitle.setAlpha(0);
+    this.tweens.add({ targets: this.title, alpha: 1, y: 168, duration: 420, ease: 'Cubic.out' });
+    this.tweens.add({ targets: this.subtitle, alpha: 1, duration: 420, delay: 150 });
 
     this.drawSlot();
     this.renderHud();
@@ -160,18 +169,32 @@ export class BuildScene extends Phaser.Scene {
     const ring = this.add.circle(0, -20, 150).setStrokeStyle(3, COLORS.glow, isChosen ? 1 : 0).setFillStyle(COLORS.panel, 0.55);
     const picture = this.add.image(0, -20, 'satellite-modules', `${kind}-${part.id}`);
     picture.setScale(Math.min(230 / picture.width, 190 / picture.height));
-    const name = this.add.text(0, 160, part.name, { fontFamily: 'Audiowide', fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
-    const benefit = this.add.text(0, 205, part.benefit, { fontFamily: 'Quicksand', fontSize: '22px', fontStyle: 'bold', color: '#e9defc' }).setOrigin(0.5);
+    // Dark shadow keeps the labels readable over the bright clouds of the Earth.
+    const name = this.add.text(0, 160, part.name, { fontFamily: 'Audiowide', fontSize: '32px', color: '#ffffff' }).setOrigin(0.5).setPadding(10).setShadow(0, 2, '#0b0618', 10, false, true);
+    const benefit = this.add.text(0, 205, part.benefit, { fontFamily: 'Quicksand', fontSize: '22px', fontStyle: 'bold', color: '#e9defc' }).setOrigin(0.5).setPadding(10).setShadow(0, 2, '#0b0618', 10, false, true);
+    // Hidden until the pointer is over the option: the trade-off and the numbers.
+    const details = this.add
+      .text(0, 250, `Pero ${part.tradeoff.toLowerCase()}\n${partNumbers(kind, part)}`, {
+        fontFamily: 'Quicksand', fontSize: '19px', fontStyle: 'bold', color: CSS.pink, align: 'center', lineSpacing: 6,
+        wordWrap: { width: 380 },
+        backgroundColor: 'rgba(28, 10, 51, 0.88)', // readable over the bright clouds of the Earth
+        padding: { x: 16, y: 10 },
+      })
+      .setOrigin(0.5, 0)
+      .setAlpha(0);
 
-    const option = this.add.container(x, y, [ring, picture, name, benefit]);
+    const option = this.add.container(x, y, [ring, picture, name, benefit, details]);
     option.setSize(320, 420).setInteractive({ useHandCursor: true, draggable: true });
     option.home = { x, y };
 
     option.on('pointerover', () => {
       this.tweens.add({ targets: option, scale: 1.05, duration: 150 });
-      this.ui.say(`${part.name}: ${part.benefit.toLowerCase()}, pero ${part.tradeoff.toLowerCase()}. ${partNumbers(kind, part)}`, { silent: true });
+      this.tweens.add({ targets: details, alpha: 1, duration: 200 });
     });
-    option.on('pointerout', () => this.tweens.add({ targets: option, scale: 1, duration: 150 }));
+    option.on('pointerout', () => {
+      this.tweens.add({ targets: option, scale: 1, duration: 150 });
+      this.tweens.add({ targets: details, alpha: 0, duration: 200 });
+    });
 
     // Drag: follow the pointer; on release, mount it if it's close to the satellite.
     option.on('pointerdown', () => (option.dragged = false));
@@ -219,7 +242,7 @@ export class BuildScene extends Phaser.Scene {
         this.drawSlot();
         this.options.forEach((o) => o.list[0].setStrokeStyle(3, COLORS.glow, o === option ? 1 : 0));
         this.renderHud();
-        this.ui.say(`${wasPlaced ? 'Cambiaste a' : 'Montaste'} ${part.name}: ${part.benefit.toLowerCase()}, pero ${part.tradeoff.toLowerCase()}.`);
+        this.ui.say(`${wasPlaced ? '¡Cambiada!' : '¡Montada!'} ${part.name}: ${part.benefit.toLowerCase()}, pero ${part.tradeoff.toLowerCase()}.`);
       },
     });
   }
@@ -237,22 +260,21 @@ export class BuildScene extends Phaser.Scene {
       .join('');
     const review = `<button class="ws-slot ws-slot-review ${this.step === REVIEW ? 'current' : ''}" data-action="goto" data-kind="review" ${REVIEW > this.maxStep ? 'disabled' : ''}>Revisar</button>`;
 
+    let next = '';
+    if (this.kind && this.placed.has(this.kind)) {
+      next = actionButton('next', this.step === REVIEW - 1 ? 'Revisar ›' : `Siguiente: ${catalog[kinds[this.step + 1]].label} ›`, true);
+    } else if (!this.kind) {
+      next = actionButton('launch', 'Lanzar ›', true, !stats(catalog, this.design).valid);
+    }
+
     this.ui.area('center').innerHTML = `
+      <div class="ws-next">${next}</div>
       <div class="ws-strip">
         <div class="ws-slots">${slots}${review}</div>
         <div class="ws-mini-meters">${meter('Masa', totals.mass, limits.mass, ' kg')}${meter('Presupuesto', totals.cost, limits.budget)}</div>
       </div>`;
 
     this.ui.area('right').innerHTML = this.kind ? '' : this.reviewPanel();
-
-    const back = this.step > 0 ? actionButton('prev', '‹ Anterior') : '';
-    let forward;
-    if (this.kind) {
-      forward = actionButton('next', this.step === REVIEW - 1 ? 'Revisar ›' : 'Siguiente ›', true, !this.placed.has(this.kind));
-    } else {
-      forward = actionButton('launch', 'Lanzar ›', true, !stats(catalog, this.design).valid);
-    }
-    this.ui.area('actions').innerHTML = back + forward;
   }
 
   // Energy and data balance, so the player can predict whether the mission will work.

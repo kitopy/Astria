@@ -237,8 +237,7 @@
 /* ---------- Build: assemble the satellite (ws--wizard) ---------- */
 
 .ws-panel:empty { display: none; }
-.ws--wizard .ws-right { left: 1180px; right: 60px; width: auto; top: 260px; }
-.ws--wizard .ws-center { left: 330px; right: 330px; top: 768px; }
+.ws--wizard .ws-right { left: 1180px; right: 60px; width: auto; top: 340px; }
 
 .ws-strip {
   display: flex;
@@ -273,3 +272,20 @@
 .ws-mini-meters .ws-meter-head strong { font-size: 20px; }
 .ws-mini-meters .ws-meter-bar { height: 10px; }
 .ws-title-gap { margin-top: 26px; }
+
+/* NOAH as a small speech bubble under the title (instead of the big bottom bar) */
+.ws--wizard .ws-footer { left: 50%; right: auto; bottom: auto; top: 266px; height: auto; width: max-content; max-width: 1200px; transform: translateX(-50%); }
+.ws--wizard .ws-noah { flex: none; max-width: 1200px; padding: 10px 12px 10px 22px; gap: 14px; border-left: 0; border-radius: 30px; }
+.ws--wizard .ws-noah-name { font-size: 15px; }
+.ws--wizard .ws-noah p { font-size: 20px; line-height: 1.35; }
+.ws--wizard .ws-listen { padding: 6px 14px; font-size: 14px !important; }
+.ws--wizard .ws-actions { display: none; }
+.ws-noah.pop { animation: ws-pop 0.35s ease-out; }
+@keyframes ws-pop { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+/* Under the satellite: the "next" button (appears once the part is mounted) and, at the bottom, the parts strip */
+.ws--wizard .ws-center { left: 330px; right: 330px; top: 808px; display: flex; flex-direction: column; align-items: center; gap: 70px; }
+.ws-next { height: 66px; display: flex; align-items: center; }
+.ws-next .ws-btn { animation: ws-pop 0.35s ease-out; }
+.ws-slot { border-color: rgba(208, 144, 240, 0.7); background: rgba(28, 10, 51, 0.6); }
+.ws-mini-meters .ws-meter-bar { background: rgba(255, 255, 255, 0.22); }

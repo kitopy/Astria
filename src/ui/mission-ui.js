@@ -103,6 +103,11 @@ export function mount(scene, step, options = {}) {
     say(text, { silent = false } = {}) {
       this.message = text;
       this.area('noah').textContent = text;
+      // Replay the small "pop" animation so a new message is noticed (used by the speech bubble).
+      const box = root.querySelector('.ws-noah');
+      box.classList.remove('pop');
+      void box.offsetWidth; // forces the browser to restart the CSS animation
+      box.classList.add('pop');
       if (this.voice && !silent) this.speak();
     },
 
