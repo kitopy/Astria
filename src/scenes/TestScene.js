@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { advance, capture, launch, phases, stats, transmit } from '../game/model.js';
 import { catalog, readDesign } from '../game/design.js';
 import { actionButton, addArt, mount, preloadArt, resources } from '../ui/mission-ui.js';
+import { centerDesignArea } from '../ui/layout.js';
 
 export class TestScene extends Phaser.Scene {
   constructor() { super('Test'); }
@@ -12,6 +13,7 @@ export class TestScene extends Phaser.Scene {
   }
   preload() { preloadArt(this); }
   create() {
+    centerDesignArea(this);
     if (!this.mission) { this.scene.start('Build', { design: this.design }); return; }
     this.art = addArt(this, this.design);
     this.ui = mount(this, 'Poné tu diseño <span>a prueba.</span>', 'Observá, administrá la energía y enviá tus descubrimientos.', 1);

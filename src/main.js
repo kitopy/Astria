@@ -17,7 +17,9 @@ new Phaser.Game({
   backgroundColor: '#0b0618',
   dom: { createContainer: true }, // lets scenes place HTML elements over the canvas (used by the workshop UI)
   scale: {
-    mode: Phaser.Scale.FIT, // ...and scaled to fit any screen keeping proportions
+    // ...always fully visible; the canvas expands to fill the rest of the window
+    // (no black bars). Scenes center that area with centerDesignArea() in ui/layout.js.
+    mode: Phaser.Scale.EXPAND,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   // The first scene in the list is the one that starts.

@@ -2,12 +2,14 @@ import Phaser from 'phaser';
 import { feedback, stats } from '../game/model.js';
 import { catalog, readDesign } from '../game/design.js';
 import { actionButton, addArt, mount, preloadArt } from '../ui/mission-ui.js';
+import { centerDesignArea } from '../ui/layout.js';
 
 export class RewardScene extends Phaser.Scene {
   constructor() { super('Reward'); }
   init(data = {}) { this.design = readDesign(data.design); this.mission = data.mission ?? null; }
   preload() { preloadArt(this); }
   create() {
+    centerDesignArea(this);
     if (!this.mission) { this.scene.start('Build', { design: this.design }); return; }
     addArt(this, this.design);
     const m = this.mission, s = stats(catalog, this.design), success = m.delivered >= 2;

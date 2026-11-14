@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { DESIGN, addCoverBackground, centerDesignArea } from '../ui/layout.js';
 
 // Title screen: the first thing the player sees.
 // Layout and colors come from the GDevelop scene "MENU PRINCIPAL".
@@ -8,10 +9,10 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create() {
-    const { width, height } = this.scale;
+    centerDesignArea(this);
+    const { width } = DESIGN;
 
-    // Background stretched to fill the whole 1920x1080 screen.
-    this.add.image(0, 0, 'bg-menu').setOrigin(0).setDisplaySize(width, height);
+    addCoverBackground(this, 'bg-menu');
 
     this.add
       .text(width / 2, 455, 'ASTRION', {

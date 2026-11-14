@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { addButton } from '../ui/button.js';
+import { DESIGN, centerDesignArea } from '../ui/layout.js';
 
 // Space station: NOAH introduces the mission. (Dialog comes in a later step.)
 export class StationScene extends Phaser.Scene {
@@ -8,7 +9,8 @@ export class StationScene extends Phaser.Scene {
   }
 
   create() {
-    const { width, height } = this.scale;
+    centerDesignArea(this);
+    const { width, height } = DESIGN;
 
     this.add
       .text(width / 2, 200, 'Station — NOAH presents the mission', {

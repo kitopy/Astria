@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { DESIGN, centerDesignArea } from '../ui/layout.js';
 
 // Loads every image and font once, before the game starts.
 // Other scenes then just use the keys ('bg-menu', 'Cinzel', ...).
@@ -9,7 +10,8 @@ export class BootScene extends Phaser.Scene {
 
   // preload() runs before create(): Phaser waits until everything here is loaded.
   preload() {
-    const { width, height } = this.scale;
+    centerDesignArea(this);
+    const { width, height } = DESIGN;
 
     // Simple loading bar, so the player doesn't see a black screen.
     const bar = this.add.rectangle(width / 2 - 400, height / 2, 0, 16, 0xd9b8ff).setOrigin(0, 0.5);

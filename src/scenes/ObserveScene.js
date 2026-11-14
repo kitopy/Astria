@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { preloadArt } from '../ui/mission-ui.js';
 import { speakIfEnabled } from '../ui/noahVoice.js';
+import { addCoverBackground, centerDesignArea } from '../ui/layout.js';
 
 // Region of earth.png used as the "photo" taken by the satellite (forest, river, mountain).
 const PHOTO_CROP = { x: 420, y: 730, width: 454, height: 294 };
@@ -31,11 +32,11 @@ export class ObserveScene extends Phaser.Scene {
   }
 
   create() {
-    const { width, height } = this.scale;
+    centerDesignArea(this);
     this.found = false;
     this.lineIndex = 0;
 
-    this.add.image(0, 0, 'bg-mission').setOrigin(0).setDisplaySize(width, height);
+    addCoverBackground(this, 'bg-mission');
 
     PANELS.forEach((panel, i) => this.addPanel(panel, i === 1));
 
@@ -106,8 +107,9 @@ export class ObserveScene extends Phaser.Scene {
   checkClick(photo, pointer) {
     if (this.found) return;
 
-    const dx = (pointer.x - photo.x) / photo.w - CHANGE.x;
-    const dy = (pointer.y - photo.y) / photo.h - CHANGE.y;
+    // worldX/worldY: position in game coordinates, taking the centered camera into account.
+    const dx = (pointer.worldX - photo.x) / photo.w - CHANGE.x;
+    const dy = (pointer.worldY - photo.y) / photo.h - CHANGE.y;
     const isHit = Math.hypot(dx, dy * (photo.h / photo.w)) <= CHANGE.radius;
 
     if (!isHit) {

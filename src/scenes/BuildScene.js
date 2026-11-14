@@ -2,12 +2,14 @@ import Phaser from 'phaser';
 import { initialDesign, kinds, selected, stats } from '../game/model.js';
 import { catalog, readDesign, saveDesign } from '../game/design.js';
 import { actionButton, addArt, mount, preloadArt, resources } from '../ui/mission-ui.js';
+import { centerDesignArea } from '../ui/layout.js';
 
 export class BuildScene extends Phaser.Scene {
   constructor() { super('Build'); }
   init(data = {}) { this.design = readDesign(data.design ?? this.registry.get('satelliteDesign')); }
   preload() { preloadArt(this); }
   create() {
+    centerDesignArea(this);
     this.art = addArt(this, this.design);
     this.ui = mount(this, 'Tu satélite. <span>Tu misión.</span>', 'Construí, probá y descubrí qué cambia en la Tierra.', 0);
     this.ui.bind({
