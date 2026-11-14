@@ -19,6 +19,8 @@ El visor de cámara toma un recorte del mosaico NASA Blue Marble en la posición
 
 El desafío de visibilidad añade nubes generadas por el juego entre las observaciones. No corresponden a una medición meteorológica ni modifican la imagen original de NASA. Buscar un claro consume 6 unidades didácticas de energía para representar la orientación y estabilización de la cámara; no elimina nubes ni simula maniobras orbitales. El desplazamiento de encuadre y su duración son ilustrativos.
 
+También se simulan cámara inestable y señal débil, resueltas con estabilización del sensor o alineación de antena. Sus efectos y el costo de 6 unidades son didácticos, sin modelar vibraciones ni propagación de radio. Cada intento sortea uno de los tres imprevistos excluyendo el anterior. Además del diseño se conserva localmente el identificador del último imprevisto para evitar repeticiones consecutivas al recargar.
+
 ## Fuentes de referencia
 
 - Challenge elegido: https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/?tab=details
@@ -45,7 +47,7 @@ Hay una observación por etapa y una transmisión por contacto. Una imagen sólo
 
 El arte del satélite y la ilustración de Tierra utilizada en el comparador Observe se generaron con IA. La Tierra 3D del taller y de resultados usa la textura real descrita en "Imagen real de la Tierra". El mapa de la operación y el video de archivo usan los recursos reales identificados arriba. El hallazgo del comparador es narrativo y simulado: no se realiza detección automática de deforestación ni se adquieren imágenes en vivo. El video Landsat conserva sus años históricos y no representa las dos fotos obtenidas por el jugador. Una causa de cambio no se infiere automáticamente de dos imágenes.
 
-NOAH usa mensajes preparados y, opcionalmente, la síntesis de voz local del navegador. No utiliza un servicio de IA conversacional. No se solicitan cuentas ni datos personales; sólo se conserva el diseño en el almacenamiento local del navegador. No se ha realizado todavía validación con usuarios de Super Kids.
+NOAH usa mensajes preparados y, opcionalmente, la síntesis de voz local del navegador. No utiliza un servicio de IA conversacional. No se solicitan cuentas ni datos personales; se conservan el diseño y el identificador del último imprevisto en el almacenamiento local del navegador. No se ha realizado todavía validación con usuarios de Super Kids.
 
 ## Imagen real de la Tierra (fondo 3D)
 

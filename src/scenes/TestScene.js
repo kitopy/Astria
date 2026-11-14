@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { advance, capture, launch, stats, transmit } from '../game/model.js';
 import { catalog, readDesign } from '../game/design.js';
 import { atGate, changeSpeed, initialFlight, pauseFlight, startFlight } from '../game/chaco-flight.js';
-import { beginReframe, cloudCover, initialVisibility, tickVisibility } from '../game/chaco-visibility.js';
+import { beginReframe, cloudCover, drawObstacle, initialVisibility, obstacleInfo, REFRAME_ENERGY, tickVisibility } from '../game/chaco-visibility.js';
 import { preloadArt } from '../ui/mission-ui.js';
 import { createChacoHUD, satellitePreview } from '../ui/chaco-hud.js';
 import { ChacoMap } from '../ui/chaco-map.js';
@@ -16,7 +16,11 @@ export class TestScene extends Phaser.Scene {
     this.specs = stats(catalog, this.design);
     this.mission = this.specs.valid ? launch(this.specs) : null;
     this.flight = initialFlight(); this.mapClock = 0; this.sensorShots=[];this.sensorFootprintGate=-1;
-    this.visibility = initialVisibility();
+    let storage;
+    try { storage = window.localStorage; } catch { /* Use the registry if storage is unavailable. */ }
+    const kind = this.mission ? drawObstacle(storage, this.registry.get('lastObstacle')) : 'clouds';
+    if (this.mission) this.registry.set('lastObstacle', kind);
+    this.visibility = initialVisibility(kind);
     this.sensorTime = 0;
   }
   preload() { preloadArt(this); }
@@ -47,7 +51,7 @@ export class TestScene extends Phaser.Scene {
       try {
         const next = beginReframe(this.mission, this.visibility);
         this.mission = next.mission; this.visibility = next.visibility;
-        this.hud.say('Ajustando la cámara hacia un claro. Usamos 6 de energía para mover y estabilizar el encuadre.');
+        this.hud.say(`${obstacleInfo(this.visibility).explanation} El ajuste usa ${REFRAME_ENERGY} de energía.`);
       } catch (error) { this.hud.say(error.message); }
     } else if (action === 'pause') {
       this.flight = pauseFlight(this.flight); this.hud.say('Vuelo en pausa. Podés revisar la batería y los datos con calma. Reanudá cuando quieras.');
@@ -79,7 +83,7 @@ export class TestScene extends Phaser.Scene {
   updateSensor() {
     this.sensor.update(this.flight.progress, {
       clouds: cloudCover(this.flight, this.visibility),
-      adjustment: this.visibility.adjustment, time: this.sensorTime
+      adjustment: this.visibility.kind === 'clouds' ? this.visibility.adjustment : 0, time: this.sensorTime
     });
   }
   update(_time, delta) {
@@ -94,8 +98,8 @@ export class TestScene extends Phaser.Scene {
       this.updateSensor();
       this.missionMap.setFootprint(this.sensor.footprint);
       this.hud.say(this.visibility.status === 'blocked'
-        ? '¡Nubes en la zona! Pausamos el recorrido. Buscá un claro: ajustar la cámara cuesta 6 de energía. Las nubes tapan el terreno, no golpean al satélite.'
-        : '¡Visibilidad recuperada! El nuevo encuadre está listo. Te quedan menos reservas: cuidalas para las fotos y la transmisión. Podés continuar el recorrido.');
+        ? `${obstacleInfo(this.visibility).label}. ${obstacleInfo(this.visibility).message} Resolverlo cuesta ${REFRAME_ENERGY} de energía.`
+        : `${obstacleInfo(this.visibility).resolved} El ajuste consumió ${REFRAME_ENERGY} de energía. Cuidá la reserva que queda.`);
       this.render();
     }
     if (this.flight.gate !== before) {

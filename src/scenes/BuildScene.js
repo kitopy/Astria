@@ -136,7 +136,7 @@ export class BuildScene extends Phaser.Scene {
       this.title.setText('¿LISTA PARA DESPEGAR?');
       this.subtitle.setText('Revisá la cuenta antes del lanzamiento');
       this.ui.say(stats(catalog, this.design).valid
-        ? `Hacé la cuenta: ¿alcanza para dos fotos, buscar un claro entre nubes (−${REFRAME_ENERGY}) y el envío?`
+        ? `Hacé la cuenta: ¿alcanza para dos fotos, resolver un imprevisto (−${REFRAME_ENERGY}) y el envío?`
         : 'Supera el límite del cohete. Tocá una pieza abajo para cambiarla.');
     }
 
@@ -288,7 +288,7 @@ export class BuildScene extends Phaser.Scene {
         <div><dt>Recarga con luz, por etapa</dt><dd>+${s.generation}</dd></div>
         <div><dt>Consumo fijo, por etapa</dt><dd>−4</dd></div>
         <div><dt>Cada foto</dt><dd>−${s.cameraPower}</dd></div>
-        <div><dt>Buscar un claro</dt><dd>−${REFRAME_ENERGY}</dd></div>
+        <div><dt>Resolver un imprevisto</dt><dd>−${REFRAME_ENERGY}</dd></div>
         <div><dt>Enviar</dt><dd>−${s.antennaPower}</dd></div>
       </dl>
       <h2 class="ws-title ws-title-gap">Datos</h2>
