@@ -4,6 +4,7 @@ import { catalog, readDesign, saveDesign } from '../game/design.js';
 import { actionButton, addArt, meter, mount, partThumb, preloadArt } from '../ui/mission-ui.js';
 import { centerDesignArea } from '../ui/layout.js';
 import { COLORS, CSS } from '../ui/palette.js';
+import { REFRAME_ENERGY } from '../game/chaco-visibility.js';
 
 // What each part does in a space mission, with the name engineers use for it.
 // The role is the subtitle on screen; the text is what NOAH says.
@@ -133,7 +134,7 @@ export class BuildScene extends Phaser.Scene {
       this.title.setText('¿LISTA PARA DESPEGAR?');
       this.subtitle.setText('Revisá la cuenta antes del lanzamiento');
       this.ui.say(stats(catalog, this.design).valid
-        ? 'Hacé la cuenta: ¿alcanza la energía para dos fotos y para enviarlas? La segunda foto se toma en la sombra, sin recarga.'
+        ? `Hacé la cuenta: reservá ${REFRAME_ENERGY} de energía para buscar un claro entre las fotos. La segunda foto se toma en la sombra, sin recarga.`
         : 'Tu satélite supera el límite del cohete. Tocá una pieza abajo y elegí una opción más liviana o más barata.');
     }
 
@@ -265,6 +266,7 @@ export class BuildScene extends Phaser.Scene {
         <div><dt>Recarga con luz, por etapa</dt><dd>+${s.generation}</dd></div>
         <div><dt>Consumo fijo, por etapa</dt><dd>−4</dd></div>
         <div><dt>Cada foto</dt><dd>−${s.cameraPower}</dd></div>
+        <div><dt>Buscar un claro</dt><dd>−${REFRAME_ENERGY}</dd></div>
         <div><dt>Enviar</dt><dd>−${s.antennaPower}</dd></div>
       </dl>
       <h2 class="ws-title ws-title-gap">Datos</h2>
