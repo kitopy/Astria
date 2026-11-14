@@ -4,6 +4,7 @@ import { catalog, readDesign, saveDesign } from '../game/design.js';
 import { actionButton, addArt, meter, mount, partThumb, preloadArt } from '../ui/mission-ui.js';
 import { centerDesignArea } from '../ui/layout.js';
 import { COLORS, CSS } from '../ui/palette.js';
+import { contentBounds } from '../ui/satellite.js';
 import { REFRAME_ENERGY } from '../game/chaco-visibility.js';
 
 // What each part does in a space mission, with the name engineers use for it.
@@ -163,13 +164,23 @@ export class BuildScene extends Phaser.Scene {
     }
   }
 
+  // Picture of a part, centered on (x, y) by the part itself (not by its loose atlas rectangle),
+  // cropped to hide empty space and slivers of neighbouring parts, and sized to fit ~200x170.
+  partImage(kind, id, x, y) {
+    const b = contentBounds(this, `${kind}-${id}`);
+    const scale = Math.min(200 / b.width, 170 / b.height);
+    return this.add
+      .image(x - b.cx * scale, y - b.cy * scale, 'satellite-modules', `${kind}-${id}`)
+      .setCrop(b.x, b.y, b.width, b.height)
+      .setScale(scale);
+  }
+
   // One of the two options: picture, name and short benefit. Drag it to the satellite, or click it.
   addOption(kind, part, x, y) {
     const isChosen = this.placed.has(kind) && this.design[kind] === part.id;
 
     const ring = this.add.circle(0, -20, 150).setStrokeStyle(3, COLORS.glow, isChosen ? 1 : 0).setFillStyle(COLORS.panel, 0.55);
-    const picture = this.add.image(0, -20, 'satellite-modules', `${kind}-${part.id}`);
-    picture.setScale(Math.min(230 / picture.width, 190 / picture.height));
+    const picture = this.partImage(kind, part.id, 0, -20);
     // Dark shadow keeps the labels readable over the bright clouds of the Earth.
     const name = this.add.text(0, 160, part.name, { fontFamily: 'Audiowide', fontSize: '32px', color: '#ffffff' }).setOrigin(0.5).setPadding(10).setShadow(0, 2, '#0b0618', 10, false, true);
     const benefit = this.add.text(0, 205, part.benefit, { fontFamily: 'Quicksand', fontSize: '22px', fontStyle: 'bold', color: '#e9defc' }).setOrigin(0.5).setPadding(10).setShadow(0, 2, '#0b0618', 10, false, true);
@@ -219,8 +230,7 @@ export class BuildScene extends Phaser.Scene {
   // The piece flies into its slot, then the satellite shows it.
   mount(kind, part, option) {
     const slot = this.art.slots(kind)[0];
-    const flying = this.add.image(option.x, option.y - 20, 'satellite-modules', `${kind}-${part.id}`);
-    flying.setScale(Math.min(230 / flying.width, 190 / flying.height));
+    const flying = this.partImage(kind, part.id, option.x, option.y - 20);
     this.tweens.add({ targets: option, x: option.home.x, y: option.home.y, duration: 300 });
 
     this.tweens.add({
