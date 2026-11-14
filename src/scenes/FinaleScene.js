@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { speakIfEnabled } from '../ui/noahVoice.js';
 import { DESIGN, addCoverBackground, centerDesignArea, visibleArea } from '../ui/layout.js';
+import { COLORS, CSS } from '../ui/palette.js';
 
 // What the player did, and which real job does that work.
 const ACHIEVEMENTS = [
@@ -58,7 +59,7 @@ export class FinaleScene extends Phaser.Scene {
     speakIfEnabled(this, NOAH_LINE);
 
     this.add
-      .text(1450, 905, 'VOLVER AL INICIO ›', { fontFamily: 'Audiowide', fontSize: '30px', color: '#b9f566' })
+      .text(1450, 905, 'VOLVER AL INICIO ›', { fontFamily: 'Audiowide', fontSize: '30px', color: CSS.glow })
       .setOrigin(1, 1)
       .setInteractive({ useHandCursor: true })
       .on('pointerup', () => this.scene.start('Menu'));
@@ -66,9 +67,9 @@ export class FinaleScene extends Phaser.Scene {
 
   // One achievement card. Cards appear one after the other (delay grows with index).
   addCard(x, y, { title, text }, index) {
-    const bg = this.add.rectangle(0, 0, 480, 230, 0x1d1036, 0.85).setStrokeStyle(4, 0xb98cff);
+    const bg = this.add.rectangle(0, 0, 480, 230, COLORS.panel, 0.85).setStrokeStyle(4, COLORS.orchid);
     const titleText = this.add
-      .text(0, -60, title, { fontFamily: 'Audiowide', fontSize: '40px', color: '#b9f566' })
+      .text(0, -60, title, { fontFamily: 'Audiowide', fontSize: '40px', color: CSS.gold })
       .setOrigin(0.5);
     const body = this.add
       .text(0, 30, text, { fontFamily: 'Quicksand', fontSize: '28px', fontStyle: 'bold', color: '#ffffff', align: 'center' })

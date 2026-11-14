@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { addCoverBackground, centerDesignArea } from '../ui/layout.js';
 import { speakIfEnabled } from '../ui/noahVoice.js';
+import { CSS } from '../ui/palette.js';
 
 // NOAH presents the mission, one line per "CONTINUAR".
 // Adapted from the GDevelop scene "ESTACION PRINCIPAL" to the forest mission.
@@ -34,7 +35,7 @@ export class StationScene extends Phaser.Scene {
     });
 
     this.continueButton = this.add
-      .text(1640, 735, '', { fontFamily: 'Audiowide', fontSize: '36px', color: '#b9f566' })
+      .text(1640, 735, '', { fontFamily: 'Audiowide', fontSize: '36px', color: CSS.glow })
       .setOrigin(1, 1)
       .setInteractive({ useHandCursor: true })
       .on('pointerup', () => this.advance());
