@@ -60,26 +60,16 @@ export class StationScene extends Phaser.Scene {
     this.addVoiceToggle();
   }
 
-  // Top-right switch. Uses the same 'noahVoice' setting as the workshop screens.
+  // Top-right switch, same neon cut-corner style as the other buttons. Uses the same 'noahVoice'
+  // setting as the mission screens.
   addVoiceToggle() {
-    const label = () => `VOZ DE NOAH: ${this.registry.get('noahVoice') ? 'ACTIVADA' : 'APAGADA'}`;
-    const toggle = this.add
-      .text(1880, 50, label(), {
-        fontFamily: 'Audiowide',
-        fontSize: '24px',
-        color: '#ffffff',
-        backgroundColor: '#2a1650',
-        padding: { x: 20, y: 12 },
-      })
-      .setOrigin(1, 0)
-      .setInteractive({ useHandCursor: true });
-
-    toggle.on('pointerup', () => {
+    const label = () => `VOZ DE NOAH: ${this.registry.get('noahVoice') ? 'SÍ' : 'NO'}`;
+    const toggle = addNeonButton(this, 1690, 70, label(), () => {
       const on = !this.registry.get('noahVoice');
       this.registry.set('noahVoice', on);
-      toggle.setText(label());
+      toggle.list[2].setText(label()); // [fill, border, label]
       if (on) speakIfEnabled(this, BRIEFING);
       else noahStop();
-    });
+    }, { width: 360, height: 70, fontSize: 22 });
   }
 }
