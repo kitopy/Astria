@@ -16,6 +16,7 @@ const SATELLITE = { x: 960, y: 555, scale: 1, reviewX: 720 };
 const OPTION_X = [330, 1590]; // the two options float left and right of the satellite
 const SNAP_DISTANCE = 300; // dropping a piece closer than this to the satellite mounts it
 const AUTO_NEXT_MS = 1500; // after mounting a part for the first time, go to the next one by itself
+const OPTION_SLIDE = 140; // how far (px) the options slide in from / out to the sides between steps
 
 // The number that matters for each part type, plus mass and cost (shown under an option on hover).
 function partNumbers(kind, part) {
@@ -120,30 +121,78 @@ export class BuildScene extends Phaser.Scene {
 
   // ---------- Screens ----------
 
+  // Changes from one step to the next as a short sequence, never all at once:
+  // the old options slide out, the title swaps, then the new options slide in one after the other.
   showStep() {
-    this.options.forEach((option) => option.destroy());
+    this.advancing = false;
+    const leaving = this.options;
     this.options = [];
+    for (const option of leaving) {
+      option.disableInteractive();
+      this.tweens.killTweensOf(option);
+      this.tweens.add({
+        targets: option,
+        x: option.home.x + this.sideOf(option) * OPTION_SLIDE,
+        alpha: 0,
+        scale: 0.85,
+        duration: 260,
+        ease: 'Cubic.in',
+        onComplete: () => option.destroy(),
+      });
+    }
+    const enterAt = leaving.length ? 240 : 0; // new options wait until the old ones are gone
 
     const kind = this.kind;
     const x = kind ? SATELLITE.x : SATELLITE.reviewX; // on review, the satellite moves left for the balance panel
     this.tweens.add({ targets: this.art, x, duration: 500, ease: 'Cubic.out', onUpdate: () => this.drawSlot() });
 
+    this.swapTitle(kind ? catalog[kind].label.toUpperCase() : '¿LISTA PARA DESPEGAR?');
+
     if (kind) {
-      this.title.setText(catalog[kind].label.toUpperCase());
-      catalog[kind].options.forEach((part, i) => this.options.push(this.addOption(kind, part, OPTION_X[i], SATELLITE.y)));
+      catalog[kind].options.forEach((part, i) => {
+        const option = this.addOption(kind, part, OPTION_X[i], SATELLITE.y);
+        this.options.push(option);
+        // Enter from its own side; it can only be grabbed once it has arrived.
+        option.disableInteractive();
+        option.setAlpha(0).setScale(0.85).setX(option.home.x + this.sideOf(option) * OPTION_SLIDE);
+        this.tweens.add({
+          targets: option,
+          x: option.home.x,
+          alpha: 1,
+          scale: 1,
+          delay: enterAt + i * 120,
+          duration: 420,
+          ease: 'Back.out',
+          onComplete: () => option.setInteractive(),
+        });
+      });
       this.ui.say(partIntro(kind, this.placed.has(kind)));
     } else {
-      this.title.setText('¿LISTA PARA DESPEGAR?');
       this.ui.say(reviewLine(stats(catalog, this.design).valid, REFRAME_ENERGY));
     }
 
-    // The title rises in on every new step, so the change of part is noticed.
-    this.tweens.killTweensOf(this.title);
-    this.title.setAlpha(0).setY(188);
-    this.tweens.add({ targets: this.title, alpha: 1, y: 168, duration: 420, ease: 'Cubic.out' });
-
     this.drawSlot();
     this.renderHud();
+  }
+
+  // -1 for the option on the left of the satellite, 1 for the one on the right.
+  sideOf(option) {
+    return option.home.x < SATELLITE.x ? -1 : 1;
+  }
+
+  // The current title fades up and out, then the new one rises in, so the change of part is noticed.
+  swapTitle(text) {
+    const title = this.title;
+    this.tweens.killTweensOf(title);
+    const riseIn = () => {
+      title.setText(text).setAlpha(0).setY(188);
+      this.tweens.add({ targets: title, alpha: 1, y: 168, duration: 420, ease: 'Cubic.out' });
+    };
+    if (!title.text || title.text === text) {
+      riseIn();
+      return;
+    }
+    this.tweens.add({ targets: title, alpha: 0, y: 150, duration: 200, ease: 'Cubic.in', onComplete: riseIn });
   }
 
   // Pulsing outline where the current part goes, until it's mounted.
@@ -192,12 +241,13 @@ export class BuildScene extends Phaser.Scene {
     const option = this.add.container(x, y, [ring, picture, name, benefit, details]);
     option.setSize(320, 420).setInteractive({ useHandCursor: true, draggable: true });
     option.home = { x, y };
+    option.details = details;
     // While dragging, only the part itself is held: the circle and the texts stay behind (hidden).
-    const extras = [ring, name, benefit, details];
+    // The hover details are not brought back: they only show again with the pointer over the option.
     option.lift = (lifted) => {
-      this.tweens.killTweensOf(extras);
-      this.tweens.add({ targets: extras, alpha: lifted ? 0 : 1, duration: lifted ? 120 : 250 });
-      if (!lifted) details.setAlpha(0); // the hover details only come back with the pointer
+      this.tweens.killTweensOf([ring, name, benefit, details]);
+      if (lifted) details.setAlpha(0);
+      this.tweens.add({ targets: [ring, name, benefit], alpha: lifted ? 0 : 1, duration: lifted ? 120 : 250 });
     };
 
     option.on('pointerover', () => {
@@ -236,11 +286,28 @@ export class BuildScene extends Phaser.Scene {
     return option;
   }
 
-  // The piece flies into its slot, then the satellite shows it.
+  // The piece flies into its slot, the satellite shows it with a small bump, and:
+  //  - the first time a part type is mounted, the screen moves on to the next part by itself;
+  //  - when changing a part already mounted, the options stay so she can compare calmly.
   mount(kind, part, option) {
+    if (this.advancing) return;
+    const firstTime = !this.placed.has(kind);
     const slot = this.art.slots(kind)[0];
     const flying = this.partImage(kind, part.id, option.x, option.y - 20);
-    if (option.dragged) {
+    this.tweens.killTweensOf(option);
+
+    if (firstTime) {
+      // The part has left its circle for good: hide that option and dim the other one.
+      this.advancing = true;
+      this.options.forEach((o) => o.disableInteractive());
+      option.setAlpha(0);
+      for (const other of this.options) {
+        // Hover details would stay stuck: the pointer-out event no longer fires once input is off.
+        this.tweens.killTweensOf(other.details);
+        other.details.setAlpha(0);
+        if (other !== option) this.tweens.add({ targets: other, alpha: 0.35, scale: 0.95, duration: 250 });
+      }
+    } else if (option.dragged) {
       // The held part becomes the flying one; the option reappears in its place afterwards.
       option.setAlpha(0).setPosition(option.home.x, option.home.y).setScale(1);
       option.lift(false);
@@ -257,22 +324,20 @@ export class BuildScene extends Phaser.Scene {
       ease: 'Cubic.in',
       onComplete: () => {
         flying.destroy();
-        const wasPlaced = this.placed.has(kind);
         this.design[kind] = part.id;
         this.placed.add(kind);
         if (this.step === this.maxStep) this.maxStep = Math.min(REVIEW, this.step + 1);
         this.persist();
         this.art.setPlaced(this.placed);
         this.art.applyDesign(this.design, kind);
+        // Small bump of the whole satellite: the part clicked into place.
+        this.tweens.add({ targets: this.art, scale: SATELLITE.scale * 1.04, duration: 110, yoyo: true, ease: 'Sine.out' });
         this.drawSlot();
         this.options.forEach((o) => o.list[0].setStrokeStyle(3, COLORS.glow, o === option ? 1 : 0));
         this.renderHud();
-        // First time this part is mounted: move on by itself (the "Siguiente" button is there to go faster).
-        // Changing a part that was already mounted doesn't advance, so the player can compare calmly.
-        // When it advances, this line stays silent: the next part's spoken intro would cut it anyway.
-        const autoNext = !wasPlaced;
-        this.ui.say(mountLine(part, wasPlaced), { silent: autoNext });
-        if (autoNext) {
+        // When it moves on by itself, this line stays silent: the next part's spoken intro would cut it anyway.
+        this.ui.say(mountLine(part, !firstTime), { silent: firstTime });
+        if (firstTime) {
           const stepAtMount = this.step;
           this.time.delayedCall(AUTO_NEXT_MS, () => {
             if (this.step === stepAtMount) this.goTo(this.step + 1); // unless she already moved on
@@ -296,7 +361,9 @@ export class BuildScene extends Phaser.Scene {
     const review = `<button class="ws-slot ws-slot-review ${this.step === REVIEW ? 'current' : ''}" data-action="goto" data-kind="review" ${REVIEW > this.maxStep ? 'disabled' : ''}>Revisar</button>`;
 
     let next = '';
-    if (this.kind && this.placed.has(this.kind)) {
+    if (this.advancing) {
+      next = ''; // it moves on by itself in a moment; a button appearing and vanishing would only distract
+    } else if (this.kind && this.placed.has(this.kind)) {
       next = actionButton('next', this.step === REVIEW - 1 ? 'Revisar ›' : `Siguiente: ${catalog[kinds[this.step + 1]].label} ›`, true);
     } else if (!this.kind) {
       next = actionButton('launch', 'Lanzar ›', true, !stats(catalog, this.design).valid);
