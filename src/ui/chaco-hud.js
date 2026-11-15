@@ -37,11 +37,15 @@ export function createChacoHUD(scene, design, onAction) {
   root.innerHTML = `<div class="chaco-map" aria-label="Mapa geográfico de Paraguay"></div><div class="chaco-shadow"></div><div class="weather-fog" aria-hidden="true"></div>
   <div class="chaco-top-actions"><button data-flight="voice" aria-pressed="false">Voz de NOAH: apagada</button></div>
   <aside class="chaco-status hud-panel" aria-label="Estado de la misión">
-    <div class="status-row"><span>Batería</span><strong data-hud="energy"></strong></div>
-    <progress data-hud="battery" aria-label="Energía disponible"></progress>
-    <div class="status-row"><span>Fotos tomadas</span><strong data-hud="captured">0/2</strong></div>
-    <div class="status-row"><span>Fotos enviadas</span><strong data-hud="delivered">0/2</strong></div>
-    <p class="status-sun" data-hud="sun">Con luz solar</p>
+    <div class="status-battery">
+      <span class="status-battery-icon" aria-hidden="true"></span>
+      <span class="status-battery-bar"><i data-hud="battery-fill"></i></span>
+      <strong data-hud="energy"></strong>
+    </div>
+    <div class="status-photos" data-hud="photos" aria-label="Fotos">
+      <span class="photo-slot"></span><span class="photo-slot"></span>
+      <span class="status-sun" data-hud="sun" title="Luz del Sol"></span>
+    </div>
   </aside>
   <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2></div><div class="sensor-window"><canvas aria-label="Vista recreada del Chaco con imágenes de archivo"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record" data-hud="sensor-year">ARCHIVO · 1985</span></div><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
   <div class="photo-pop hud-panel" aria-live="polite" hidden></div>
@@ -212,9 +216,18 @@ export function createChacoHUD(scene, design, onAction) {
       const obstructed=['blocked','adjusting'].includes(visibility.status);
       this.updateWeather(flight,visibility);
       root.classList.toggle('panels-deployed',flight.progress>0||flight.running);
-      get('captured').textContent=`${mission.captured.length}/2`;get('delivered').textContent=`${mission.delivered}/2`;
-      get('energy').textContent=`${mission.energy}/${specs.capacity}`;get('battery').max=specs.capacity;get('battery').value=mission.energy;
-            get('sun').textContent=phases[mission.phase].sun?'Con luz solar':'En la sombra: sin recarga';
+      // Status with few numbers: a battery bar with the current charge, two photo slots
+      // (empty, taken, sent) and a sun that dims while the satellite is in the shadow.
+      const charge=specs.capacity?mission.energy/specs.capacity:0;
+      get('battery-fill').style.width=`${Math.round(charge*100)}%`;
+      get('battery-fill').classList.toggle('low',charge<.3);
+      get('energy').textContent=mission.energy;
+      get('photos').querySelectorAll('.photo-slot').forEach((slot,i)=>{
+        slot.classList.toggle('sent',i<mission.delivered);
+        slot.classList.toggle('taken',i>=mission.delivered&&i<mission.captured.length);
+      });
+      get('photos').setAttribute('aria-label',`Fotos: ${mission.captured.length} tomadas, ${mission.delivered} enviadas`);
+      get('sun').title=phases[mission.phase].sun?'Con luz del Sol':'En la sombra: sin recarga';
       root.classList.toggle('in-shadow',!phases[mission.phase].sun);
       const control=action=>root.querySelector(`[data-flight="${action}"]`);
       // Fix button of the surprise problem; without energy for it, back to the workshop instead.
