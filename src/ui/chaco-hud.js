@@ -72,7 +72,7 @@ export function createChacoHUD(scene, design, onAction) {
       <button data-flight="finish" class="console-action" hidden><span class="console-icon" aria-hidden="true"></span><span class="console-label">Ver resultados</span></button>
     </div>
   </div></section>
-  <footer class="chaco-sources"><span>Mapa real · recorrido simulado</span><span>NASA GIBS · Natural Earth · MapLibre</span></footer>`;
+`;
   document.body.append(root);
   const get = key => root.querySelector(`[data-hud="${key}"]`);
   // Welcome: the shared game dialog (ui/dialog.js). The flight waits until it's closed.

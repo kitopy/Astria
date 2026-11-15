@@ -56,6 +56,11 @@ export class RewardScene extends Phaser.Scene {
           <img src="${shot.image}" alt="Foto del Chaco, ${shot.year}">
           <figcaption>${shot.year >= 2020 ? 'Hoy' : shot.year}</figcaption>
         </figure>`).join('');
+      // Credits of the real data used in the mission, small, at the very end (not during play).
+      const credits = document.createElement('p');
+      credits.className = 'ws-credits';
+      credits.textContent = 'Imágenes: NASA Landsat · Mapa: NASA GIBS y Natural Earth (MapLibre) · Recorrido simulado';
+      ui.root.append(credits);
       ui.area('actions').innerHTML = actionButton('again', 'Jugar de nuevo', true);
       ui.bind({ again: () => this.scene.start('Menu') });
     } else {
