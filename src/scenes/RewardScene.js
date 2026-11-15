@@ -57,13 +57,11 @@ export class RewardScene extends Phaser.Scene {
         </figure>`).join('');
       ui.area('actions').innerHTML = actionButton('finish', 'Terminar ›', true);
       ui.bind({ finish: () => this.scene.start('Finale') });
-      ui.say('¡Gracias por cuidar el Chaco!');
     } else {
       const failed = whatFailed(m);
       below.innerHTML = `<p class="ws-result-reason">${failed.text}</p>`;
       ui.area('actions').innerHTML = actionButton('fix', `Cambiar ${catalog[failed.part].label.toLowerCase()} ›`, true);
       ui.bind({ fix: () => this.scene.start('Build', { design: this.design, focus: failed.part }) });
-      ui.say('Probemos otra vez. ¡Ya casi está!');
       // The part to change blinks on the satellite (the same "just mounted" highlight, repeated).
       const blink = () => art.applyDesign(this.design, failed.part);
       this.time.delayedCall(600, blink);
