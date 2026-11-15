@@ -22,7 +22,7 @@ function allDesigns() {
 
 // StationScene (mission briefing)
 const station = [
-  'Hola, exploradora. Soy NOAH. El bosque del Chaco paraguayo está cambiando: vamos a construir un satélite para fotografiarlo desde el espacio.',
+  'Hola, exploradores. Soy NOAH. El bosque del Chaco paraguayo está cambiando: vamos a construir un satélite para fotografiarlo desde el espacio.',
 ];
 
 // TestScene + game logic errors (Cesar's flight over the Chaco)
@@ -77,13 +77,13 @@ const reward = [
 const observe = [
   'NOAH // ANÁLISIS EN CURSO\nEsta comparación representa dos observaciones. Las imágenes son simuladas.\n¿Qué cambió? Tocá el lugar donde veas la diferencia.',
   'NOAH // SIGAMOS BUSCANDO\nCasi... Mirá con calma el bosque en las dos fotos.\nHay una zona que se ve distinta en la imagen B.',
-  'NOAH // ¡CAMBIO ENCONTRADO!\n¡Buen ojo, exploradora! El río y la montaña quedaron iguales,\npero en la imagen B falta una parte del bosque.',
+  'NOAH // ¡CAMBIO ENCONTRADO!\n¡Buen ojo, explorador! El río y la montaña quedaron iguales,\npero en la imagen B falta una parte del bosque.',
   'NOAH // ASÍ TRABAJAN LOS SATÉLITES\nLos satélites Landsat de la NASA fotografían el mismo lugar\nde la Tierra cada 16 días. Comparando fotos, se ven los cambios.',
 ];
 
 // FinaleScene
 const finale = [
-  'NOAH // ¡GRACIAS, EXPLORADORA!\nDetrás de cada misión hay personas que diseñan, prueban y descubren.\nVos también podés construir, descubrir y explorar el universo.',
+  'NOAH // ¡GRACIAS, EXPLORADOR!\nDetrás de cada misión hay personas que diseñan, prueban y descubren.\nVos también podés construir, descubrir y explorar el universo.',
 ];
 
 export const otherLines = [...station, ...flight, ...reward, ...observe, ...finale];

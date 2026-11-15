@@ -61,7 +61,7 @@ export function createChacoComparison(scene, onAction) {
     get('.cmp-question').hidden = state.phase !== 'interpret';
     get('.cmp-discovery').hidden = state.phase !== 'complete';
     get('[data-cmp-step]').textContent = ['PRIMER PASO','SEGUNDO PASO','TU INTERPRETACIÓN','INVESTIGACIÓN COMPLETA'][phaseIndex()];
-    get('[data-cmp-title]').textContent = ['Hacé viajar el tiempo','Encontrá una zona de cambio','¿Qué te cuentan las imágenes?','¡Buen ojo, exploradora!'][phaseIndex()];
+    get('[data-cmp-title]').textContent = ['Hacé viajar el tiempo','Encontrá una zona de cambio','¿Qué te cuentan las imágenes?','¡Buen ojo, explorador!'][phaseIndex()];
     get('[data-cmp-task]').textContent = ['Deslizá la barra y mirá cómo cambia el mismo lugar entre 1985 y 2025.','Tocá un claro del centro: una zona que era oscura y ahora se ve más clara.','Compará otra vez el lugar marcado y elegí qué cambió.','Tus observaciones ayudan a comprender por qué cuidamos el bosque.'][phaseIndex()];
     root.querySelectorAll('.cmp-steps li').forEach((item,i) => item.classList.toggle('active', i === Math.min(2,phaseIndex())));
     get('.cmp-hint-area').hidden = state.phase !== 'select' || state.hints < 2;

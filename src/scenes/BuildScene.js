@@ -216,7 +216,7 @@ export class BuildScene extends Phaser.Scene {
 
     const kind = this.kind;
 
-    this.swapTitle(kind ? catalog[kind].label.toUpperCase() : '¿LISTA PARA DESPEGAR?');
+    this.swapTitle(kind ? catalog[kind].label.toUpperCase() : '¿LISTO PARA DESPEGAR?');
 
     if (kind) {
       catalog[kind].options.forEach((part, i) => {

@@ -147,14 +147,14 @@
 .astrion-checks .bad .mark::after {
   content: '';
   position: absolute;
-  left: 6px;
-  top: 12px;
+  left: 50%;
+  top: 50%;
   width: 14px;
   height: 3px;
   background: #ff8fa3;
-  transform: rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg); /* exactly in the middle of the circle */
 }
-.astrion-checks .bad .mark::after { transform: rotate(-45deg); }
+.astrion-checks .bad .mark::after { transform: translate(-50%, -50%) rotate(-45deg); }
 
 /* The buttons wait for the checklist, so the result is read before choosing. */
 .astrion-dialog:has(.astrion-checks) .astrion-dialog-actions {
