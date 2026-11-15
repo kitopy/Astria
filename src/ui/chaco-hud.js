@@ -1,6 +1,7 @@
 import { noahSpeak, noahStop } from './noahVoice.js';
 import { showDialog } from './dialog.js';
 import { frames } from './satellite.js';
+import { sfx } from './sfx.js';
 import { phases } from '../game/model.js';
 import { atGate } from '../game/chaco-flight.js';
 import { cloudCover, obstacleInfo, obstacleIntensity, REFRAME_ENERGY } from '../game/chaco-visibility.js';
@@ -136,6 +137,8 @@ export function createChacoHUD(scene, design, onAction) {
         const fill = figure.querySelector('.send-bar i');
         fill.style.transitionDuration = `${FILL_MS * share}ms`;
         setTimeout(() => { fill.style.width = `${share * 100}%`; }, start);
+        // Data blips while this bar fills.
+        for (let t = 0; t < FILL_MS * share; t += 150) setTimeout(() => sfx.blip(Math.floor(t / 150)), start + t);
         start += FILL_MS * share;
         return share === 1;
       });
@@ -146,6 +149,7 @@ export function createChacoHUD(scene, design, onAction) {
           figure.classList.add(complete ? 'arrived' : 'missing');
           figure.querySelector('figcaption').textContent = complete ? '¡Llegó!' : 'No llegó completa';
         });
+        if (results.every(Boolean)) sfx.done(); else sfx.almost();
         // Both photos arrived: next comes analyzing them; otherwise the results.
         button.textContent = results.every(Boolean) && results.length >= 2 ? 'Analizar las fotos' : 'Ver resultados';
         button.dataset.done = 'yes';
@@ -276,6 +280,8 @@ export function createChacoHUD(scene, design, onAction) {
       this.positionActionMenu();
       clearTimeout(this.photoTimer);
       this.photoTimer=setTimeout(()=>{pop.hidden=true;},pair?5500:4500);
+      clearTimeout(this.renderTimer);
+      this.renderTimer=setTimeout(()=>sfx.done(),1400); // when the scan line finishes
     },
     // Keeps the boxes that belong to the satellite (photo menu, last photo) next to it while the map moves.
     positionActionMenu(){
@@ -295,6 +301,6 @@ export function createChacoHUD(scene, design, onAction) {
         box.style.top = `${top}px`;
       }
     },
-    destroy(){clearTimeout(this.photoTimer);noahStop();root.remove();}
+    destroy(){clearTimeout(this.photoTimer);clearTimeout(this.renderTimer);noahStop();root.remove();}
   };
 }

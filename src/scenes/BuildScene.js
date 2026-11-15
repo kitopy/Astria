@@ -4,6 +4,7 @@ import { catalog, readDesign, saveDesign } from '../game/design.js';
 import { actionButton, addArt, meter, mount, partThumb, preloadArt } from '../ui/mission-ui.js';
 import { centerDesignArea } from '../ui/layout.js';
 import { showDialog } from '../ui/dialog.js';
+import { sfx } from '../ui/sfx.js';
 import { COLORS, CSS } from '../ui/palette.js';
 import { contentBounds } from '../ui/satellite.js';
 import { mountLine, partIntro, reviewLine } from '../game/noah-lines.js';
@@ -422,6 +423,7 @@ export class BuildScene extends Phaser.Scene {
         this.art.applyDesign(this.design, kind);
         // Small bump of the whole satellite: the part clicked into place.
         this.tweens.add({ targets: this.art, scale: SATELLITE.scale * 1.04, duration: 110, yoyo: true, ease: 'Sine.out' });
+        sfx.pop();
         this.drawSlot();
         this.options.forEach((o) => o.list[0].setStrokeStyle(3, COLORS.glow, o === option ? 1 : 0));
         this.renderHud();

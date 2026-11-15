@@ -3,6 +3,7 @@ import { stats } from '../game/model.js';
 import { catalog, readDesign } from '../game/design.js';
 import { actionButton, addArt, mount, preloadArt } from '../ui/mission-ui.js';
 import { centerDesignArea } from '../ui/layout.js';
+import { sfx } from '../ui/sfx.js';
 
 // What went wrong, in one short sentence, and the part that fixes it (same order as the flight:
 // photos first, then sending them).
@@ -48,6 +49,9 @@ export class RewardScene extends Phaser.Scene {
     const below = document.createElement('div');
     below.className = 'ws-result-below';
     ui.root.append(below);
+
+    if (success) sfx.success();
+    else sfx.almost();
 
     if (success) {
       // The two photos of the mission, as a trophy (only when they exist: the dev shortcuts have none).
