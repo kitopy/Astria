@@ -8,6 +8,7 @@ import { TestScene } from './scenes/TestScene.js';
 import { RewardScene } from './scenes/RewardScene.js';
 import { ObserveScene } from './scenes/ObserveScene.js';
 import { FinaleScene } from './scenes/FinaleScene.js';
+import { DevToolsScene } from './scenes/DevToolsScene.js';
 
 new Phaser.Game({
   type: Phaser.AUTO, // WebGL if available, otherwise Canvas
@@ -23,5 +24,5 @@ new Phaser.Game({
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   // The first scene in the list is the one that starts.
-  scene: [BootScene, MenuScene, StationScene, BuildScene, TestScene, RewardScene, ObserveScene, FinaleScene],
+  scene: [BootScene, DevToolsScene, MenuScene, StationScene, BuildScene, TestScene, RewardScene, ObserveScene, FinaleScene],
 });

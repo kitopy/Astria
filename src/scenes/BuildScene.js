@@ -47,6 +47,7 @@ export class BuildScene extends Phaser.Scene {
     this.design = readDesign(data.design ?? this.registry.get('satelliteDesign'));
     const focusIndex = data.focus === 'review' ? REVIEW : kinds.indexOf(data.focus);
     this.step = focusIndex >= 0 ? focusIndex : 0;
+    this.showBuildIntroOnStart = this.step === 0 && !data.design && data.focus == null;
     this.placed = new Set(data.design ? kinds : []); // part types already mounted
     this.maxStep = data.design ? REVIEW : 0; // furthest step reached
   }
@@ -90,10 +91,43 @@ export class BuildScene extends Phaser.Scene {
     });
 
     this.showStep();
+    if (this.showBuildIntroOnStart) this.showBuildIntro();
   }
 
   get kind() {
     return kinds[this.step]; // undefined on the review step
+  }
+
+  showBuildIntro() {
+    const intro = document.createElement('section');
+    intro.className = 'ws-build-intro';
+    intro.setAttribute('role', 'dialog');
+    intro.setAttribute('aria-modal', 'true');
+    intro.setAttribute('aria-labelledby', 'build-intro-title');
+    intro.setAttribute('aria-describedby', 'build-intro-copy');
+    intro.innerHTML = `
+      <div class="ws-build-intro-card">
+        <span class="ws-build-intro-mark" aria-hidden="true">✦</span>
+        <span class="ws-build-intro-kicker">TU SATÉLITE, TUS DECISIONES</span>
+        <h2 id="build-intro-title">Elegí qué pieza llevar</h2>
+        <p id="build-intro-copy">En cada paso vas a elegir entre dos opciones. Mirá qué aporta cada una y elegí la que prefieras para tu misión.</p>
+        <button type="button" class="ws-btn ws-primary" data-build-intro-close>¡Entendido!</button>
+      </div>`;
+    this.ui.root.append(intro);
+
+    let open = true;
+    let timer;
+    const close = () => {
+      if (!open) return;
+      open = false;
+      timer.remove();
+      intro.classList.add('is-leaving');
+      this.time.delayedCall(420, () => intro.remove());
+    };
+    timer = this.time.delayedCall(3000, close);
+    intro.querySelector('[data-build-intro-close]').addEventListener('click', close);
+    intro.querySelector('[data-build-intro-close]').focus({ preventScroll: true });
+    this.events.once('shutdown', () => timer.remove());
   }
 
   goTo(step) {

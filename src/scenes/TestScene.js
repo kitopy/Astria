@@ -9,18 +9,39 @@ import { ChacoMap } from '../ui/chaco-map.js';
 import { SatelliteSensor } from '../ui/satellite-sensor.js';
 import { centerDesignArea } from '../ui/layout.js';
 
+const DEBUG_SCENARIOS = {
+  'first-observation': { gate: 1, progress: .25, phase: 1, captured: [], photoPhases: [], energy: 'full' },
+  'second-observation': { gate: 2, progress: .75, phase: 2, captured: [1], photoPhases: [1], energy: 'full' },
+  'return-low-battery': { gate: 2, progress: .75, phase: 2, captured: [1], photoPhases: [1], energy: 0 },
+  transmission: { gate: 3, progress: 1, phase: 3, captured: [1, 2], photoPhases: [1, 2], energy: 'full' },
+};
+
 export class TestScene extends Phaser.Scene {
   constructor() { super('Test'); }
   init(data = {}) {
     this.design = readDesign(data.design ?? this.registry.get('satelliteDesign'));
     this.specs = stats(catalog, this.design);
     this.mission = this.specs.valid ? launch(this.specs) : null;
+    this.debugScenario = Object.hasOwn(DEBUG_SCENARIOS, data.debugScenario) ? data.debugScenario : null;
     this.flight = initialFlight(); this.mapClock = 0; this.sensorShots=[];
     let storage;
     try { storage = window.localStorage; } catch { /* Use the registry if storage is unavailable. */ }
-    const kind = this.mission ? drawObstacle(storage, this.registry.get('lastObstacle')) : 'clouds';
-    if (this.mission) this.registry.set('lastObstacle', kind);
+    const kind = this.mission && !this.debugScenario ? drawObstacle(storage, this.registry.get('lastObstacle')) : 'clouds';
+    if (this.mission && !this.debugScenario) this.registry.set('lastObstacle', kind);
     this.visibility = initialVisibility(kind);
+    if (this.debugScenario && this.mission) {
+      const scenario = DEBUG_SCENARIOS[this.debugScenario];
+      this.flight = { progress: scenario.progress, gate: scenario.gate, running: false, speed: 1 };
+      const photos = scenario.photoPhases.map(phase => ({ phase, quality: this.specs.quality, remaining: this.specs.data }));
+      this.mission = {
+        ...this.mission,
+        phase: scenario.phase,
+        energy: scenario.energy === 'full' ? this.specs.capacity : scenario.energy,
+        photos,
+        captured: [...scenario.captured],
+      };
+      this.visibility = { ...this.visibility, status: 'clear' };
+    }
     this.sensorTime = 0;
   }
   preload() { preloadArt(this); }

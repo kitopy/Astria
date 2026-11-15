@@ -1,6 +1,10 @@
 # Astrion
 Videojuego para hackaton.
 
+## Saltar a una parte durante el desarrollo
+
+En este equipo, abri `http://localhost:5173/?dev=1` (o `http://localhost:4173/?dev=1` para el preview local) para ver el selector de desarrollo. Permite abrir directamente una pieza del armado o una etapa del viaje. **Regreso - bateria en cero** inicia el tramo desde el Chaco hacia Asuncion con la bateria agotada; en esa pantalla podes cambiar la velocidad del viaje y repetir el ajuste visual. La opcion solo se activa en `localhost` o `127.0.0.1`; el juego normal no muestra el selector.
+
 ## Ejecutar en local
 
 Usar Node.js 22.12 o superior. Instalar las dependencias respetando el archivo de bloqueo:
