@@ -120,7 +120,7 @@ export class TestScene extends Phaser.Scene {
     if (previousVisibility !== this.visibility.status) {
       this.updateSensor();
       this.hud.say(this.visibility.status === 'blocked'
-        ? `${obstacleInfo(this.visibility).label}. ${obstacleInfo(this.visibility).message} Resolverlo cuesta ${REFRAME_ENERGY} de energía.`
+        ? `${obstacleInfo(this.visibility).title} ${obstacleInfo(this.visibility).short}` // same words as the warning dialog
         : `${obstacleInfo(this.visibility).resolved} El ajuste consumió ${REFRAME_ENERGY} de energía. Cuidá la reserva que queda.`);
       this.render();
     }

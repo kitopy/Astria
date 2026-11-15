@@ -7,6 +7,7 @@ const HISTORY_KEY = 'astria:last-obstacle';
 
 export const OBSTACLES = {
   clouds: {
+    short: 'Las nubes tapan el bosque.', // one line for the warning dialog
     progress: CLOUD_PROGRESS, warning: .36, label: 'Nubes sobre el terreno',
     title: '¡La vista está cubierta!', action: 'Buscar un claro', working: 'Buscando un claro…',
     message: 'Pausamos el viaje. Ajustá el encuadre y reservá energía para tus fotos.',
@@ -14,6 +15,7 @@ export const OBSTACLES = {
     resolved: '¡Visibilidad recuperada! El nuevo encuadre está listo.', log: 'Nubes en el trayecto: reencuadre del sensor'
   },
   camera: {
+    short: 'La cámara se mueve y la foto sale borrosa.', // one line for the warning dialog
     progress: .45, warning: .36, label: 'Cámara inestable',
     title: '¡La imagen está temblando!', action: 'Estabilizar cámara', working: 'Estabilizando cámara…',
     message: 'El sensor necesita estabilizarse antes de la próxima foto. Ajustalo para recuperar una imagen firme.',
@@ -21,6 +23,7 @@ export const OBSTACLES = {
     resolved: '¡Cámara estable! Ya podés seguir hacia la segunda foto.', log: 'Cámara inestable: estabilización del sensor'
   },
   signal: {
+    short: 'La antena no encuentra la estación.', // one line for the warning dialog
     progress: .9, warning: .82, label: 'Señal débil',
     title: '¡La señal está muy baja!', action: 'Alinear antena', working: 'Alineando antena…',
     message: 'Estamos cerca del contacto terrestre. Reorientá la antena para preparar el envío de tus fotos.',

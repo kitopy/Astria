@@ -31,13 +31,10 @@ export function createChacoHUD(scene, design, onAction) {
   </aside>
   <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2><span data-hud="sensor-state">Preparando</span></div><div class="sensor-window"><canvas aria-label="Vista recreada del Chaco con imágenes de archivo"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record" data-hud="sensor-year">ARCHIVO · 1985</span></div><p>Archivo Landsat / NASA · observación recreada</p><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
   <div class="chaco-map-tools"><button data-flight="recenter" aria-label="Volver a centrar Paraguay">Centrar Paraguay</button><button data-flight="speed">Velocidad ×1</button><button data-flight="workshop">Volver al taller</button></div>
-  <aside class="visibility-challenge hud-panel" aria-label="Imprevisto de la misión" hidden>
-    <span class="weather-tag" data-hud="obstacle-tag">IMPREVISTO DEL TRAYECTO</span>
-    <h2 data-hud="weather-title">Buscá un claro</h2>
-    <p data-hud="weather-message">Las nubes tapan el terreno. Reorientá la cámara para recuperar la vista.</p>
+  <aside class="visibility-challenge hud-panel" aria-label="Ajuste en curso" hidden>
+    <h2 data-hud="weather-title"></h2>
     <div class="signal-bars" aria-label="Intensidad de la señal" hidden><span></span><span></span><span></span><span></span></div>
-    <button data-flight="reframe" class="flight-primary">Buscar un claro · −${REFRAME_ENERGY} energía</button>
-    <progress data-hud="reframe-progress" max="1" value="0" aria-label="Ajuste del encuadre" hidden></progress>
+    <progress data-hud="reframe-progress" max="1" value="0" aria-label="Avance del ajuste"></progress>
   </aside>
   <section class="chaco-bottom"><div class="chaco-noah hud-panel"><span class="chaco-noah-icon" aria-hidden="true">N</span><div><strong>NOAH</strong><p data-hud="noah" aria-live="polite"></p></div><button data-flight="listen" aria-label="Escuchar el mensaje de NOAH">Escuchar</button></div>
   <div class="chaco-controls orbital-console" aria-label="Panel de mando del satélite">
@@ -67,6 +64,32 @@ export function createChacoHUD(scene, design, onAction) {
     root.classList.remove('mission-intro-active');
     onAction('intro-closed');
   });
+  // Surprise problem (clouds, shaky camera, weak signal): a dialog that waits for the fix.
+  // It can't be closed with Escape: without the fix the satellite would stay stopped.
+  let obstacleOpen = false;
+  const obstacleArt = {
+    clouds: '<div class="obstacle-art clouds" aria-hidden="true"><i></i><i></i><i></i></div>',
+    camera: '<div class="obstacle-art camera" aria-hidden="true"><i></i></div>',
+    signal: '<div class="obstacle-art signal" aria-hidden="true"><i></i><i></i><i></i><i></i></div>',
+  };
+  async function openObstacle(visibility, energy) {
+    obstacleOpen = true;
+    const info = obstacleInfo(visibility);
+    const canFix = energy >= REFRAME_ENERGY;
+    const choice = await showDialog(scene, {
+      title: info.title,
+      text: canFix ? info.short : `${info.short} No queda energía para arreglarlo.`,
+      body: obstacleArt[visibility.kind] ?? obstacleArt.clouds,
+      dismissable: false,
+      actions: canFix
+        ? [{ label: `${info.action} · −${REFRAME_ENERGY}`, value: 'reframe', primary: true }]
+        : [{ label: 'Volver al taller', value: 'workshop', primary: true }],
+    });
+    obstacleOpen = false;
+    if (!scene.sys.isActive()) return; // the scene ended while the dialog was open
+    onAction(choice);
+  }
+
   let voice = !!scene.registry.get('noahVoice'), message = '';
   function speak() { noahSpeak(message); } // same voice as the rest of the game (ui/noahVoice.js)
   function voiceLabel() { const button=root.querySelector('[data-flight="voice"]');button.textContent=`Voz de NOAH: ${voice?'activada':'apagada'}`;button.setAttribute('aria-pressed',String(voice)); }
@@ -96,14 +119,12 @@ export function createChacoHUD(scene, design, onAction) {
       root.style.setProperty('--obstacle-strength',String(intensity));
       root.dataset.visibility=status;
       root.dataset.obstacle=visibility.kind;
-      root.querySelector('.visibility-challenge').hidden=!(status==='blocked'||status==='adjusting'||intensity>.1);
-      get('obstacle-tag').textContent=`IMPREVISTO SIMULADO · ${info.label.toUpperCase()}`;
-      get('weather-title').textContent=status==='adjusting'?info.working:status==='blocked'?info.title:'NOAH detectó un imprevisto';
-      get('weather-message').textContent=status==='adjusting'?info.explanation:info.message;
+      // Only while fixing: what's happening and how far along it is. The warning itself is a dialog.
+      root.querySelector('.visibility-challenge').hidden=status!=='adjusting';
+      get('weather-title').textContent=info.working;
       const bars=root.querySelector('.signal-bars');
       bars.hidden=visibility.kind!=='signal';
       bars.querySelectorAll('span').forEach((bar,i)=>{bar.style.opacity=i<Math.round(1+3*(1-intensity))?'1':'.2';});
-      get('reframe-progress').hidden=status!=='adjusting';
       get('reframe-progress').value=visibility.adjustment;
     },
     update(mission,specs,flight,visibility){
@@ -119,8 +140,7 @@ export function createChacoHUD(scene, design, onAction) {
       root.classList.toggle('in-shadow',!phases[mission.phase].sun);
       const control=action=>root.querySelector(`[data-flight="${action}"]`);
       control('travel').hidden=phase===3||flight.running;control('travel').disabled=!this.ready||this.introOpen||obstructed;
-      control('reframe').disabled=!this.ready||visibility.status!=='blocked'||mission.energy<REFRAME_ENERGY;
-      control('reframe').textContent=visibility.status==='adjusting'?info.working:`${info.action} · −${REFRAME_ENERGY} energía`;
+      if(visibility.status==='blocked'&&this.ready&&!this.introOpen&&!obstacleOpen)openObstacle(visibility,mission.energy);
       control('travel').querySelector('.console-label').textContent=!gate?'Reanudar viaje':['Rumbo al Chaco','Siguiente pasada','Regreso a Asunción'][phase];
       control('pause').hidden=!flight.running;control('pause').disabled=!flight.running;
       control('capture').disabled=!this.ready||!gate||![1,2].includes(phase)||mission.captured.includes(phase)||mission.energy<specs.cameraPower;
