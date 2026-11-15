@@ -45,7 +45,7 @@ export class DevToolsScene extends Phaser.Scene {
         <h2>Investigar el Chaco</h2>
         <div class="ws-devtools-buttons"><button data-dev-observe>Comparación de imágenes</button></div>
         <h2>Final</h2>
-        <div class="ws-devtools-buttons"><button data-dev-finale>Final · misión cumplida</button><button data-dev-result="antenna">Resultados · faltó algo</button></div>
+        <div class="ws-devtools-buttons"><button data-dev-result="success">Final · misión cumplida</button><button data-dev-result="antenna">Resultados · faltó algo</button></div>
         <button class="ws-devtools-normal" data-dev-normal>Ir al juego normal</button>
       </section>`;
     document.body.append(root);
@@ -62,10 +62,6 @@ export class DevToolsScene extends Phaser.Scene {
         return;
       }
       const design = readDesign();
-      if (button.hasAttribute('data-dev-finale')) {
-        this.scene.start('Finale');
-        return;
-      }
       if (button.dataset.devResult) {
         const mission = RESULTS[button.dataset.devResult];
         this.scene.start('Reward', { design, mission, captures: mission.delivered >= 2 ? ARCHIVE_PHOTOS : [] });

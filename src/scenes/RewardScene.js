@@ -54,12 +54,21 @@ export class RewardScene extends Phaser.Scene {
     else sfx.almost();
 
     if (success) {
-      // The two photos of the mission, as a trophy (only when they exist: the dev shortcuts have none).
-      below.innerHTML = this.captures.slice(0, 2).map((shot, i) => `
-        <figure class="ws-result-photo" style="animation-delay:${0.3 + i * 0.2}s">
+      art.setPosition(960, 395).setScale(0.8); // a bit higher and smaller, to fit the cards around it
+      // What the player practiced, so they feel proud: one card on each side of the satellite and,
+      // below it, the discovery with the two photos of the mission as a trophy. Cards appear one by one.
+      const card = (title, text, extra = '', delay = 0, side = '') =>
+        `<div class="ws-achievement ${side}" style="animation-delay:${delay}s"><strong>${title}</strong><p>${text}</p>${extra}</div>`;
+      const photos = this.captures.slice(0, 2).map((shot) => `
+        <figure class="ws-result-photo">
           <img src="${shot.image}" alt="Foto del Chaco, ${shot.year}">
           <figcaption>${shot.year >= 2020 ? 'Hoy' : shot.year}</figcaption>
         </figure>`).join('');
+      const sides = document.createElement('div');
+      sides.innerHTML = card('DISEÑASTE', 'Elegiste las piezas<br>de tu satélite', '', 0.4, 'ws-achievement-left')
+        + card('PROBASTE', 'Cuidaste la energía<br>en el viaje', '', 0.75, 'ws-achievement-right');
+      ui.root.append(...sides.children);
+      below.innerHTML = card('DESCUBRISTE', 'Encontraste cómo cambió el bosque', photos ? `<div class="ws-result-photos">${photos}</div>` : '', 1.1);
       // Credits of the real data used in the mission, small, at the very end (not during play).
       const credits = document.createElement('p');
       credits.className = 'ws-credits';

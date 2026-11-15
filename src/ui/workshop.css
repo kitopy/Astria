@@ -451,3 +451,40 @@
 .ws--result [data-action="voice"] { display: none; }
 .ws--result .ws-footer { justify-content: center; }
 .ws-credits { position: absolute; left: 0; right: 0; bottom: 8px; margin: 0; text-align: center; font-size: 15px; color: var(--muted); text-shadow: 0 1px 4px #000; }
+
+/* ---------- End of a successful mission: what the player practiced ---------- */
+.ws-achievement {
+  position: relative;
+  padding: 30px 30px 22px;
+  text-align: center;
+  border: 2px solid transparent;
+  border-image-source: var(--hud-panel);
+  border-image-slice: 40 fill;
+  border-image-width: 40px;
+  border-image-repeat: stretch;
+  animation: ws-medal 0.7s cubic-bezier(.2,.9,.3,1.4) both;
+}
+.ws-achievement strong {
+  display: block;
+  font-family: 'Audiowide', sans-serif;
+  font-weight: 400;
+  font-size: 40px;
+  color: var(--gold);
+  text-shadow: 0 0 14px rgba(255, 217, 168, 0.5);
+  animation: ws-medal-glow 1.8s ease-in-out infinite alternate;
+}
+.ws-achievement p { margin: 10px 0 0; font-size: 26px; line-height: 1.35; color: var(--ink); }
+.ws-achievement-left, .ws-achievement-right { position: absolute; top: 330px; width: 400px; }
+.ws-achievement-left { left: 110px; }
+.ws-achievement-right { right: 110px; }
+.ws-result-photos { display: flex; justify-content: center; gap: 24px; margin-top: 16px; }
+.ws--result .ws-result-below { top: 660px; }
+.ws--result .ws-result-photo { width: 260px; animation: none; }
+@keyframes ws-medal { 0% { opacity: 0; transform: scale(0.6); } 70% { opacity: 1; transform: scale(1.08); } 100% { transform: none; } }
+@keyframes ws-medal-glow { to { text-shadow: 0 0 26px rgba(255, 217, 168, 0.9); } }
+@media (prefers-reduced-motion: reduce) { .ws-achievement, .ws-achievement strong { animation: none; } }
+/* Leave room for the "Jugar de nuevo" button below the discovery card. */
+.ws--result .ws-result-below { top: 600px; }
+.ws--result .ws-result-below .ws-achievement { padding: 26px 26px 16px; }
+.ws--result .ws-result-photo { width: 220px; }
+.ws--result .ws-result-photo figcaption { font-size: 20px; margin-top: 6px; }
