@@ -100,7 +100,8 @@ export class BuildScene extends Phaser.Scene {
     }
   }
 
-  // Hovering a part already on the satellite shows its name in a small box next to the pointer.
+  // Hovering a part already on the satellite shows its name in a small box next to the pointer
+  // and lights up its square in the parts strip; clicking it opens that part to change it.
   // Parts not mounted yet are hidden, and Phaser ignores hidden objects, so they show nothing.
   addPartTooltips() {
     const tip = document.createElement('div');
@@ -114,13 +115,29 @@ export class BuildScene extends Phaser.Scene {
       ...Object.entries(this.art.components).map(([kind, image]) => [image, kind]),
     ];
     for (const [image, kind] of parts) {
-      image.setInteractive();
+      const editable = kind !== 'body';
+      image.setInteractive({ useHandCursor: editable });
       image.on('pointerover', (pointer) => {
         if (pointer.isDown) return; // not while dragging a part onto the satellite
         tip.textContent = this.partName(kind);
         tip.hidden = false;
+        this.linkSlot(kind);
       });
-      image.on('pointerout', () => (tip.hidden = true));
+      image.on('pointerout', () => {
+        tip.hidden = true;
+        this.linkSlot(null);
+      });
+      if (!editable) continue;
+      // Down and up on the same part: a click. A part dropped onto the satellite doesn't count.
+      image.on('pointerdown', () => (this.pressedPart = kind));
+      image.on('pointerup', () => {
+        const step = kinds.indexOf(kind);
+        if (this.pressedPart === kind && step !== this.step) {
+          tip.hidden = true;
+          this.goTo(step);
+        }
+        this.pressedPart = null;
+      });
     }
 
     this.input.on('pointermove', (pointer) => {
@@ -128,6 +145,12 @@ export class BuildScene extends Phaser.Scene {
       tip.style.left = `${pointer.worldX + 18}px`;
       tip.style.top = `${pointer.worldY + 24}px`;
     });
+  }
+
+  // Highlights the square of a part type in the parts strip (null: none).
+  linkSlot(kind) {
+    this.linkedKind = kind;
+    this.ui.root.querySelectorAll('.ws-slot[data-kind]').forEach((slot) => slot.classList.toggle('linked', slot.dataset.kind === kind));
   }
 
   // "Cámara esencial", "Batería de reserva"... or the body.
@@ -419,7 +442,7 @@ export class BuildScene extends Phaser.Scene {
     const totals = this.mountedTotals();
     const slots = kinds
       .map((kind, i) => {
-        const current = this.step === i ? 'current' : '';
+        const current = [this.step === i ? 'current' : '', this.linkedKind === kind ? 'linked' : ''].join(' ');
         const content = this.placed.has(kind) ? partThumb(kind, this.design[kind], 56, 42) : '';
         return `<button class="ws-slot ${current}" data-action="goto" data-kind="${kind}" ${i > this.maxStep ? 'disabled' : ''} aria-label="${catalog[kind].label}">${content}</button>`;
       })

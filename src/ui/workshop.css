@@ -288,6 +288,13 @@
 .ws-next { height: 66px; display: flex; align-items: center; }
 .ws-next .ws-btn { animation: ws-pop 0.35s ease-out; }
 .ws-slot { border-color: rgba(208, 144, 240, 0.7); background: rgba(28, 10, 51, 0.6); }
+/* The part under the pointer on the satellite (Build). */
+.ws-slot { transition: transform 0.15s ease-out, background-color 0.15s, border-color 0.15s; }
+.ws-slot.linked {
+  border: 2px solid var(--gold);
+  background: rgba(255, 217, 168, 0.35);
+  transform: translateY(-6px) scale(1.08);
+}
 .ws-mini-meters .ws-meter-bar { background: rgba(255, 255, 255, 0.22); }
 
 /* Name of the satellite part under the pointer (Build). */
