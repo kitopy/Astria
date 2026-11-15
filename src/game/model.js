@@ -63,20 +63,6 @@ export function transmit(m, s) {
     return { ...m, energy: m.energy - s.antennaPower, sent: true, delivered, detail, photos,
         log: [...m.log, `Transmisión: ${delivered} imagen(es) completas recibidas en Tierra.`] };
 }
-export function feedback(m, s) {
-    const items = [];
-    if (m.captured.length < 2)
-        items.push('Faltó una observación: probá una cámara de menor consumo o una batería con más reserva.');
-    if (m.photos.length)
-        items.push('Quedaron datos a bordo: una antena de mayor capacidad o imágenes más livianas pueden ayudar.');
-    if (!m.sent)
-        items.push('La misión necesita enviar sus imágenes: reservá energía y usá la ventana de comunicación.');
-    if (m.delivered >= 2)
-        items.push('Tu diseño obtuvo y entregó las dos observaciones. Lograste el objetivo de la misión.');
-    if (m.delivered >= 2 && s.quality === 1)
-        items.push('Un nuevo desafío: intentá enviar imágenes con más detalle sin superar masa y presupuesto.');
-    return items;
-}
 
 // Pre-flight check shown before launching: plays the mission in advance with the same rules as the
 // flight, so the review can say in plain words whether energy and data are enough.

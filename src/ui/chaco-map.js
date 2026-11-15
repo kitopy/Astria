@@ -98,10 +98,5 @@ export class ChacoMap {
       this.map.setPaintProperty('downlink', 'line-opacity', 1);
     }
   }
-  recenter() {
-    this.follow = true;
-    this.map.easeTo({ center: [-59.2, -23.3], zoom: this.baseZoom, pitch: 18, bearing: -8,
-      duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 700 });
-  }
   destroy() { window.removeEventListener('resize', this.onResize); this.markers.forEach(marker => marker.remove()); this.map.remove(); }
 }

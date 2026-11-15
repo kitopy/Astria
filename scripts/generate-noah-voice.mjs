@@ -19,7 +19,6 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { speechText, voiceKey, workshopLines } from '../src/game/noah-lines.js';
-import { REFRAME_ENERGY } from '../src/game/chaco-visibility.js';
 import { otherLines } from './noah-other-lines.mjs';
 
 const API = 'https://api.elevenlabs.io/v1';
@@ -54,10 +53,9 @@ if (args.has('--voices')) {
 }
 
 // ---------- Collect lines ----------
-const catalog = JSON.parse(readFileSync(new URL('../src/game/parts.json', import.meta.url), 'utf8'));
 const harvested = existsSync(HARVEST) ? JSON.parse(readFileSync(HARVEST, 'utf8')) : [];
 const lines = new Map(); // key -> spoken text
-for (const text of [...workshopLines(catalog, REFRAME_ENERGY), ...otherLines, ...harvested]) {
+for (const text of [...workshopLines(), ...otherLines, ...harvested]) {
   lines.set(voiceKey(text), speechText(text));
 }
 

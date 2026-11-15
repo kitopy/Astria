@@ -12,56 +12,40 @@ export function createChacoComparison(scene, onAction) {
   root.setAttribute('aria-label', 'Investigación del Chaco paraguayo');
   root.innerHTML = `
     <header class="brush-header">
-      <strong>ASTRION</strong>
       <button data-action="voice" aria-pressed="false">Voz de NOAH</button>
     </header>
     <div class="brush-intro">
       <div><h1>Investigá el Chaco</h1></div>
-      <span>IMÁGENES LANDSAT / NASA</span>
     </div>
     <main class="brush-layout">
       <section class="brush-viewer" aria-label="Comparación interactiva de imágenes">
         <div class="brush-stage" aria-label="Lupa comparativa: imagen de 2025 con archivo de 1985">
           <img src="${base}${comparisonCase.after}" alt="Sector del Chaco paraguayo en 2025, imagen Landsat de NASA" draggable="false">
           <canvas class="brush-reveal" aria-label="Zonas de 1985 reveladas"></canvas>
-          <span class="brush-region">SECTOR DE ESTUDIO · CHACO PARAGUAYO</span>
-          <span class="brush-year brush-year-after"><b>2025</b><small>Tu misión · captura simulada</small></span>
-          <span class="brush-year brush-year-before"><b>1985</b><small>Dentro de la lupa · archivo NASA</small></span>
           <span class="brush-analysis-toast" data-ui="toast" role="status" aria-live="polite"></span>
           <span class="brush-cursor" aria-hidden="true"><b>1985</b></span>
           <span class="brush-help">Mové la lupa · Tocá para registrar</span>
           <span class="brush-pins" aria-hidden="true"></span>
         </div>
-        <div class="brush-viewer-bar"><span>Fuera de la lupa: 2025 · Dentro: 1985</span><button data-action="toggle-year">Ver 1985 completo</button></div>
       </section>
       <aside class="brush-panel" aria-label="Tu investigación">
         <div class="brush-panel-head"><span>ANÁLISIS</span></div>
-        <div class="brush-location">
-          <strong>Chaco paraguayo</strong>
-          <div class="brush-mini-view" aria-label="Vista general de la imagen: el recuadro sigue la lupa">
-            <img src="${base}${comparisonCase.after}" alt="Vista general del sector observado">
-            <span class="brush-mini-target"></span>
-          </div>
-          <small>Tu lupa en la imagen</small>
-        </div>
         <h2 data-ui="title">Buscá dos cambios</h2>
         <p data-ui="task">En 2025 aparecen grandes sectores claros. Pasá el pincel por uno y fijate qué había allí en 1985.</p>
         <div class="brush-findings"><div data-finding="0"><b>01</b><span>Por encontrar</span></div><div data-finding="1"><b>02</b><span>Por encontrar</span></div></div>
         <p class="brush-message" data-ui="message" role="status" aria-live="polite"></p>
         <button class="brush-primary" data-action="mark" disabled>Marcar este cambio</button>
-        <button class="brush-secondary" data-action="reset">Empezar de nuevo</button>
         <fieldset class="brush-question" hidden><legend>¿Qué muestran las dos fechas?</legend><button data-answer="vegetation">Antes había más bosque continuo</button><button data-answer="growth">Ahora hay más bosque continuo</button><button data-answer="water">Apareció un lago</button></fieldset>
         <div class="brush-result" hidden><strong>Encontraste el cambio</strong><p>En esta serie, el bosque de 1985 se ve más continuo. En 2025 aparecen claros y parcelas. Las imágenes muestran el cambio; por sí solas no explican todas sus causas.</p><button class="brush-primary" data-action="finish">Ver resultados</button></div>
       </aside>
     </main>
-    <footer class="brush-credit">Imágenes Landsat de 1985 y 2025 de <a href="${comparisonCase.source}" target="_blank" rel="noopener">NASA</a>. La captura de 2025 y el viaje son simulados en el juego.</footer>`;
+`;
   document.body.append(root);
 
   const find = selector => root.querySelector(selector);
   const stage = find('.brush-stage');
-  stage.append(find('.brush-location'), find('.brush-findings'));
+  stage.append(find('.brush-findings'));
   stage.append(find('.brush-panel'));
-  find('.brush-viewer-bar').append(find('[data-action="reset"]'));
   stage.style.backgroundImage = `url("${base}${comparisonCase.before}")`;
   const currentImage = find('.brush-stage img');
   const reveal = find('.brush-reveal');
@@ -131,9 +115,6 @@ export function createChacoComparison(scene, onAction) {
 
   function paintAt(point) {
     lastLensPoint = point;
-    const target = find('.brush-mini-target');
-    target.style.left = `${point.x * 100}%`;
-    target.style.top = `${point.y * 100}%`;
     const cursor = find('.brush-cursor');
     cursor.style.left = `${point.x * 100}%`;
     cursor.style.top = `${point.y * 100}%`;
@@ -194,8 +175,7 @@ export function createChacoComparison(scene, onAction) {
     samples = [];
     maskContext.clearRect(0, 0, mask.width, mask.height);
     revealContext.clearRect(0, 0, reveal.width, reveal.height);
-    stage.classList.remove('has-paint', 'painting', 'show-before');
-    find('[data-action="toggle-year"]').textContent = 'Ver 1985 completo';
+    stage.classList.remove('has-paint', 'painting');
     find('[data-action="mark"]').disabled = true;
     render();
     paintAt({ x: .5, y: .48 });
@@ -268,7 +248,7 @@ export function createChacoComparison(scene, onAction) {
   }
 
   stage.addEventListener('pointerdown', event => {
-    if (!ready || state.phase !== 'explore' || stage.classList.contains('show-before')) return;
+    if (!ready || state.phase !== 'explore') return;
     stage.setPointerCapture(event.pointerId);
     painting = true;
     lastPoint = null;
@@ -282,7 +262,7 @@ export function createChacoComparison(scene, onAction) {
     const point = pointFromEvent(event);
     find('.brush-cursor').style.left = `${point.x * 100}%`;
     find('.brush-cursor').style.top = `${point.y * 100}%`;
-    if (ready && !stage.classList.contains('show-before')) paintAt(point);
+    if (ready) paintAt(point);
   });
   const stopPainting = () => {
     painting = false;
@@ -309,17 +289,12 @@ export function createChacoComparison(scene, onAction) {
     }
     const action = button.dataset.action;
     if (action === 'mark') markFinding();
-    else if (action === 'reset') reset();
-    else if (action === 'toggle-year') {
-      const showingArchive = stage.classList.toggle('show-before');
-      find('.brush-year-before small').textContent = showingArchive ? 'Archivo histórico · NASA' : 'Dentro de la lupa · archivo NASA';
-      button.textContent = showingArchive ? 'Volver a 2025' : 'Ver 1985 completo';
-    } else if (action === 'voice') {
+    else if (action === 'voice') {
       scene.registry.set('noahVoice', !scene.registry.get('noahVoice'));
       updateVoice();
       if (scene.registry.get('noahVoice')) speakIfEnabled(scene, message);
       else window.speechSynthesis?.cancel();
-    } else if (action === 'back' || action === 'finish') onAction(action);
+    } else if (action === 'finish') onAction(action);
   });
 
   Promise.all([currentImage.decode(), archiveImage.decode()]).then(() => {
