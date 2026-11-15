@@ -9,14 +9,6 @@ import { contentBounds } from '../ui/satellite.js';
 import { mountLine, partIntro, reviewLine } from '../game/noah-lines.js';
 import { REFRAME_ENERGY } from '../game/chaco-visibility.js';
 
-// The name engineers use for each part (subtitle on screen). NOAH's lines are in game/noah-lines.js.
-const PART_ROLE = {
-  camera: 'Los ojos del satélite',
-  solar: 'Sistema de energía',
-  battery: 'Almacenamiento de energía',
-  antenna: 'Comunicaciones',
-};
-
 const REVIEW = kinds.length; // step index of the final review (after the 4 parts)
 
 // Layout (in the 1920x1080 design area)
@@ -72,7 +64,6 @@ export class BuildScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setPadding(48) // room for the glow, otherwise it gets cut into a visible box
       .setShadow(0, 0, CSS.glow, 28, false, true);
-    this.subtitle = this.add.text(960, 236, '', { fontFamily: 'Quicksand', fontSize: '24px', fontStyle: 'bold', color: '#c4a9e4' }).setOrigin(0.5);
     this.options = [];
 
     this.ui = mount(this, 0, { wizard: true });
@@ -139,21 +130,17 @@ export class BuildScene extends Phaser.Scene {
 
     if (kind) {
       this.title.setText(catalog[kind].label.toUpperCase());
-      this.subtitle.setText(PART_ROLE[kind]);
       catalog[kind].options.forEach((part, i) => this.options.push(this.addOption(kind, part, OPTION_X[i], SATELLITE.y)));
       this.ui.say(partIntro(kind, this.placed.has(kind)));
     } else {
       this.title.setText('¿LISTA PARA DESPEGAR?');
-      this.subtitle.setText('Revisá la cuenta antes del lanzamiento');
       this.ui.say(reviewLine(stats(catalog, this.design).valid, REFRAME_ENERGY));
     }
 
     // The title rises in on every new step, so the change of part is noticed.
-    this.tweens.killTweensOf([this.title, this.subtitle]);
+    this.tweens.killTweensOf(this.title);
     this.title.setAlpha(0).setY(188);
-    this.subtitle.setAlpha(0);
     this.tweens.add({ targets: this.title, alpha: 1, y: 168, duration: 420, ease: 'Cubic.out' });
-    this.tweens.add({ targets: this.subtitle, alpha: 1, duration: 420, delay: 150 });
 
     this.drawSlot();
     this.renderHud();
@@ -205,8 +192,16 @@ export class BuildScene extends Phaser.Scene {
     const option = this.add.container(x, y, [ring, picture, name, benefit, details]);
     option.setSize(320, 420).setInteractive({ useHandCursor: true, draggable: true });
     option.home = { x, y };
+    // While dragging, only the part itself is held: the circle and the texts stay behind (hidden).
+    const extras = [ring, name, benefit, details];
+    option.lift = (lifted) => {
+      this.tweens.killTweensOf(extras);
+      this.tweens.add({ targets: extras, alpha: lifted ? 0 : 1, duration: lifted ? 120 : 250 });
+      if (!lifted) details.setAlpha(0); // the hover details only come back with the pointer
+    };
 
     option.on('pointerover', () => {
+      if (option.dragged) return;
       this.tweens.add({ targets: option, scale: 1.05, duration: 150 });
       this.tweens.add({ targets: details, alpha: 1, duration: 200 });
     });
@@ -218,13 +213,20 @@ export class BuildScene extends Phaser.Scene {
     // Drag: follow the pointer; on release, mount it if it's close to the satellite.
     option.on('pointerdown', () => (option.dragged = false));
     option.on('drag', (pointer, dragX, dragY) => {
-      option.dragged = true;
+      if (!option.dragged) {
+        option.dragged = true;
+        option.lift(true);
+      }
       option.setPosition(dragX, dragY);
     });
     option.on('dragend', () => {
       if (!option.dragged) return;
-      if (Phaser.Math.Distance.Between(option.x, option.y, this.art.x, this.art.y) < SNAP_DISTANCE) this.mount(kind, part, option);
-      else this.tweens.add({ targets: option, x: x, y: y, duration: 300, ease: 'Back.out' });
+      if (Phaser.Math.Distance.Between(option.x, option.y, this.art.x, this.art.y) < SNAP_DISTANCE) {
+        this.mount(kind, part, option);
+      } else {
+        option.lift(false);
+        this.tweens.add({ targets: option, x: x, y: y, duration: 300, ease: 'Back.out' });
+      }
     });
     // A simple click (no drag) also mounts it.
     option.on('pointerup', () => {
@@ -238,7 +240,12 @@ export class BuildScene extends Phaser.Scene {
   mount(kind, part, option) {
     const slot = this.art.slots(kind)[0];
     const flying = this.partImage(kind, part.id, option.x, option.y - 20);
-    this.tweens.add({ targets: option, x: option.home.x, y: option.home.y, duration: 300 });
+    if (option.dragged) {
+      // The held part becomes the flying one; the option reappears in its place afterwards.
+      option.setAlpha(0).setPosition(option.home.x, option.home.y).setScale(1);
+      option.lift(false);
+      this.tweens.add({ targets: option, alpha: 1, delay: 380, duration: 250 });
+    }
 
     this.tweens.add({
       targets: flying,

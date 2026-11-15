@@ -274,7 +274,7 @@
 .ws-title-gap { margin-top: 26px; }
 
 /* NOAH as a small speech bubble under the title (instead of the big bottom bar) */
-.ws--wizard .ws-footer { left: 50%; right: auto; bottom: auto; top: 266px; height: auto; width: max-content; max-width: 1200px; transform: translateX(-50%); }
+.ws--wizard .ws-footer { left: 50%; right: auto; bottom: auto; top: 250px; height: auto; width: max-content; max-width: 1200px; transform: translateX(-50%); }
 .ws--wizard .ws-noah { flex: none; max-width: 1200px; padding: 10px 12px 10px 22px; gap: 14px; border-left: 0; border-radius: 30px; }
 .ws--wizard .ws-noah-name { font-size: 15px; }
 .ws--wizard .ws-noah p { font-size: 20px; line-height: 1.35; }
