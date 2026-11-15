@@ -390,7 +390,8 @@ export class BuildScene extends Phaser.Scene {
     const flying = this.partImage(kind, part.id, option.x, option.y - 20);
     this.tweens.killTweensOf(option);
 
-    // The part has left its circle for good: hide that option and dim the other one.
+    // The part has left its circle for good: hide that option, and the other one leaves right away
+    // (slides out to its side), so only the satellite stays on screen.
     this.advancing = true;
     this.options.forEach((o) => o.disableInteractive());
     option.setAlpha(0);
@@ -398,8 +399,19 @@ export class BuildScene extends Phaser.Scene {
       // Hover details would stay stuck: the pointer-out event no longer fires once input is off.
       this.tweens.killTweensOf(other.details);
       other.details.setAlpha(0);
-      if (other !== option) this.tweens.add({ targets: other, alpha: 0.35, scale: 0.95, duration: 250 });
+      if (other === option) continue;
+      this.tweens.killTweensOf(other);
+      this.tweens.add({
+        targets: other,
+        x: other.home.x + this.sideOf(other) * OPTION_SLIDE,
+        alpha: 0,
+        scale: 0.85,
+        duration: 260,
+        ease: 'Cubic.in',
+        onComplete: () => other.destroy(),
+      });
     }
+    this.options = [option];
 
     this.tweens.add({
       targets: flying,
