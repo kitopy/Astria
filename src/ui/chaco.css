@@ -58,6 +58,30 @@
 @media(max-height:500px) and (min-width:700px){.chaco-game .orbital-console .console-action{width:80px;gap:2px;font-size:9px}.chaco-game .orbital-console .console-action.is-cued{width:103px}.console-icon{width:39px;height:39px}.console-action.is-cued .console-icon{width:52px;height:52px}.orbital-console-head{padding:2px 10px;font-size:7px}.console-label{padding:2px 4px}}
 @media(prefers-reduced-motion:reduce){.console-action.is-cued .console-icon{animation:none}.chaco-game .orbital-console .console-action{transition:none}}
 
+/* Observation choices follow the satellite when the flight reaches a camera stop. */
+.flight-action-menu{position:absolute;z-index:7;width:350px;padding:17px 18px;background:#1c0a33f2;border:1px solid #d090f0;border-radius:17px;box-shadow:0 16px 38px #1c0a33b8;animation:flight-action-enter .28s ease-out both}
+.flight-action-eyebrow{font:9px Audiowide,sans-serif;letter-spacing:1.1px;color:#d090f0}
+.flight-action-menu h2{margin:9px 0 5px;font:17px Audiowide,sans-serif;color:#f5c7e7}
+.flight-action-menu p{margin:0 0 13px;color:#f8f1ff;font:12px/1.4 Quicksand,sans-serif}
+.flight-action-choices{display:grid;gap:8px}
+.chaco-game .flight-action-choice{display:flex;align-items:center;gap:10px;width:100%;min-height:59px;padding:8px 10px;border:1px solid #a783ca;border-radius:11px;background:#3c2454;color:#f8f1ff;text-align:left;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s}
+.chaco-game .flight-action-choice:hover:not(:disabled){background:#7050b0;border-color:#f0b0f0;transform:translateX(3px)}
+.chaco-game .flight-action-choice.primary{border-color:#f0b0f0;background:#7050b0;box-shadow:0 0 0 2px #f0b0f044,0 0 24px #f0b0f088;animation:flight-action-glow 2.4s ease-in-out infinite}
+.chaco-game .flight-action-choice.primary:hover:not(:disabled){background:#815fc0;box-shadow:0 0 0 3px #f0b0f077,0 0 34px #f0b0f0aa}
+.chaco-game .flight-action-choice.primary:disabled{animation:none;box-shadow:none}
+.flight-action-icon{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;border:1px solid #d090f0;border-radius:9px;color:#f5c7e7}
+.flight-action-icon svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.flight-action-copy{display:block;min-width:0;flex:1}.flight-action-copy strong{display:block;font:11px Audiowide,sans-serif}.flight-action-copy small{display:block;margin-top:3px;color:#e0d2eb;font:10px/1.25 Quicksand,sans-serif}
+.flight-action-cost{white-space:nowrap;color:#ffd9a8;font:9px Audiowide,sans-serif}
+.action-menu-open .orbital-console{visibility:hidden;pointer-events:none}
+.map-satellite.action-ready::after{content:'';position:absolute;inset:9px;border:2px solid #ffd9a8;border-radius:50%;box-shadow:0 0 0 6px #ffd9a83b,0 0 21px #ffd9a8c0;pointer-events:none;animation:flight-marker-glow 2s ease-in-out infinite}
+@keyframes flight-action-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flight-action-glow{50%{box-shadow:0 0 0 4px #f0b0f05c,0 0 35px #f0b0f0bb}}
+@keyframes flight-marker-glow{50%{box-shadow:0 0 0 10px #ffd9a820,0 0 28px #ffd9a8dd}}
+@media(max-width:800px){.flight-action-menu{left:12px!important;top:auto!important;bottom:210px;width:min(350px,calc(100vw - 24px));padding:12px}.flight-action-menu h2{font-size:14px}.flight-action-menu p{font-size:11px}.chaco-game .flight-action-choice{min-height:50px}}
+@media(max-width:1000px){.action-menu-open .chaco-noah{visibility:hidden}}
+@media(max-height:760px) and (min-width:801px){.flight-action-menu{width:315px;padding:13px}.flight-action-menu h2{font-size:14px}.flight-action-menu p{font-size:11px;margin-bottom:8px}.chaco-game .flight-action-choice{min-height:48px;padding:6px 8px}.flight-action-copy strong{font-size:10px}.flight-action-copy small{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.flight-action-menu,.chaco-game .flight-action-choice.primary,.map-satellite.action-ready::after{animation:none}}
 
 /* ---------- ASTRION look for the flight (same palette, fonts and high-tech frames as the workshop) ----------
    The frames (--hud-panel, --hud-slim, --hud-line...) are defined in workshop.css. */

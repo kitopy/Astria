@@ -31,6 +31,22 @@ export function createChacoHUD(scene, design, onAction) {
   </aside>
   <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2><span data-hud="sensor-state">Preparando</span></div><div class="sensor-window"><canvas aria-label="Vista recreada del Chaco con imágenes de archivo"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record" data-hud="sensor-year">ARCHIVO · 1985</span></div><p>Archivo Landsat / NASA · observación recreada</p><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
   <div class="chaco-map-tools"><button data-flight="recenter" aria-label="Volver a centrar Paraguay">Centrar Paraguay</button><button data-flight="speed">Velocidad ×1</button><button data-flight="workshop">Volver al taller</button></div>
+  <section class="flight-action-menu hud-panel" aria-label="Elegí una acción de observación" hidden>
+    <span class="flight-action-eyebrow">VENTANA DE OBSERVACIÓN</span>
+    <h2 data-hud="action-title">El Chaco está a la vista</h2>
+    <p data-hud="action-prompt">Elegí qué hacer con la cámara.</p>
+    <div class="flight-action-choices">
+      <button data-flight-choice="capture" class="flight-action-choice primary">
+        <span class="flight-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l1.5-2h7L17 8h3v10H4V8Z"/><circle cx="12" cy="13" r="3"/></svg></span>
+        <span class="flight-action-copy"><strong>Tomar foto</strong><small data-hud="action-capture-detail">Guardar una imagen del Chaco</small></span>
+        <span class="flight-action-cost" data-hud="action-cost"></span>
+      </button>
+      <button data-flight-choice="travel" class="flight-action-choice">
+        <span class="flight-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
+        <span class="flight-action-copy"><strong>Seguir sin foto</strong><small>Perdés esta vista y cuidás la batería</small></span>
+      </button>
+    </div>
+  </section>
   <aside class="visibility-challenge hud-panel" aria-label="Ajuste en curso" hidden>
     <h2 data-hud="weather-title"></h2>
     <div class="signal-bars" aria-label="Intensidad de la señal" hidden><span></span><span></span><span></span><span></span></div>
@@ -102,8 +118,8 @@ export function createChacoHUD(scene, design, onAction) {
   function voiceLabel() { const button=root.querySelector('[data-flight="voice"]');button.textContent=`Voz de NOAH: ${voice?'activada':'apagada'}`;button.setAttribute('aria-pressed',String(voice)); }
   voiceLabel();
   root.addEventListener('click', event => {
-    const button=event.target.closest('button[data-flight]');if(!button||button.disabled)return;
-    const action=button.dataset.flight;
+    const button=event.target.closest('button[data-flight],button[data-flight-choice]');if(!button||button.disabled)return;
+    const action=button.dataset.flight??button.dataset.flightChoice;
     if(action==='voice'){voice=!voice;scene.registry.set('noahVoice',voice);voiceLabel();if(voice)speak();else noahStop();}
     else if(action==='listen')speak();
     else onAction(action);
@@ -153,6 +169,25 @@ export function createChacoHUD(scene, design, onAction) {
       control('capture').disabled=!this.ready||!gate||![1,2].includes(phase)||mission.captured.includes(phase)||mission.energy<specs.cameraPower;
       control('capture').hidden=!gate||![1,2].includes(phase)||mission.captured.includes(phase);
       control('capture').querySelector('.console-label').textContent=`Tomar foto · −${specs.cameraPower}`;
+      const actionAvailable = this.ready && !this.introOpen && gate && [1, 2].includes(phase) && !mission.captured.includes(phase) && !obstructed;
+      const actionMenu = root.querySelector('.flight-action-menu');
+      actionMenu.hidden = !actionAvailable;
+      root.classList.toggle('action-menu-open', actionAvailable);
+      root.querySelector('.map-satellite')?.classList.toggle('action-ready', actionAvailable);
+      if (actionAvailable) {
+        get('action-title').textContent = phase === 1 ? 'Primera vista del Chaco' : 'Segunda vista del Chaco';
+        get('action-prompt').textContent = phase === 1
+          ? 'El bosque entra en el visor. ¿Tomamos la primera imagen?'
+          : 'El satélite vuelve a cruzar la zona. ¿Hacemos otra captura?';
+        get('action-capture-detail').textContent = phase === 1 ? 'Guardar esta vista del bosque' : 'Registrar una segunda vista';
+        get('action-cost').textContent = `−${specs.cameraPower} energía`;
+        const captureChoice = actionMenu.querySelector('[data-flight-choice="capture"]');
+        const travelChoice = actionMenu.querySelector('[data-flight-choice="travel"]');
+        captureChoice.disabled = control('capture').disabled;
+        captureChoice.classList.toggle('primary', !captureChoice.disabled);
+        travelChoice.classList.toggle('primary', captureChoice.disabled);
+        this.positionActionMenu();
+      }
       control('transmit').disabled=!this.ready||!gate||phase!==3||mission.sent||!mission.photos.length||mission.energy<specs.antennaPower;
       control('transmit').hidden=phase!==3||mission.sent;
       control('transmit').querySelector('.console-label').textContent=`Enviar fotos · −${specs.antennaPower}`;
@@ -163,6 +198,22 @@ export function createChacoHUD(scene, design, onAction) {
       get('command-title').textContent=!this.ready?'Preparando sistema':titles[command];
       root.querySelectorAll('.console-action').forEach(button=>button.classList.toggle('is-cued',button.dataset.flight===command&&!button.disabled));
       control('speed').textContent=`Velocidad ×${flight.speed}`;
+    },
+    positionActionMenu(){
+      const menu = root.querySelector('.flight-action-menu');
+      if (menu.hidden || window.innerWidth <= 800) return;
+      const satellite = root.querySelector('.map-satellite');
+      if (!satellite) return;
+      const marker = satellite.getBoundingClientRect();
+      const bounds = root.getBoundingClientRect();
+      const gap = 20;
+      const right = marker.right - bounds.left + gap;
+      const left = right + menu.offsetWidth <= bounds.width - gap
+        ? right
+        : marker.left - bounds.left - menu.offsetWidth - gap;
+      const top = Math.max(75, Math.min(marker.top - bounds.top - 25, bounds.height - menu.offsetHeight - 175));
+      menu.style.left = `${Math.max(gap, left)}px`;
+      menu.style.top = `${top}px`;
     },
     destroy(){noahStop();root.querySelector('video').pause();root.remove();}
   };

@@ -143,6 +143,7 @@ export class TestScene extends Phaser.Scene {
     if (this.mapClock >= 45) {
       this.mapClock = 0;
       this.missionMap.update(this.flight);
+      this.hud.positionActionMenu();
       this.updateSensor();
       this.hud.updateWeather(this.flight, this.visibility);
     }
