@@ -14,7 +14,7 @@ import './dialog.css';
 // or because the scene ended. With no actions, a single "¡Entendido!" button is shown.
 // body: optional extra HTML under the text (only markup written in the game's code, never user text).
 // dismissable: false when the player must pick one of the buttons (Escape does nothing).
-export function showDialog(scene, { title, text = '', body = '', dismissable = true, actions = [{ label: '¡Entendido!', value: 'ok', primary: true }] }) {
+export function showDialog(scene, { title, text = '', body = '', dismissable = true, autoCloseMs = 0, showCountdown = true, actions = [{ label: '¡Entendido!', value: 'ok', primary: true }] }) {
   const dialog = document.createElement('dialog');
   dialog.className = 'astrion-dialog';
   dialog.innerHTML = `
@@ -30,20 +30,37 @@ export function showDialog(scene, { title, text = '', body = '', dismissable = t
   dialog.querySelectorAll('button').forEach((button, i) => (button.textContent = actions[i].label));
   document.body.append(dialog);
 
+  // Timed acknowledgements resolve like their first action; questions never time out by default.
+  const timed = Number.isFinite(autoCloseMs) && autoCloseMs > 0;
+  if (timed && showCountdown) {
+    const countdown = document.createElement('div');
+    countdown.className = 'astrion-dialog-countdown';
+    countdown.innerHTML = '<span></span><div aria-hidden="true"><i></i></div>';
+    countdown.querySelector('span').textContent = `Continúa en ${Math.ceil(autoCloseMs / 1000)} s`;
+    dialog.style.setProperty('--dialog-countdown-duration', `${autoCloseMs}ms`);
+    dialog.querySelector('.astrion-dialog-actions').before(countdown);
+  }
+
   return new Promise((resolve) => {
     let result = null;
     let done = false;
+    let timeout;
+    let countdownInterval;
 
     const finish = () => {
       if (done) return;
       done = true;
+      clearTimeout(timeout);
+      clearInterval(countdownInterval);
       scene.events.off('shutdown', onShutdown);
       dialog.remove();
       resolve(result);
     };
     let closing = false;
     const close = (value) => {
-      if (!dialog.open) return;
+      if (!dialog.open || closing) return;
+      clearTimeout(timeout);
+      clearInterval(countdownInterval);
       closing = true;
       result = value;
       dialog.classList.add('is-leaving');
@@ -77,6 +94,15 @@ export function showDialog(scene, { title, text = '', body = '', dismissable = t
     scene.events.once('shutdown', onShutdown);
 
     dialog.showModal();
+    if (timed) {
+      const deadline = Date.now() + autoCloseMs;
+      if (showCountdown) {
+        countdownInterval = setInterval(() => {
+          dialog.querySelector('.astrion-dialog-countdown span').textContent = `Continúa en ${Math.max(0, Math.ceil((deadline - Date.now()) / 1000))} s`;
+        }, 100);
+      }
+      timeout = setTimeout(() => close(actions[0]?.value ?? null), autoCloseMs);
+    }
     (dialog.querySelector('button.primary') ?? dialog.querySelector('button')).focus({ preventScroll: true });
   });
 }

@@ -171,6 +171,11 @@
 @keyframes astrion-dialog-fade { from { opacity: 0; } }
 @keyframes astrion-dialog-out { to { opacity: 0; } }
 
+.astrion-dialog-countdown { margin: 18px auto 0; max-width: 220px; color: #ead4ed; font-size: 12px; }
+.astrion-dialog-countdown>div { height: 3px; margin-top: 8px; background: #7050b066; overflow: hidden; border-radius: 3px; }
+.astrion-dialog-countdown i { display: block; height: 100%; background: #f5c7e7; transform-origin: left; animation: dialog-countdown var(--dialog-countdown-duration) linear forwards; }
+@keyframes dialog-countdown { to { transform: scaleX(0); } }
+
 @media (prefers-reduced-motion: reduce) {
   .astrion-dialog,
   .astrion-dialog::backdrop,
