@@ -35,7 +35,7 @@ const flight = [
   'Llegamos a Asunción. ¡Enviá tus fotos!',
   'Llegamos a Asunción, pero no queda energía para enviar.',
   '¡Un imprevisto!',
-  ...Object.values(OBSTACLES).flatMap((o) => [o.explanation, o.resolved]),
+  ...Object.values(OBSTACLES).map((o) => o.resolved), // the explanations are only shown (the fix is too short)
   '¡Llegaron las dos fotos!',
   'Llegaron 0 de 2 fotos. La antena no alcanzó para enviar todo.',
   'Llegaron 1 de 2 fotos. La antena no alcanzó para enviar todo.',
@@ -43,8 +43,8 @@ const flight = [
 
 // Image analysis (Cesar's lens screen, ui/chaco-brush.js)
 const observe = [
-  '¡Buen ojo! Primer hallazgo registrado. ¡Vamos por el segundo!',
-  '¡Lo lograste! Los dos hallazgos están listos. ¿Qué descubriste?',
+  '¡Buen ojo! ¡Vamos por el segundo!',
+  '¡Lo lograste!',
   'Buscá otro sector, más lejos del primero.',
 ];
 

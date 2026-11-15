@@ -150,6 +150,7 @@ export function createChacoHUD(scene, design, onAction) {
           figure.querySelector('figcaption').textContent = complete ? '¡Llegó!' : 'No llegó completa';
         });
         if (results.every(Boolean)) sfx.done(); else sfx.almost();
+        if (voice) speak(); // NOAH says the result (set silently by TestScene) only now that the bars have stopped
         // Both photos arrived: next comes analyzing them; otherwise the results.
         button.textContent = results.every(Boolean) && results.length >= 2 ? 'Analizar las fotos' : 'Ver resultados';
         button.dataset.done = 'yes';
@@ -196,7 +197,8 @@ export function createChacoHUD(scene, design, onAction) {
     get introOpen(){return introOpen;},
     setSensorYear(year){get('sensor-year').textContent=`ARCHIVO · ${year}`;},
     showShots(shots){shotsShown=shots;const tray=root.querySelector('.sensor-thumbnails');tray.replaceChildren();for(const [i,shot]of shots.entries()){const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=shot.image;img.alt=`Vista de archivo del Chaco, ${shot.year??`foto ${i+1}`}`;caption.textContent=`${shot.year??`Foto ${i+1}`}${shot.delivered?' · enviada':' · a bordo'}`;figure.append(img,caption);tray.append(figure);}},
-    say(text){message=text;get('noah').textContent=text;if(voice)speak();},
+    // silent: show the text without saying it (when it would be cut, or said later on purpose).
+    say(text,{silent=false}={}){message=text;get('noah').textContent=text;if(voice&&!silent)speak();},
     updateWeather(flight,visibility){
       const cover=cloudCover(flight,visibility), status=visibility.status;
       const info=obstacleInfo(visibility), intensity=obstacleIntensity(flight,visibility);

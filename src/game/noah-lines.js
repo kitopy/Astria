@@ -22,13 +22,11 @@ export function reviewLine() {
   return 'Revisemos tu satélite antes de despegar.';
 }
 
-// Every workshop line that can ever be said, for every part (used by the voice generator).
-export function workshopLines(catalog, reframeEnergy) {
+// Every workshop line that is said aloud (used by the voice generator). The "¡Montada!/¡Cambiada!"
+// lines are only shown, never said (the next part's intro would cut them), so they get no audio.
+export function workshopLines() {
   const lines = [reviewLine()];
-  for (const kind of Object.keys(PART_TEXT)) {
-    lines.push(partIntro(kind, false), partIntro(kind, true));
-    for (const part of catalog[kind].options) lines.push(mountLine(part, false), mountLine(part, true));
-  }
+  for (const kind of Object.keys(PART_TEXT)) lines.push(partIntro(kind, false), partIntro(kind, true));
   return lines;
 }
 

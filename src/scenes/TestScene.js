@@ -75,7 +75,7 @@ export class TestScene extends Phaser.Scene {
       try {
         const next = beginReframe(this.mission, this.visibility);
         this.mission = next.mission; this.visibility = next.visibility;
-        this.hud.say(obstacleInfo(this.visibility).explanation);
+        this.hud.say(obstacleInfo(this.visibility).explanation, { silent: true }); // the fix lasts 2 s: a spoken line would be cut
       } catch (error) { this.hud.say(error.message); }
     } else if (action === 'workshop') { this.scene.start('Build', { design: this.design }); return; }
     else if (action === 'finish' && this.flight.gate === 3) {
@@ -95,11 +95,12 @@ export class TestScene extends Phaser.Scene {
         this.hud.showShots(this.sensorShots);
         if(shot){const panel=this.hud.root.querySelector('.sensor-window');panel.classList.remove('taking-photo');void panel.offsetWidth;panel.classList.add('taking-photo');}
         this.missionMap.effect(action, this.flight);
+        // The send result is said by the send dialog when its bars stop (not before the animation).
         this.hud.say(action === 'capture'
           ? '¡Foto guardada!'
           : this.mission.photos.length
             ? `Llegaron ${this.mission.delivered} de 2 fotos. La antena no alcanzó para enviar todo.`
-            : '¡Llegaron las dos fotos!');
+            : '¡Llegaron las dos fotos!', { silent: action === 'transmit' });
       } catch (error) { this.hud.say(error.message); }
     }
     this.render();

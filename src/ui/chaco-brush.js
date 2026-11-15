@@ -218,8 +218,8 @@ export function createChacoComparison(scene, onAction) {
     find('[data-action="mark"]').disabled = true;
     render();
     say(state.phase === 'interpret'
-      ? '¡Lo lograste! Los dos hallazgos están listos. ¿Qué descubriste?'
-      : '¡Buen ojo! Primer hallazgo registrado. ¡Vamos por el segundo!');
+      ? '¡Lo lograste!'
+      : '¡Buen ojo! ¡Vamos por el segundo!');
     if (state.phase === 'interpret') {
       find('.brush-question').hidden = true;
       find('[data-ui="toast"]').classList.remove('show');

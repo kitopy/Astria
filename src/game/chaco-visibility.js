@@ -28,7 +28,7 @@ export const OBSTACLES = {
     title: '¡La señal está muy baja!', action: 'Alinear antena', working: 'Alineando antena…',
     message: 'Estamos cerca del contacto terrestre. Reorientá la antena para preparar el envío de tus fotos.',
     explanation: 'La antena busca la estación terrestre. Las barras muestran cómo mejora la señal.',
-    resolved: '¡Señal recuperada! Continuá hasta Asunción para transmitir.', log: 'Señal débil: alineación de la antena'
+    resolved: '¡Señal recuperada!', log: 'Señal débil: alineación de la antena'
   }
 };
 
