@@ -54,7 +54,6 @@ export function createChacoHUD(scene, design, onAction) {
   <section class="chaco-bottom"><div class="chaco-noah hud-panel"><span class="chaco-noah-icon" aria-hidden="true">N</span><div><strong>NOAH</strong><p data-hud="noah" aria-live="polite"></p></div><button data-flight="listen" aria-label="Escuchar el mensaje de NOAH">Escuchar</button></div>
   <div class="chaco-controls orbital-console" aria-label="Panel de mando del satélite">
     <div class="orbital-console-actions">
-      <button data-flight="transmit" class="console-action" hidden><span class="console-icon" aria-hidden="true"></span><span class="console-label">Enviar fotos</span></button>
       <button data-flight="finish" class="console-action" hidden><span class="console-icon" aria-hidden="true"></span><span class="console-label">Ver resultados</span></button>
     </div>
   </div></section>
@@ -100,6 +99,68 @@ export function createChacoHUD(scene, design, onAction) {
     onAction(choice);
   }
 
+  // Sending the photos in Asunción: a dialog with the photos and their data blocks.
+  // The player presses "Enviar" and watches the blocks travel one by one; the antenna can only send
+  // `specs.rate` blocks, so with a small antenna some photos stay incomplete (same rule as model.js).
+  let sendOpen = false, shotsShown = [];
+  function openSend(mission, specs) {
+    sendOpen = true;
+    const photos = mission.photos.map((photo, i) => ({ blocks: photo.remaining, shot: shotsShown[i] }));
+    const dialog = document.createElement('dialog');
+    dialog.className = 'astrion-dialog send-dialog';
+    dialog.innerHTML = `
+      <h2>Enviar a la Tierra</h2>
+      <p>La antena envía ${specs.rate} ${specs.rate === 1 ? 'bloque' : 'bloques'}.</p>
+      <div class="send-photos">${photos.map((photo, i) => `
+        <figure>
+          ${photo.shot?.image ? `<img src="${photo.shot.image}" alt="Foto ${i + 1}">` : `<span class="send-placeholder">Foto ${i + 1}</span>`}
+          <div class="send-blocks">${'<i></i>'.repeat(photo.blocks)}</div>
+          <figcaption>${photo.shot?.year ?? `Foto ${i + 1}`}</figcaption>
+        </figure>`).join('')}
+      </div>
+      <div class="astrion-dialog-actions"><button type="button" class="primary" data-send>Enviar · −${specs.antennaPower}</button></div>`;
+    document.body.append(dialog);
+    dialog.addEventListener('cancel', (event) => event.preventDefault()); // a choice is needed
+    // If the browser forces it closed anyway (Escape twice in Chrome), it opens again.
+    dialog.addEventListener('close', () => { if (dialog.isConnected) dialog.showModal(); });
+    scene.events.once('shutdown', () => dialog.remove());
+    dialog.showModal();
+    const button = dialog.querySelector('[data-send]');
+    button.focus({ preventScroll: true });
+
+    button.addEventListener('click', () => {
+      if (button.dataset.done) {
+        dialog.remove();
+        onAction('finish');
+        return;
+      }
+      button.disabled = true;
+      onAction('transmit');
+      // Light the blocks in order, as many as the antenna can send.
+      const figures = [...dialog.querySelectorAll('.send-photos figure')];
+      let budget = specs.rate, step = 0;
+      figures.forEach((figure) => {
+        for (const block of figure.querySelectorAll('.send-blocks i')) {
+          if (budget <= 0) break;
+          budget--;
+          setTimeout(() => block.classList.add('sent'), 300 + step++ * 260);
+        }
+      });
+      setTimeout(() => {
+        if (!dialog.isConnected) return;
+        figures.forEach((figure) => {
+          const complete = [...figure.querySelectorAll('.send-blocks i')].every((block) => block.classList.contains('sent'));
+          figure.classList.add(complete ? 'arrived' : 'missing');
+          figure.querySelector('figcaption').textContent = complete ? '¡Llegó!' : 'No llegó completa';
+        });
+        button.textContent = 'Ver resultados';
+        button.dataset.done = 'yes';
+        button.disabled = false;
+        button.focus({ preventScroll: true });
+      }, 300 + step * 260 + 400);
+    });
+  }
+
   let voice = !!scene.registry.get('noahVoice'), message = '';
   function speak() { noahSpeak(message); } // same voice as the rest of the game (ui/noahVoice.js)
   function voiceLabel() { const button=root.querySelector('[data-flight="voice"]');button.textContent=`Voz de NOAH: ${voice?'activada':'apagada'}`;button.setAttribute('aria-pressed',String(voice)); }
@@ -116,7 +177,7 @@ export function createChacoHUD(scene, design, onAction) {
     root, mapElement:root.querySelector('.chaco-map'), sensorCanvas:root.querySelector('.sensor-window canvas'), ready:false,
     get introOpen(){return introOpen;},
     setSensorYear(year){get('sensor-year').textContent=`ARCHIVO · ${year}`;},
-    showShots(shots){const tray=root.querySelector('.sensor-thumbnails');tray.replaceChildren();for(const [i,shot]of shots.entries()){const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=shot.image;img.alt=`Vista de archivo del Chaco, ${shot.year??`foto ${i+1}`}`;caption.textContent=`${shot.year??`Foto ${i+1}`}${shot.delivered?' · enviada':' · a bordo'}`;figure.append(img,caption);tray.append(figure);}},
+    showShots(shots){shotsShown=shots;const tray=root.querySelector('.sensor-thumbnails');tray.replaceChildren();for(const [i,shot]of shots.entries()){const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=shot.image;img.alt=`Vista de archivo del Chaco, ${shot.year??`foto ${i+1}`}`;caption.textContent=`${shot.year??`Foto ${i+1}`}${shot.delivered?' · enviada':' · a bordo'}`;figure.append(img,caption);tray.append(figure);}},
     say(text){message=text;get('noah').textContent=text;if(voice)speak();},
     updateWeather(flight,visibility){
       const cover=cloudCover(flight,visibility), status=visibility.status;
@@ -156,11 +217,11 @@ export function createChacoHUD(scene, design, onAction) {
         get('action-cost').textContent = `−${specs.cameraPower}`;
         this.positionActionMenu();
       }
-      control('transmit').disabled=!this.ready||!gate||phase!==3||mission.sent||!mission.photos.length||mission.energy<specs.antennaPower;
-      control('transmit').hidden=phase!==3||mission.sent||control('transmit').disabled;
-      control('transmit').querySelector('.console-label').textContent=`Enviar fotos · −${specs.antennaPower}`;
-      control('finish').hidden=phase!==3||!control('transmit').hidden;
-      const command=phase===3?(control('transmit').hidden?'finish':'transmit'):'';
+      // In Asunción: the send dialog opens by itself. Without photos or energy to send, only "Ver resultados".
+      const canSend=this.ready&&!this.introOpen&&gate&&phase===3&&!mission.sent&&mission.photos.length>0&&mission.energy>=specs.antennaPower;
+      if(canSend&&!sendOpen&&!obstructed)openSend(mission,specs);
+      control('finish').hidden=!(phase===3&&gate&&!canSend&&!sendOpen);
+      const command=control('finish').hidden?'':'finish';
       root.dataset.command=command;
       root.querySelectorAll('.console-action').forEach(button=>button.classList.toggle('is-cued',button.dataset.flight===command));
     },
