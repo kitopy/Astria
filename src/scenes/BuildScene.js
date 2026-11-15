@@ -316,7 +316,8 @@ export class BuildScene extends Phaser.Scene {
   addOption(kind, part, x, y) {
     const isChosen = this.placed.has(kind) && this.design[kind] === part.id;
 
-    const ring = this.add.circle(0, -20, 150).setStrokeStyle(3, COLORS.glow, isChosen ? 1 : 0).setFillStyle(COLORS.panel, 0.55);
+    // No disc behind the part: only a pink outline around the part already mounted (when changing it).
+    const ring = this.add.circle(0, -20, 150).setStrokeStyle(3, COLORS.glow, isChosen ? 1 : 0);
     const picture = this.partImage(kind, part.id, 0, -20);
     // Dark shadow keeps the labels readable over the bright clouds of the Earth.
     const name = this.add.text(0, 160, part.name, { fontFamily: 'Audiowide', fontSize: '32px', color: '#ffffff' }).setOrigin(0.5).setPadding(10).setShadow(0, 2, '#0b0618', 10, false, true);
