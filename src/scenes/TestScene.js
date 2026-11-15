@@ -132,7 +132,7 @@ export class TestScene extends Phaser.Scene {
     if (previousVisibility !== this.visibility.status) {
       this.updateSensor();
       this.hud.say(this.visibility.status === 'blocked'
-        ? `${obstacleInfo(this.visibility).title} ${obstacleInfo(this.visibility).short}` // same words as the warning dialog
+        ? '¡Un imprevisto!' // the box next to the satellite says what happened
         : obstacleInfo(this.visibility).resolved);
       this.render();
     }

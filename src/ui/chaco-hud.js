@@ -53,9 +53,11 @@ export function createChacoHUD(scene, design, onAction) {
       </button>
     </div>
   </section>
-  <aside class="visibility-challenge hud-panel" aria-label="Ajuste en curso" hidden>
+  <aside class="visibility-challenge hud-panel" aria-label="Imprevisto" hidden>
     <h2 data-hud="weather-title"></h2>
-    <div class="signal-bars" aria-label="Intensidad de la señal" hidden><span></span><span></span><span></span><span></span></div>
+    <canvas class="obstacle-view" width="320" height="180" aria-hidden="true"></canvas>
+    <p data-hud="weather-message"></p>
+    <button data-flight="reframe" class="flight-primary fix-button"></button>
     <progress data-hud="reframe-progress" max="1" value="0" aria-label="Avance del ajuste"></progress>
   </aside>
   <section class="chaco-bottom"><div class="chaco-noah hud-panel"><span class="chaco-noah-icon" aria-hidden="true">N</span><div><strong>NOAH</strong><p data-hud="noah" aria-live="polite"></p></div><button data-flight="listen" aria-label="Escuchar el mensaje de NOAH">Escuchar</button></div>
@@ -80,31 +82,6 @@ export function createChacoHUD(scene, design, onAction) {
     root.classList.remove('mission-intro-active');
     onAction('intro-closed');
   });
-  // Surprise problem (clouds, shaky camera, weak signal): a dialog that waits for the fix.
-  // It can't be closed with Escape: without the fix the satellite would stay stopped.
-  let obstacleOpen = false;
-  const obstacleArt = {
-    clouds: '<div class="obstacle-art clouds" aria-hidden="true"><i></i><i></i><i></i></div>',
-    camera: '<div class="obstacle-art camera" aria-hidden="true"><i></i></div>',
-    signal: '<div class="obstacle-art signal" aria-hidden="true"><i></i><i></i><i></i><i></i></div>',
-  };
-  async function openObstacle(visibility, energy) {
-    obstacleOpen = true;
-    const info = obstacleInfo(visibility);
-    const canFix = energy >= REFRAME_ENERGY;
-    const choice = await showDialog(scene, {
-      title: info.title,
-      text: canFix ? info.short : `${info.short} No queda energía para arreglarlo.`,
-      body: obstacleArt[visibility.kind] ?? obstacleArt.clouds,
-      dismissable: false,
-      actions: canFix
-        ? [{ label: `${info.action} · −${REFRAME_ENERGY}`, value: 'reframe', primary: true }]
-        : [{ label: 'Volver al taller', value: 'workshop', primary: true }],
-    });
-    obstacleOpen = false;
-    if (!scene.sys.isActive()) return; // the scene ended while the dialog was open
-    onAction(choice);
-  }
 
   // Sending the photos in Asunción: a dialog with the photos and a send bar under each one.
   // The player presses "Enviar" and the bars fill one after the other. The antenna can only send
@@ -171,6 +148,26 @@ export function createChacoHUD(scene, design, onAction) {
     });
   }
 
+  // What the satellite's camera sees during a surprise problem, copied from the (hidden) camera canvas.
+  // Clouds are already painted by the camera; the shake is CSS (chaco.css); a weak signal is drawn here
+  // as "pixel drop": missing blocks and shifted stripes, fewer as the signal comes back.
+  const sensorCanvas = root.querySelector('.sensor-window canvas');
+  const obstacleView = root.querySelector('.obstacle-view');
+  function drawObstacleView(kind, strength) {
+    const ctx = obstacleView.getContext('2d'), w = obstacleView.width, h = obstacleView.height;
+    ctx.drawImage(sensorCanvas, 0, 0, w, h);
+    if (kind !== 'signal' || strength <= 0) return;
+    for (let i = 0; i < Math.round(strength * 6); i++) { // stripes shifted sideways
+      const y = Math.random() * h, height = 4 + Math.random() * 14, shift = (Math.random() - .5) * 60 * strength;
+      ctx.drawImage(obstacleView, 0, y, w, height, shift, y, w, height);
+    }
+    for (let i = 0; i < Math.round(strength * 28); i++) { // missing blocks
+      const size = 8 + Math.random() * 22;
+      ctx.fillStyle = Math.random() < .75 ? '#0b0618' : '#f0b0f0';
+      ctx.fillRect(Math.floor(Math.random() * w / 8) * 8, Math.floor(Math.random() * h / 8) * 8, size, size * .6);
+    }
+  }
+
   let voice = !!scene.registry.get('noahVoice'), message = '';
   function speak() { noahSpeak(message); } // same voice as the rest of the game (ui/noahVoice.js)
   function voiceLabel() { const button=root.querySelector('[data-flight="voice"]');button.textContent=`Voz de NOAH: ${voice?'activada':'apagada'}`;button.setAttribute('aria-pressed',String(voice)); }
@@ -196,13 +193,16 @@ export function createChacoHUD(scene, design, onAction) {
       root.style.setProperty('--obstacle-strength',String(intensity));
       root.dataset.visibility=status;
       root.dataset.obstacle=visibility.kind;
-      // Only while fixing: what's happening and how far along it is. The warning itself is a dialog.
-      root.querySelector('.visibility-challenge').hidden=status!=='adjusting';
-      get('weather-title').textContent=info.working;
-      const bars=root.querySelector('.signal-bars');
-      bars.hidden=visibility.kind!=='signal';
-      bars.querySelectorAll('span').forEach((bar,i)=>{bar.style.opacity=i<Math.round(1+3*(1-intensity))?'1':'.2';});
+      // Surprise problem: a box on the map next to the satellite (positionActionMenu), no dialog, so the
+      // effect on the map stays visible. Stopped: what happened + the fix button. Fixing: progress bar.
+      const panel=root.querySelector('.visibility-challenge');
+      const wasHidden=panel.hidden;
+      panel.hidden=!(status==='blocked'||status==='adjusting');
+      panel.dataset.status=status;
+      get('weather-title').textContent=status==='adjusting'?info.working:info.title;
       get('reframe-progress').value=visibility.adjustment;
+      if(!panel.hidden)drawObstacleView(visibility.kind,intensity);
+      if(wasHidden&&!panel.hidden)this.positionActionMenu();
     },
     update(mission,specs,flight,visibility){
       const gate=atGate(flight), phase=flight.gate;
@@ -214,7 +214,11 @@ export function createChacoHUD(scene, design, onAction) {
             get('sun').textContent=phases[mission.phase].sun?'Con luz solar':'En la sombra: sin recarga';
       root.classList.toggle('in-shadow',!phases[mission.phase].sun);
       const control=action=>root.querySelector(`[data-flight="${action}"]`);
-      if(visibility.status==='blocked'&&this.ready&&!this.introOpen&&!obstacleOpen)openObstacle(visibility,mission.energy);
+      // Fix button of the surprise problem; without energy for it, back to the workshop instead.
+      const canFix=mission.energy>=REFRAME_ENERGY, fixButton=root.querySelector('.fix-button'), problem=obstacleInfo(visibility);
+      fixButton.dataset.flight=canFix?'reframe':'workshop';
+      fixButton.textContent=canFix?`${problem.action} · −${REFRAME_ENERGY}`:'Volver al taller';
+      get('weather-message').textContent=canFix?problem.short:`${problem.short} No queda energía para arreglarlo.`;
       // The satellite flies by itself (TestScene). Only two moments ask the player to act:
       // over the forest, the photo menu next to the satellite; in Asunción, send and see the results.
       const actionAvailable = this.ready && !this.introOpen && !obstructed && canCapture(mission,specs,flight);
@@ -261,7 +265,7 @@ export function createChacoHUD(scene, design, onAction) {
       const marker = satellite.getBoundingClientRect();
       const bounds = root.getBoundingClientRect();
       const gap = 20;
-      for (const box of root.querySelectorAll('.flight-action-menu, .photo-pop')) {
+      for (const box of root.querySelectorAll('.flight-action-menu, .photo-pop, .visibility-challenge')) {
         if (box.hidden) continue;
         const right = marker.right - bounds.left + gap;
         const left = right + box.offsetWidth <= bounds.width - gap

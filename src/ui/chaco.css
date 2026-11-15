@@ -173,35 +173,10 @@
   .chaco-game .chaco-noah p{font-size:13px}
 }
 
-/* ---------- Surprise problems ----------
-   The warning is a dialog (ui/dialog.js) with a small animated picture of the problem.
-   While it's being fixed, a small panel shows what's happening and the progress. */
-.obstacle-art{position:relative;width:220px;height:110px;margin:20px auto 0;overflow:hidden;border:1px solid #d090f0;background:linear-gradient(160deg,#2f5b3d,#1d3a2a 60%,#16301f)}
-/* Clouds drifting over the forest. */
-.obstacle-art.clouds i{position:absolute;width:120px;height:46px;border-radius:50%;background:#eef2f8;filter:blur(6px);opacity:.9;animation:obstacle-cloud 3.5s ease-in-out infinite alternate}
-.obstacle-art.clouds i:nth-child(1){left:-20px;top:12px}
-.obstacle-art.clouds i:nth-child(2){left:70px;top:46px;animation-delay:-1.2s}
-.obstacle-art.clouds i:nth-child(3){left:140px;top:6px;animation-delay:-2.4s}
-@keyframes obstacle-cloud{to{transform:translateX(30px)}}
-/* A camera lens shaking. */
-.obstacle-art.camera{display:grid;place-items:center;background:#1c0a33}
-.obstacle-art.camera i{width:62px;height:62px;border:4px solid #d090f0;border-radius:50%;background:radial-gradient(circle,#f0b0f0 0 9px,#7050b0 10px 20px,#1c0a33 21px);animation:obstacle-shake .16s linear infinite}
-@keyframes obstacle-shake{25%{transform:translate(4px,-2px) rotate(3deg)}75%{transform:translate(-4px,2px) rotate(-3deg)}}
-/* Signal bars: only the first one is on, the next one keeps trying. */
-.obstacle-art.signal{display:flex;align-items:flex-end;justify-content:center;gap:10px;padding-bottom:22px;background:#1c0a33}
-.obstacle-art.signal i{width:20px;background:#f0b0f0;opacity:.18}
-.obstacle-art.signal i:nth-child(1){height:16px;opacity:1}
-.obstacle-art.signal i:nth-child(2){height:30px;animation:obstacle-blink 1s steps(2) infinite}
-.obstacle-art.signal i:nth-child(3){height:44px}
-.obstacle-art.signal i:nth-child(4){height:58px}
-@keyframes obstacle-blink{50%{opacity:.8}}
-@media(prefers-reduced-motion:reduce){.obstacle-art i{animation:none!important}}
-
 /* While fixing: small panel above the console. */
 .chaco-game .visibility-challenge{top:auto;bottom:190px;width:320px;padding:26px 22px 18px;text-align:center}
 .chaco-game .visibility-challenge h2{font-size:18px;margin:0 0 12px;color:#f5c7e7}
 .chaco-game .visibility-challenge progress{display:block;width:100%;height:8px;margin:0;accent-color:#f0b0f0}
-.chaco-game .signal-bars span{background:#f0b0f0}
 
 /* NASA case: fits the screen without scrolling, the video plays by itself (muted, in a loop). */
 .chaco-game .chaco-case{width:min(720px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:hidden;padding:30px 30px 22px;text-align:center;color:#f3e6ff}
@@ -300,3 +275,18 @@
 .send-bar{height:8px;margin-top:10px;border:1px solid #d090f0;background:#1c0a33}
 .send-bar i{display:block;width:0;height:100%;background:#f0b0f0;box-shadow:0 0 10px #f0b0f0;transition-property:width;transition-timing-function:linear}
 .send-photos figure.missing .send-bar i{background:#ff8fa3;box-shadow:none}
+
+/* ---------- Surprise problem box (on the map, next to the satellite) ----------
+   Placed by positionActionMenu() in chaco-hud.js. Shows the camera view with the problem on it. */
+.chaco-game .visibility-challenge{position:absolute;top:0;left:0;bottom:auto;transform:none;width:300px;padding:26px 18px 16px;text-align:center;z-index:7}
+.chaco-game .visibility-challenge h2{font-size:17px;margin:0 0 10px;color:#f5c7e7}
+.chaco-game .visibility-challenge p{margin:10px 0 12px;font-size:14px;line-height:1.4}
+.chaco-game .visibility-challenge button{width:100%}
+.obstacle-view{display:block;width:100%;aspect-ratio:16/9;border:1px solid #d090f0;background:#0b0618}
+/* Stopped: message + button. Fixing: only the title ("Estabilizando…") and the progress bar. */
+.visibility-challenge[data-status=blocked] progress{display:none}
+.visibility-challenge[data-status=adjusting] p,.visibility-challenge[data-status=adjusting] button{display:none}
+.visibility-challenge[data-status=adjusting] progress{margin-top:10px}
+/* Shaky camera: the view trembles and blurs, calmer while it's being fixed. */
+.chaco-game[data-obstacle=camera]:not([data-visibility=clear]) .obstacle-view{filter:blur(calc(var(--obstacle-strength,0) * 1.6px));animation:map-shake .14s linear infinite}
+@media(prefers-reduced-motion:reduce){.obstacle-view{animation:none!important}}
