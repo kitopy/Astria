@@ -43,10 +43,6 @@ export class BootScene extends Phaser.Scene {
 
     this.load.image('bg-menu', 'images/bg-menu.png');
     this.load.image('bg-station', 'images/bg-station.png');
-    this.load.image('bg-mission', 'images/bg-mission.png');
-    this.load.image('frame-observation', 'images/frame-observation.png');
-    this.load.image('sky-observation', 'images/sky-observation.png');
-    this.load.image('star-anomaly', 'images/star-anomaly.png');
     this.load.image('panel-dialog', 'images/panel-dialog.png');
 
     // For fonts, the key is the font-family name used later in text styles.

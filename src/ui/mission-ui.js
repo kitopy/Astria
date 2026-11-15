@@ -15,7 +15,7 @@ import { addShootingStars } from './starfield.js';
 const BASE = import.meta.env.BASE_URL;
 
 export function preloadArt(scene) {
-  for (const key of ['earth', 'satellite-modules']) {
+  for (const key of ['satellite-modules']) {
     if (!scene.textures.exists(key)) scene.load.image(key, `${BASE}assets/${key}.png`);
   }
 }
