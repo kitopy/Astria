@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { COLORS } from './palette.js';
 
 // Where each part is in public/assets/satellite-modules.png, as [x, y, width, height] normalized to
-// 1280 × 1280 (the atlas itself is 2048 × 2048; the code scales). The atlas packs the 9 separate
+// 1280 × 1280 (the atlas itself is 1536 × 1536; the code scales). The atlas packs the 9 separate
 // pieces of the ASTRION art (chassis, 2 solar panels, 2 cameras, 2 battery modules, 2 antennas).
 export const frames = {
   body: [5, 441.25, 406.25, 373.75],
