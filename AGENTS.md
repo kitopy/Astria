@@ -64,5 +64,30 @@ NOAH's lines are pre-recorded MP3s in `public/assets/voice/`, keyed by a hash of
 2. **Don't rewrite or restyle files you weren't asked to touch.** Don't rename things for taste.
 3. **Before finishing, run `npm test` and `npm run build`.** Both must pass.
 4. **Look at the change in the browser** (`npm run dev`). On localhost, `?dev=1` opens a picker that jumps straight to any build step or flight stage.
-5. **Don't commit or push unless asked.** When done, summarize what changed and suggest a short commit message in English.
+5. **When done, summarize what changed and suggest a short commit message in English.** Then offer to commit and push (see below). Don't do it without the person's OK.
 6. **Data and sources:** NASA and Natural Earth files in `public/data/` are tracked in `public/data/sources.json` and `public/FUENTES.md`. Update those when adding or replacing data.
+
+## Git: stay in sync with the team
+
+Several people push to `main` at the same time. Conflicts happen when someone works for hours without syncing. Not everyone on the team is used to Git, so **guide the person step by step**: say which command you are running and why, in plain words.
+
+**Before starting any task**, get the latest version:
+
+```sh
+git status        # must be clean; if not, commit or ask what to do with the changes first
+git pull
+```
+
+**After each small finished change** (tests and build passing), with the person's OK:
+
+```sh
+git add <the files you changed>
+git commit -m "Short message in English"
+git pull          # bring in what others pushed meanwhile
+git push
+```
+
+- **Commit and push often:** after each small piece, not once at the end of the day. Small, frequent pushes keep conflicts small.
+- **If `git pull` reports a conflict, stop.** Show the person which files conflict. Resolve by keeping **both** sides' work, never by deleting the other person's code. If unsure, ask the team before continuing.
+- **Never** use `git push --force`, `git reset --hard`, `git checkout -- .` or `git clean`, and never delete branches. These can destroy other people's work.
+- **Only add the files you changed.** Not `git add .` when unrelated files show up in `git status`.
