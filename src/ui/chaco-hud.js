@@ -48,13 +48,13 @@ export function createChacoHUD(scene, design, onAction) {
   </aside>
   <section class="chaco-bottom"><div class="chaco-noah hud-panel"><span class="chaco-noah-icon" aria-hidden="true">N</span><div><strong>NOAH</strong><p data-hud="noah" aria-live="polite"></p></div><button data-flight="listen" aria-label="Escuchar el mensaje de NOAH">Escuchar</button></div>
   <div class="chaco-controls orbital-console" aria-label="Panel de mando del satélite">
-    <div class="orbital-console-head"><span>✦ PANEL DE MANDO</span><strong data-hud="command-title">Preparando la misión</strong><small data-hud="command-hint">Esperá a que el mapa y la cámara estén listos.</small></div>
+    <div class="orbital-console-head" data-hud="command-title">Preparando sistema</div>
     <div class="orbital-console-actions">
-      <button data-flight="travel" class="console-action" disabled><span class="console-icon" aria-hidden="true">➤</span><span class="console-label">Iniciar recorrido</span></button>
-      <button data-flight="capture" class="console-action" disabled><span class="console-icon" aria-hidden="true">◎</span><span class="console-label">Observar</span></button>
-      <button data-flight="transmit" class="console-action" disabled><span class="console-icon" aria-hidden="true">⇡</span><span class="console-label">Transmitir</span></button>
-      <button data-flight="pause" class="console-action" disabled><span class="console-icon" aria-hidden="true">Ⅱ</span><span class="console-label">Pausar</span></button>
-      <button data-flight="finish" class="console-action" hidden><span class="console-icon" aria-hidden="true">✦</span><span class="console-label">Ver resultados</span></button>
+      <button data-flight="travel" class="console-action" disabled><span class="console-icon" aria-hidden="true"></span><span class="console-label">Rumbo al Chaco</span></button>
+      <button data-flight="capture" class="console-action" disabled><span class="console-icon" aria-hidden="true"></span><span class="console-label">Tomar foto</span></button>
+      <button data-flight="transmit" class="console-action" disabled><span class="console-icon" aria-hidden="true"></span><span class="console-label">Enviar fotos</span></button>
+      <button data-flight="pause" class="console-action" disabled><span class="console-icon" aria-hidden="true"></span><span class="console-label">Pausar</span></button>
+      <button data-flight="finish" class="console-action" hidden><span class="console-icon" aria-hidden="true"></span><span class="console-label">Ver resultados</span></button>
     </div>
   </div>
   <ol class="chaco-timeline"><li>Preparación</li><li>Primera pasada</li><li>Segunda pasada</li><li>Contacto terrestre</li></ol></section>
@@ -133,7 +133,7 @@ export function createChacoHUD(scene, design, onAction) {
       control('travel').hidden=phase===3||flight.running;control('travel').disabled=!this.ready||this.introOpen||obstructed;
       control('reframe').disabled=!this.ready||visibility.status!=='blocked'||mission.energy<REFRAME_ENERGY;
       control('reframe').textContent=visibility.status==='adjusting'?info.working:`${info.action} · −${REFRAME_ENERGY} energía`;
-      control('travel').querySelector('.console-label').textContent=!gate?'Reanudar vuelo':phase===0?'Iniciar recorrido':'Continuar recorrido';
+      control('travel').querySelector('.console-label').textContent=!gate?'Reanudar viaje':['Rumbo al Chaco','Siguiente pasada','Regreso a Asunción'][phase];
       control('pause').hidden=!flight.running;control('pause').disabled=!flight.running;
       control('capture').disabled=!this.ready||!gate||![1,2].includes(phase)||mission.captured.includes(phase)||mission.energy<specs.cameraPower;
       control('capture').hidden=!gate||![1,2].includes(phase)||mission.captured.includes(phase);
@@ -143,11 +143,9 @@ export function createChacoHUD(scene, design, onAction) {
       control('transmit').querySelector('.console-label').textContent=`Enviar fotos · −${specs.antennaPower}`;
       control('finish').hidden=phase!==3;control('finish').querySelector('.console-label').textContent=mission.sent?'Ver resultados':'Revisar resultados';
       const command=obstructed?'reframe':flight.running?'pause':phase===3?(control('transmit').disabled?'finish':'transmit'):!control('capture').hidden&&!control('capture').disabled?'capture':'travel';
-      const titles={travel:phase===0?'Prepará el despegue':'Seguí la ruta',capture:'El bosque está en el visor',transmit:'Contacto con Asunción',finish:'Revisá tu misión',reframe:info.title,pause:'Satélite en vuelo'};
-      const hints={travel:phase===0?'Activá tu satélite para llegar al Chaco.':phase===2&&mission.energy<specs.cameraPower?'La batería no alcanza para otra foto. Continuá hacia Asunción.':'Seguí el trayecto hasta la próxima parada.',capture:'Tomá una imagen del Chaco y guardala a bordo.',transmit:'Enviá las imágenes a la estación terrestre.',finish:'Mirá qué lograste y qué podrías mejorar.',reframe:`${info.message} El ajuste usa ${REFRAME_ENERGY} de energía.`,pause:'Seguí la nave en el mapa o pausá el recorrido.'};
+      const titles={travel:'Ruta',capture:'Cámara',transmit:'Antena',finish:'Misión',reframe:'Ajuste',pause:'En vuelo'};
       root.dataset.command=command;
-      get('command-title').textContent=!this.ready?'Preparando el mapa':titles[command];
-      get('command-hint').textContent=!this.ready?'Esperá a que el mapa y la cámara estén listos.':hints[command];
+      get('command-title').textContent=!this.ready?'Preparando sistema':titles[command];
       root.querySelectorAll('.console-action').forEach(button=>button.classList.toggle('is-cued',button.dataset.flight===command&&!button.disabled));
       control('speed').textContent=`Velocidad ×${flight.speed}`;
       root.querySelectorAll('.chaco-timeline li').forEach((item,i)=>{item.classList.toggle('active',i===phase);item.classList.toggle('done',i<phase);});

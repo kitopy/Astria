@@ -50,25 +50,34 @@
 @media(max-width:600px){.mission-intro-card{padding:28px 22px 26px;border-radius:22px}.mission-intro-orbit{width:60px;height:60px;margin-bottom:18px}.mission-intro-orbit i{top:26px}.mission-intro-orbit b{top:26px}.mission-intro-card p{font-size:14px}.mission-intro-card button{min-height:48px}}
 @media(prefers-reduced-motion:reduce){.mission-intro,.mission-intro-card,.mission-intro-orbit,.mission-intro-card button,.mission-intro-timer i,.mission-intro-active .chaco-map{animation-duration:.01ms!important;animation-iteration-count:1!important}}
 
-/* Contextual orbital controls: one clear next action at each stop. */
-.chaco-game .orbital-console{width:min(790px,calc(100vw - 40px));min-height:88px;display:flex;flex-wrap:nowrap;gap:16px;align-items:center;justify-content:space-between;padding:12px 15px;border:1px solid #a892c9;border-radius:22px;background:linear-gradient(115deg,#25183eea,#141e35f2);box-shadow:0 12px 34px #070918a8;backdrop-filter:blur(9px)}
-.orbital-console-head{min-width:0;flex:1;text-align:left}
-.orbital-console-head>span{display:block;color:#d0b5ff;font-size:10px;font-weight:850;letter-spacing:1.8px}
-.orbital-console-head strong{display:block;margin:3px 0;color:#fff;font-size:18px;line-height:1.15}
-.orbital-console-head small{display:block;max-width:340px;color:#e0d4f0;font-size:11px;line-height:1.3}
-.orbital-console-actions{display:flex;gap:8px;align-items:center;justify-content:center;flex-shrink:0}
-.chaco-game .orbital-console .console-action{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;max-width:225px;padding:8px 13px;border:1px solid #a88dc7;border-radius:14px;background:#33264c;color:#f7edff;font-size:13px;line-height:1.2;box-shadow:none;transition:background .25s,border-color .25s,box-shadow .25s,transform .25s}
-.chaco-game .orbital-console .console-action:hover:not(:disabled){background:#4b3566;transform:translateY(-2px)}
-.chaco-game .orbital-console .console-action.is-cued{border-color:#b9f566;background:#b9f566;color:#14220b;font-weight:850;box-shadow:0 0 0 2px #b9f56625,0 0 20px #b9f5664d;animation:orbital-cue 3.5s ease-in-out infinite}
-.console-icon{display:grid;place-items:center;flex:0 0 31px;width:31px;height:31px;border:1px solid currentColor;border-radius:50%;font-size:19px;line-height:1}
-.console-label{display:block;text-align:left}
-.chaco-game[data-command=capture] .sensor-window{border-color:#b9f566;box-shadow:0 0 18px #b9f56655}
-.chaco-game[data-command=transmit] .map-station .station-dot{border-color:#b9f566;color:#b9f566;box-shadow:0 0 18px #b9f56688}
-.chaco-game[data-command=reframe] .visibility-challenge{box-shadow:0 12px 50px #080d27a0,0 0 20px #ffd9a852}
-.chaco-game .chaco-timeline li.active{color:#d2ff99}
-@keyframes orbital-cue{50%{box-shadow:0 0 0 3px #b9f56635,0 0 24px #b9f5666b}}
-@media(max-height:760px){.chaco-game .orbital-console{min-height:64px;padding:7px 10px}.orbital-console-head strong{font-size:14px}.orbital-console-head small{font-size:9px}.chaco-game .orbital-console .console-action{min-height:42px;font-size:11px;padding:5px 9px}.console-icon{width:26px;height:26px;flex-basis:26px;font-size:16px}}
-@media(max-width:800px){.chaco-game .orbital-console{width:min(100%,640px)}.orbital-console-head>span{font-size:8px}.orbital-console-head strong{font-size:13px}.orbital-console-head small{font-size:9px}.chaco-game .orbital-console .console-action{max-width:160px;font-size:10px}.console-icon{width:25px;height:25px;flex-basis:25px;font-size:15px}}
-@media(max-width:600px){.chaco-game .orbital-console{flex-direction:column;gap:7px;padding:9px}.orbital-console-head{text-align:center}.orbital-console-head small{max-width:300px}.orbital-console-actions{width:100%}.chaco-game .orbital-console .console-action{flex:1;max-width:none}}
-@media(max-height:500px) and (min-width:700px){.chaco-game .orbital-console{width:min(620px,calc(100vw - 24px));min-height:51px;gap:8px;padding:5px 8px;border-radius:12px}.orbital-console-head>span{font-size:7px}.orbital-console-head strong{font-size:11px;margin:1px 0}.orbital-console-head small{font-size:8px}.chaco-game .orbital-console .console-action{min-height:35px;max-width:145px;font-size:9px;padding:3px 6px}.console-icon{width:22px;height:22px;flex-basis:22px;font-size:13px}}
-@media(prefers-reduced-motion:reduce){.chaco-game .orbital-console .console-action.is-cued{animation:none}.chaco-game .orbital-console .console-action{transition:none}}
+/* The controls float over the route like a small cockpit, with one highlighted action. */
+.chaco-game .orbital-console{width:max-content;min-height:0;display:flex;flex-direction:column-reverse;align-items:center;gap:5px;padding:0;border:0;background:none;box-shadow:none;backdrop-filter:none}
+.orbital-console-head{min-width:90px;padding:3px 14px;border:1px solid #d090f080;border-radius:12px;background:#1c0a33e8;color:#f5c7e7;font-family:'Audiowide',sans-serif;font-size:10px;letter-spacing:1px;text-align:center;text-transform:uppercase}
+.orbital-console-actions{display:flex;align-items:flex-end;justify-content:center;gap:15px}
+.chaco-game .orbital-console .console-action{width:105px;min-height:0;max-width:none;display:flex;flex-direction:column;align-items:center;gap:7px;padding:0;border:0;border-radius:0;background:none;color:#f3e6ff;font-size:11px;line-height:1.2;box-shadow:none;transition:transform .2s ease}
+.chaco-game .orbital-console .console-action:hover:not(:disabled){background:none;transform:translateY(-3px)}
+.chaco-game .orbital-console .console-action.is-cued{width:135px;border:0;background:none;color:#f5c7e7;font-weight:850;box-shadow:none;order:-1;animation:none}
+.console-icon{position:relative;display:grid;place-items:center;flex:none;width:55px;height:55px;border:2px solid #d090f0;border-radius:50%;background:radial-gradient(circle,#7050b0,#1c0a33 76%);box-shadow:0 5px 22px #1c0a3399;color:#f5c7e7}
+.console-action.is-cued .console-icon{width:82px;height:82px;border:3px solid #f0b0f0;box-shadow:0 0 0 7px #7050b055,0 0 27px #f0b0f099,0 8px 25px #1c0a33aa;animation:orbital-cue 3.5s ease-in-out infinite}
+.console-action.is-cued .console-icon::after{content:'';position:absolute;inset:-12px;border:1px dashed #d090f090;border-radius:50%}
+.console-label{display:block;width:100%;padding:4px 6px;border:1px solid #d090f070;border-radius:10px;background:#1c0a33e8;text-align:center;text-shadow:0 1px 3px #1c0a33}
+.console-action.is-cued .console-label{border-color:#f0b0f0;color:#fff}
+.console-action[data-flight=travel] .console-icon::before{content:'';width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:17px solid currentColor;transform:translateX(3px)}
+.console-action[data-flight=capture] .console-icon::before{content:'';width:23px;height:23px;border:3px solid currentColor;border-radius:50%}
+.console-action[data-flight=capture] .console-icon::after{content:'';position:absolute;width:7px;height:7px;border-radius:50%;background:currentColor}
+.console-action.is-cued[data-flight=capture] .console-icon::after{width:7px;height:7px;inset:auto;border:0;background:currentColor}
+.console-action[data-flight=transmit] .console-icon::before{content:'';width:22px;height:22px;border-top:3px solid currentColor;border-right:3px solid currentColor;transform:rotate(-45deg) translate(-3px,3px)}
+.console-action[data-flight=transmit] .console-icon::after{content:'';position:absolute;width:3px;height:25px;background:currentColor;transform:translateY(4px)}
+.console-action.is-cued[data-flight=transmit] .console-icon::after{inset:auto;border:0;border-radius:0}
+.console-action[data-flight=pause] .console-icon::before{content:'';width:16px;height:22px;background:linear-gradient(90deg,currentColor 0 5px,transparent 5px 11px,currentColor 11px 16px)}
+.console-action[data-flight=finish] .console-icon::before{content:'';width:13px;height:22px;border-right:3px solid currentColor;border-bottom:3px solid currentColor;transform:rotate(45deg) translate(-3px,-3px)}
+.chaco-game[data-command=capture] .sensor-window{border-color:#f0b0f0;box-shadow:0 0 18px #f0b0f077}
+.chaco-game[data-command=transmit] .map-station .station-dot{border-color:#f0b0f0;color:#f0b0f0;box-shadow:0 0 18px #f0b0f088}
+.chaco-game[data-command=reframe] .visibility-challenge{box-shadow:0 12px 50px #1c0a33aa,0 0 18px #f0b0f077}
+.chaco-game .chaco-timeline li.active{color:#f0b0f0}
+.chaco-game .chaco-timeline li.active::before{background:#f0b0f0;border-color:#f0b0f0;box-shadow:0 0 10px #f0b0f0}
+@keyframes orbital-cue{50%{box-shadow:0 0 0 9px #7050b066,0 0 32px #f0b0f0aa,0 8px 25px #1c0a33aa}}
+@media(max-height:760px){.chaco-game .orbital-console .console-action{width:88px;gap:3px;font-size:10px}.chaco-game .orbital-console .console-action.is-cued{width:115px}.console-icon{width:44px;height:44px}.console-action.is-cued .console-icon{width:64px;height:64px}.orbital-console-head{font-size:8px}}
+@media(max-width:600px){.chaco-game .orbital-console .console-action{width:75px}.chaco-game .orbital-console .console-action.is-cued{width:100px}.console-icon{width:42px;height:42px}.console-action.is-cued .console-icon{width:62px;height:62px}.console-label{font-size:9px}}
+@media(max-height:500px) and (min-width:700px){.chaco-game .orbital-console .console-action{width:80px;gap:2px;font-size:9px}.chaco-game .orbital-console .console-action.is-cued{width:103px}.console-icon{width:39px;height:39px}.console-action.is-cued .console-icon{width:52px;height:52px}.orbital-console-head{padding:2px 10px;font-size:7px}.console-label{padding:2px 4px}}
+@media(prefers-reduced-motion:reduce){.console-action.is-cued .console-icon{animation:none}.chaco-game .orbital-console .console-action{transition:none}}
