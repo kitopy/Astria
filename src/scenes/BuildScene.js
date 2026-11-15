@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { initialDesign, kinds, limits, stats } from '../game/model.js';
+import { initialDesign, kinds, limits, preflight, stats } from '../game/model.js';
 import { catalog, readDesign, saveDesign } from '../game/design.js';
 import { actionButton, addArt, meter, mount, partThumb, preloadArt } from '../ui/mission-ui.js';
 import { centerDesignArea } from '../ui/layout.js';
@@ -12,7 +12,8 @@ import { REFRAME_ENERGY } from '../game/chaco-visibility.js';
 const REVIEW = kinds.length; // step index of the final review (after the 4 parts)
 
 // Layout (in the 1920x1080 design area)
-const SATELLITE = { x: 960, y: 555, scale: 1, reviewX: 720 };
+const SATELLITE = { x: 960, y: 555, scale: 1 };
+const PREFLIGHT_DELAY_MS = 1300; // on the review step, the check opens once the title has been typed
 const OPTION_X = [330, 1590]; // the two options float left and right of the satellite
 const SNAP_DISTANCE = 300; // dropping a piece closer than this to the satellite mounts it
 const AUTO_NEXT_MS = 1500; // after mounting a part for the first time, go to the next one by itself
@@ -71,9 +72,7 @@ export class BuildScene extends Phaser.Scene {
     this.ui.bind({
       next: () => this.goTo(this.nextStep()),
       goto: (button) => this.goTo(button.dataset.kind === 'review' ? REVIEW : kinds.indexOf(button.dataset.kind)),
-      launch: () => {
-        if (stats(catalog, this.design).valid) this.scene.start('Test', { design: { ...this.design } });
-      },
+      launch: () => this.openPreflight(),
       reset: () => {
         this.design = { ...initialDesign };
         this.persist();
@@ -217,8 +216,6 @@ export class BuildScene extends Phaser.Scene {
     const enterAt = leaving.length ? 240 : 0; // new options wait until the old ones are gone
 
     const kind = this.kind;
-    const x = kind ? SATELLITE.x : SATELLITE.reviewX; // on review, the satellite moves left for the balance panel
-    this.tweens.add({ targets: this.art, x, duration: 500, ease: 'Cubic.out', onUpdate: () => this.drawSlot() });
 
     this.swapTitle(kind ? catalog[kind].label.toUpperCase() : '¿LISTA PARA DESPEGAR?');
 
@@ -242,7 +239,10 @@ export class BuildScene extends Phaser.Scene {
       });
       this.ui.say(partIntro(kind, this.placed.has(kind)));
     } else {
-      this.ui.say(reviewLine(stats(catalog, this.design).valid, REFRAME_ENERGY));
+      this.ui.say(reviewLine());
+      this.time.delayedCall(PREFLIGHT_DELAY_MS, () => {
+        if (this.step === REVIEW) this.openPreflight();
+      });
     }
 
     this.drawSlot();
@@ -453,7 +453,7 @@ export class BuildScene extends Phaser.Scene {
       const target = this.nextStep();
       next = actionButton('next', target === REVIEW ? 'Revisar ›' : `Siguiente: ${catalog[kinds[target]].label} ›`, true);
     } else if (!this.kind) {
-      next = actionButton('launch', 'Lanzar ›', true, !stats(catalog, this.design).valid);
+      next = actionButton('launch', 'Despegar ›', true);
     }
 
     this.ui.area('center').innerHTML = `
@@ -462,28 +462,46 @@ export class BuildScene extends Phaser.Scene {
         <div class="ws-slots">${slots}${review}</div>
         <div class="ws-mini-meters">${meter('Masa', totals.mass, limits.mass, ' kg')}${meter('Presupuesto', totals.cost, limits.budget)}</div>
       </div>`;
-
-    this.ui.area('right').innerHTML = this.kind ? '' : this.reviewPanel();
   }
 
-  // Energy and data balance, so the player can predict whether the mission will work.
-  reviewPanel() {
-    const s = stats(catalog, this.design);
-    return `
-      <h2 class="ws-title">Energía</h2>
-      <dl class="ws-specs">
-        <div><dt>Batería al despegar</dt><dd>${s.capacity}</dd></div>
-        <div><dt>Recarga con luz, por etapa</dt><dd>+${s.generation}</dd></div>
-        <div><dt>Consumo fijo, por etapa</dt><dd>−4</dd></div>
-        <div><dt>Cada foto</dt><dd>−${s.cameraPower}</dd></div>
-        <div><dt>Resolver un imprevisto</dt><dd>−${REFRAME_ENERGY}</dd></div>
-        <div><dt>Enviar</dt><dd>−${s.antennaPower}</dd></div>
-      </dl>
-      <h2 class="ws-title ws-title-gap">Datos</h2>
-      <dl class="ws-specs">
-        <div><dt>Dos fotos</dt><dd>${s.data * 2} bloques</dd></div>
-        <div><dt>La antena envía</dt><dd>${s.rate} bloques</dd></div>
-      </dl>
-      <p class="ws-status ${s.valid ? '' : 'over'}">${s.valid ? 'Entra en el cohete.' : 'Supera el límite del cohete.'}</p>`;
+  // Pre-flight check: a dialog with three simple lines (energy, sending the photos, rocket) and the
+  // way forward: launch, or go straight to the part to change.
+  async openPreflight() {
+    if (this.preflightOpen) return;
+    const check = preflight(stats(catalog, this.design), REFRAME_ENERGY);
+    const rocketState = check.rocket ? 'Entra' : check.tooHeavy && check.tooExpensive ? 'Muy pesado y caro' : check.tooHeavy ? 'Muy pesado' : 'Muy caro';
+    const lines = [
+      ['Energía', check.energy, check.energy ? 'Alcanza' : 'No alcanza'],
+      ['Envío de fotos', check.data, check.data ? 'Alcanza' : 'No alcanza'],
+      ['Cohete', check.rocket, rocketState],
+    ];
+    const body = `<ul class="astrion-checks">${lines
+      .map(([label, ok, state]) => `<li class="${ok ? 'ok' : 'bad'}"><span class="mark" aria-hidden="true"></span><strong>${label}</strong><span class="state">${state}</span></li>`)
+      .join('')}</ul>`;
+
+    // The part most likely to fix the problem: battery for energy, antenna for the photos.
+    const fix = !check.energy ? 'battery' : !check.data ? 'antenna' : null;
+    let actions;
+    if (!check.rocket) {
+      actions = [{ label: 'Cambiar piezas', value: 'edit', primary: true }];
+    } else if (fix) {
+      actions = [
+        { label: 'Lanzar igual', value: 'launch' },
+        { label: `Cambiar ${catalog[fix].label.toLowerCase()}`, value: fix, primary: true },
+      ];
+    } else {
+      actions = [
+        { label: 'Cambiar piezas', value: 'edit' },
+        { label: '¡Despegar!', value: 'launch', primary: true },
+      ];
+    }
+
+    this.preflightOpen = true;
+    const choice = await showDialog(this, { title: check.rocket && !fix ? '¡Todo listo!' : 'Falta algo', body, actions });
+    this.preflightOpen = false;
+    if (!this.sys.isActive()) return; // the scene ended while the dialog was open
+    if (choice === 'launch') this.scene.start('Test', { design: { ...this.design } });
+    else if (kinds.includes(choice)) this.goTo(kinds.indexOf(choice));
+    // 'edit' or Escape: stay on the review; the strip and the satellite lead to each part.
   }
 }

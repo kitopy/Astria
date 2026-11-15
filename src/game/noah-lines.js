@@ -18,15 +18,13 @@ export function mountLine(part, changed) {
   return `${changed ? '¡Cambiada!' : '¡Montada!'} ${part.name}: ${part.benefit.toLowerCase()}, pero ${part.tradeoff.toLowerCase()}.`;
 }
 
-export function reviewLine(valid, reframeEnergy) {
-  return valid
-    ? `Hacé la cuenta: ¿alcanza para dos fotos, resolver un imprevisto (−${reframeEnergy}) y el envío?`
-    : 'Supera el límite del cohete. Tocá una pieza abajo para cambiarla.';
+export function reviewLine() {
+  return 'Revisemos tu satélite antes de despegar.';
 }
 
 // Every workshop line that can ever be said, for every part (used by the voice generator).
 export function workshopLines(catalog, reframeEnergy) {
-  const lines = [reviewLine(true, reframeEnergy), reviewLine(false, reframeEnergy)];
+  const lines = [reviewLine()];
   for (const kind of Object.keys(PART_TEXT)) {
     lines.push(partIntro(kind, false), partIntro(kind, true));
     for (const part of catalog[kind].options) lines.push(mountLine(part, false), mountLine(part, true));

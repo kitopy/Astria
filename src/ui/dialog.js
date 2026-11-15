@@ -12,12 +12,14 @@ import './dialog.css';
 //
 // Resolves with the value of the button pressed, or null if closed with Escape
 // or because the scene ended. With no actions, a single "¡Entendido!" button is shown.
-export function showDialog(scene, { title, text = '', actions = [{ label: '¡Entendido!', value: 'ok', primary: true }] }) {
+// body: optional extra HTML under the text (only markup written in the game's code, never user text).
+export function showDialog(scene, { title, text = '', body = '', actions = [{ label: '¡Entendido!', value: 'ok', primary: true }] }) {
   const dialog = document.createElement('dialog');
   dialog.className = 'astrion-dialog';
   dialog.innerHTML = `
     <h2></h2>
     ${text ? '<p></p>' : ''}
+    ${body}
     <div class="astrion-dialog-actions">
       ${actions.map((a, i) => `<button type="button" data-index="${i}" class="${a.primary ? 'primary' : ''}"></button>`).join('')}
     </div>`;

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { advance, capture, initialDesign, launch, stats, transmit } from '../src/game/model.js';
+import { advance, capture, initialDesign, launch, preflight, stats, transmit } from '../src/game/model.js';
 const catalog = JSON.parse(readFileSync(new URL('../src/game/parts.json', import.meta.url), 'utf8'));
 test('El diseño inicial completa las dos observaciones y su envío', () => {
     const s = stats(catalog, initialDesign);
@@ -45,4 +45,15 @@ test('No hay lanzamiento fuera de límites ni fotos duplicadas ni acciones fuera
     const observed = capture(advance(m, s), s);
     assert.throws(() => capture(observed, s));
     assert.equal(m.photos.length, 0);
+});
+test('La revisión previa coincide con el resultado del vuelo', () => {
+    const ok = preflight(stats(catalog, initialDesign), 6);
+    assert.deepEqual(ok, { rocket: true, tooHeavy: false, tooExpensive: false, energy: true, data: true });
+    const lowBattery = preflight(stats(catalog, { ...initialDesign, camera: 'detail', antenna: 'fast' }), 6);
+    assert.equal(lowBattery.energy, false);
+    const smallAntenna = preflight(stats(catalog, { ...initialDesign, camera: 'detail', battery: 'long' }), 6);
+    assert.equal(smallAntenna.data, false);
+    const heavy = preflight(stats(catalog, { camera: 'detail', solar: 'large', battery: 'long', antenna: 'fast' }), 6);
+    assert.equal(heavy.rocket, false);
+    assert.equal(heavy.energy, false);
 });

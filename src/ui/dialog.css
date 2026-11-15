@@ -75,6 +75,74 @@
 .astrion-dialog button.primary:focus-visible { color: #1c0a33; }
 .astrion-dialog button:focus-visible { outline: 3px solid #f0b0f0; outline-offset: 4px; }
 
+/* Checklist (pre-flight review): each line appears after the previous one. */
+.astrion-checks {
+  list-style: none;
+  margin: 22px auto 0;
+  padding: 0;
+  max-width: 360px;
+  text-align: left;
+}
+.astrion-checks li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 4px;
+  font-size: 19px;
+  border-bottom: 1px solid rgba(208, 144, 240, 0.2);
+  opacity: 0;
+  animation: astrion-check-in 0.35s ease-out forwards;
+}
+.astrion-checks li:last-child { border-bottom: 0; }
+.astrion-checks li:nth-child(1) { animation-delay: 0.35s; }
+.astrion-checks li:nth-child(2) { animation-delay: 0.7s; }
+.astrion-checks li:nth-child(3) { animation-delay: 1.05s; }
+.astrion-checks strong { flex: 1; font-weight: 700; color: #ffffff; }
+.astrion-checks .state { color: #ffd9a8; }
+.astrion-checks .bad .state { color: #ff8fa3; }
+
+/* Round mark: a tick when it's fine, a cross when it isn't. */
+.astrion-checks .mark {
+  position: relative;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #ffd9a8;
+}
+.astrion-checks .ok .mark::after {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 4px;
+  width: 7px;
+  height: 13px;
+  border: solid #ffd9a8;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+.astrion-checks .bad .mark { border-color: #ff8fa3; }
+.astrion-checks .bad .mark::before,
+.astrion-checks .bad .mark::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 12px;
+  width: 14px;
+  height: 3px;
+  background: #ff8fa3;
+  transform: rotate(45deg);
+}
+.astrion-checks .bad .mark::after { transform: rotate(-45deg); }
+
+/* The buttons wait for the checklist, so the result is read before choosing. */
+.astrion-dialog:has(.astrion-checks) .astrion-dialog-actions {
+  opacity: 0;
+  animation: astrion-check-in 0.35s ease-out 1.4s forwards;
+}
+
+@keyframes astrion-check-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
 .astrion-dialog.is-leaving,
 .astrion-dialog.is-leaving::backdrop { animation: astrion-dialog-out 0.26s ease-in forwards; }
 
@@ -84,5 +152,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .astrion-dialog,
-  .astrion-dialog::backdrop { animation-duration: 0.01ms !important; }
+  .astrion-dialog::backdrop,
+  .astrion-checks li,
+  .astrion-dialog-actions { animation-duration: 0.01ms !important; animation-delay: 0s !important; }
 }

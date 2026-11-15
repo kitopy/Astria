@@ -77,3 +77,36 @@ export function feedback(m, s) {
         items.push('Un nuevo desafío: intentá enviar imágenes con más detalle sin superar masa y presupuesto.');
     return items;
 }
+
+// Pre-flight check shown before launching: plays the mission in advance with the same rules as the
+// flight, so the review can say in plain words whether energy and data are enough.
+// The surprise problem can appear between the two photos or just before sending, so both cases
+// are tried and energy only counts as enough if it works in both.
+export function preflight(s, reframeEnergy) {
+    const flies = (reframeBeforeSending) => {
+        let m = launch(s);
+        m = advance(m, s);
+        if (m.energy < s.cameraPower) return false;
+        m = capture(m, s);
+        if (!reframeBeforeSending) {
+            if (m.energy < reframeEnergy) return false;
+            m = { ...m, energy: m.energy - reframeEnergy };
+        }
+        m = advance(m, s);
+        if (m.energy < s.cameraPower) return false;
+        m = capture(m, s);
+        if (reframeBeforeSending) {
+            if (m.energy < reframeEnergy) return false;
+            m = { ...m, energy: m.energy - reframeEnergy };
+        }
+        m = advance(m, s);
+        return m.energy >= s.antennaPower;
+    };
+    return {
+        rocket: s.valid,
+        tooHeavy: s.mass > limits.mass,
+        tooExpensive: s.cost > limits.budget,
+        energy: s.valid && flies(false) && flies(true),
+        data: s.rate >= s.data * 2, // both photos must fit in the single transmission
+    };
+}

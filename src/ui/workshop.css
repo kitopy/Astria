@@ -190,8 +190,6 @@
 
 .ws-meters { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; padding: 18px 26px; }
 .ws-meters .ws-meter + .ws-meter { margin-top: 0; }
-.ws-status { text-align: center; margin: 10px 0 0; font-size: 18px; color: var(--gold); text-shadow: 0 2px 8px #000; }
-.ws-status.over { color: var(--warn); }
 
 /* ---------- Test: flight plan ---------- */
 
@@ -213,10 +211,6 @@
 .ws-photo.taken { border-style: solid; border-color: var(--lilac); color: var(--soft); background: rgba(208, 144, 240, 0.1); }
 .ws-photo.sent { border-style: solid; border-color: var(--gold); color: var(--gold); background: rgba(255, 217, 168, 0.1); }
 
-.ws-specs { margin: 18px 0 0; font-size: 17px; border-top: 1px solid var(--line); padding-top: 10px; }
-.ws-specs div { display: flex; justify-content: space-between; margin: 10px 0; }
-.ws-specs dt { color: var(--muted); }
-.ws-specs dd { margin: 0; font-weight: 700; }
 
 .ws-caption { text-align: center; padding: 18px 24px; font-size: 20px; color: var(--soft); }
 .ws-caption strong { display: block; font-family: 'Audiowide', sans-serif; font-weight: 400; font-size: 28px; color: var(--ink); margin-bottom: 4px; }
@@ -271,7 +265,6 @@
 .ws-mini-meters .ws-meter-head span { font-size: 14px; }
 .ws-mini-meters .ws-meter-head strong { font-size: 20px; }
 .ws-mini-meters .ws-meter-bar { height: 10px; }
-.ws-title-gap { margin-top: 26px; }
 
 /* NOAH as a small speech bubble under the title (instead of the big bottom bar) */
 .ws--wizard .ws-footer { left: 50%; right: auto; bottom: auto; top: 250px; height: auto; width: max-content; max-width: 1200px; transform: translateX(-50%); }
