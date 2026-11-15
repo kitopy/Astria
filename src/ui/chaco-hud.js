@@ -18,6 +18,12 @@ export function satellitePreview(design) {
   const wing = `solar-${design.solar}`;
   return `<div class="flight-satellite ${design.solar === 'large' ? 'extended' : ''}">${part(wing,'preview-wing left')}${part(wing,'preview-wing right')}${part('body','preview-body')}${part(`camera-${design.camera}`,'preview-camera')}${part(`battery-${design.battery}`,'preview-battery')}${part(`antenna-${design.antenna}`,'preview-antenna')}</div>`;
 }
+// How a photo is named on screen: the old archive year, or "Hoy" for the recent one.
+// The first pass shows the Chaco in 1985 and the second one today, so the two photos make a "before and after".
+function photoLabel(year) {
+  return year >= 2020 ? `Hoy · ${year}` : String(year);
+}
+
 // True when the satellite is stopped over the forest and can take this pass's photo.
 export function canCapture(mission, specs, flight) {
   const phase = flight.gate;
@@ -36,7 +42,7 @@ export function createChacoHUD(scene, design, onAction) {
     <p class="status-sun" data-hud="sun">Con luz solar</p>
   </aside>
   <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2></div><div class="sensor-window"><canvas aria-label="Vista recreada del Chaco con imágenes de archivo"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record" data-hud="sensor-year">ARCHIVO · 1985</span></div><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
-  <figure class="photo-pop hud-panel" aria-live="polite" hidden><img alt=""><figcaption></figcaption></figure>
+  <div class="photo-pop hud-panel" aria-live="polite" hidden></div>
   <section class="flight-action-menu hud-panel" aria-label="Ventana de observación" hidden>
     <h2 data-hud="action-title">El Chaco está a la vista</h2>
     <div class="flight-action-choices">
@@ -116,7 +122,7 @@ export function createChacoHUD(scene, design, onAction) {
         <figure>
           ${photo.shot?.image ? `<img src="${photo.shot.image}" alt="Foto ${i + 1}">` : `<span class="send-placeholder">Foto ${i + 1}</span>`}
           <div class="send-blocks">${'<i></i>'.repeat(photo.blocks)}</div>
-          <figcaption>${photo.shot?.year ?? `Foto ${i + 1}`}</figcaption>
+          <figcaption>${photo.shot?.year ? photoLabel(photo.shot.year) : `Foto ${i + 1}`}</figcaption>
         </figure>`).join('')}
       </div>
       <div class="astrion-dialog-actions"><button type="button" class="primary" data-send>Enviar · −${specs.antennaPower}</button></div>`;
@@ -214,7 +220,7 @@ export function createChacoHUD(scene, design, onAction) {
       root.classList.toggle('action-menu-open', actionAvailable);
       root.querySelector('.map-satellite')?.classList.toggle('action-ready', actionAvailable);
       if (actionAvailable) {
-        get('action-title').textContent = phase === 1 ? 'Primera vista del Chaco' : 'Segunda vista del Chaco';
+        get('action-title').textContent = phase === 1 ? 'El Chaco en 1985' : 'El Chaco hoy';
         get('action-cost').textContent = `−${specs.cameraPower}`;
         this.positionActionMenu();
       }
@@ -227,16 +233,23 @@ export function createChacoHUD(scene, design, onAction) {
       root.querySelectorAll('.console-action').forEach(button=>button.classList.toggle('is-cued',button.dataset.flight===command));
     },
     // The photo that was just taken, in a box next to the satellite for a few seconds.
-    showPhoto(shot){
+    // With the second photo, both appear side by side: the "before and after" the mission is about.
+    showPhoto(shot, shots = [shot]){
       const pop=root.querySelector('.photo-pop');
-      pop.querySelector('img').src=shot.image;
-      pop.querySelector('img').alt=`Foto del Chaco, ${shot.year}`;
-      pop.querySelector('figcaption').textContent=`Foto ${shot.year}`;
+      const pair=shots.length>=2;
+      const shown=pair?shots.slice(0,2):[shot];
+      pop.innerHTML=`${pair?'<h2>¡Mirá cómo cambió!</h2>':''}<div class="photo-pop-row">${shown.map(()=>'<figure><img alt=""><figcaption></figcaption></figure>').join('')}</div>`;
+      pop.querySelectorAll('figure').forEach((figure,i)=>{
+        figure.querySelector('img').src=shown[i].image;
+        figure.querySelector('img').alt=`Foto del Chaco, ${shown[i].year}`;
+        figure.querySelector('figcaption').textContent=photoLabel(shown[i].year);
+      });
+      pop.classList.toggle('is-pair',pair);
       pop.hidden=false;
       pop.classList.remove('is-new');void pop.offsetWidth;pop.classList.add('is-new'); // replay the entrance
       this.positionActionMenu();
       clearTimeout(this.photoTimer);
-      this.photoTimer=setTimeout(()=>{pop.hidden=true;},3500);
+      this.photoTimer=setTimeout(()=>{pop.hidden=true;},pair?5000:3500);
     },
     // Keeps the boxes that belong to the satellite (photo menu, last photo) next to it while the map moves.
     positionActionMenu(){

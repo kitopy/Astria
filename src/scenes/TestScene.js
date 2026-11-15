@@ -53,7 +53,7 @@ export class TestScene extends Phaser.Scene {
     if (!this.mission) { this.scene.start('Build', { design: this.design }); return; }
     this.hud = createChacoHUD(this, this.design, action => this.handleAction(action));
     this.sensor=new SatelliteSensor(this.hud.sensorCanvas,this.design,()=>{if(this.hud){this.hud.ready=!!this.missionMap?.ready;this.render();}},message=>this.hud?.say(message));
-    this.hud.say('Vamos al Chaco: tomamos dos fotos del bosque y las enviamos a la Tierra.');
+    this.hud.say('Vamos a ver el bosque del Chaco en 1985 y hoy.');
     this.missionMap = new ChacoMap(this.hud.mapElement,
       () => { this.hud.ready = this.sensor.ready; this.render(); this.missionMap.update(this.flight); },
       () => { this.hud.say('No se pudo preparar una parte del mapa. Podés volver al taller o recargar la página.'); },
@@ -82,7 +82,7 @@ export class TestScene extends Phaser.Scene {
         this.updateSensor();
         const shot=action==='capture'?this.sensor.capture(this.mission.phase):null;
         this.mission = action === 'capture' ? capture(this.mission, this.specs) : transmit(this.mission, this.specs);
-        if(shot){this.sensorShots.push(shot);this.hud.showPhoto(shot);}
+        if(shot){this.sensorShots.push(shot);this.hud.showPhoto(shot,this.sensorShots);}
         this.sensorShots.forEach((photo,i)=>{photo.delivered=i<this.mission.delivered;});
         this.hud.showShots(this.sensorShots);
         if(shot){const panel=this.hud.root.querySelector('.sensor-window');panel.classList.remove('taking-photo');void panel.offsetWidth;panel.classList.add('taking-photo');}
