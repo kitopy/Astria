@@ -1,16 +1,13 @@
 import { noahSpeak, noahStop } from './noahVoice.js';
 import { showDialog } from './dialog.js';
+import { frames } from './satellite.js';
 import { phases } from '../game/model.js';
 import { atGate } from '../game/chaco-flight.js';
 import { cloudCover, obstacleInfo, obstacleIntensity, REFRAME_ENERGY } from '../game/chaco-visibility.js';
 import './chaco.css';
 
 const base = import.meta.env.BASE_URL;
-const partRect = {
-  body: [50,50,340,350], 'solar-small':[440,110,350,230], 'solar-large':[800,105,450,240],
-  'camera-simple':[70,460,300,330], 'camera-detail':[425,470,395,320], 'battery-light':[900,470,240,320],
-  'battery-long':[35,885,380,340], 'antenna-basic':[500,870,240,350], 'antenna-fast':[820,835,430,390]
-};
+const partRect = frames; // same atlas rectangles as the workshop (ui/satellite.js)
 function part(frame, className) {
   return `<svg class="${className}" viewBox="${partRect[frame].join(' ')}" aria-hidden="true"><image href="${base}assets/satellite-modules.png" width="1280" height="1280"/></svg>`;
 }
