@@ -289,3 +289,30 @@
 .ws-next .ws-btn { animation: ws-pop 0.35s ease-out; }
 .ws-slot { border-color: rgba(208, 144, 240, 0.7); background: rgba(28, 10, 51, 0.6); }
 .ws-mini-meters .ws-meter-bar { background: rgba(255, 255, 255, 0.22); }
+
+/* Subtle cue that the Chaco comparison is the next step after a successful flight. */
+.ws-next-comparison {
+  animation: ws-next-glow 5s ease-in-out infinite;
+  border-color: rgba(208, 144, 240, 0.72);
+}
+.ws-next-label {
+  display: inline-block;
+  margin: 0 0 10px;
+  color: #eadbff;
+  font-family: 'Audiowide', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  animation: ws-next-label-glow 5s ease-in-out infinite;
+}
+.ws-next-comparison > .ws-title { text-shadow: 0 0 10px rgba(240, 176, 240, 0.22); }
+@keyframes ws-next-glow {
+  0%, 100% { box-shadow: 0 12px 40px rgba(10, 4, 25, 0.45); border-color: rgba(208, 144, 240, 0.55); }
+  50% { box-shadow: 0 12px 46px rgba(10, 4, 25, 0.45), 0 0 18px rgba(208, 144, 240, 0.2); border-color: rgba(232, 199, 255, 0.78); }
+}
+@keyframes ws-next-label-glow {
+  0%, 100% { opacity: 0.82; }
+  50% { opacity: 1; text-shadow: 0 0 12px rgba(232, 199, 255, 0.34); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-next-comparison, .ws-next-label { animation: none; }
+}

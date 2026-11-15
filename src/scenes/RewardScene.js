@@ -50,11 +50,19 @@ export class RewardScene extends Phaser.Scene {
       <p>${success ? 'Diseñaste. Probaste. Descubriste.' : 'Tu próxima idea puede cambiar el resultado.'}</p>`;
 
     const right=ui.area('right');
+    right.classList.toggle('ws-next-comparison', success);
     right.innerHTML=`<h2 class="ws-title">El Chaco: antes y después</h2>
       <div class="saved-sensor-photos historical-sensor-photos">
         <figure><img src="${BASE}${comparisonCase.before}" alt="Antes: Chaco paraguayo en ${comparisonCase.beforeYear}" data-year="${comparisonCase.beforeYear}"><figcaption>Antes · ${comparisonCase.beforeYear}</figcaption></figure>
         <figure><img src="${BASE}${comparisonCase.after}" alt="Después: el mismo sector en ${comparisonCase.afterYear}" data-year="${comparisonCase.afterYear}"><figcaption>Después · ${comparisonCase.afterYear}</figcaption></figure>
       </div><p class="ws-story">El mismo sector, cuarenta años después. Son imágenes de archivo Landsat / NASA: tu misión recrea la observación. Ahora podés investigar qué cambió.</p>`;
+
+    if (success) {
+      const nextLabel = document.createElement('span');
+      nextLabel.className = 'ws-next-label';
+      nextLabel.textContent = 'SIGUIENTE MISIÓN';
+      right.prepend(nextLabel);
+    }
 
     // The full historical pair is shared with the investigation screen.
     ui.area('actions').innerHTML = success
