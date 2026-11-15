@@ -1,7 +1,7 @@
 {
-  "name": "astria",
+  "name": "astrion",
   "version": "1.0.0",
-  "description": "Videojuego para hackaton.",
+  "description": "ASTRION: educational space mission game for NASA Space Apps Challenge 2026.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,16 +11,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kitopy/Astria.git"
+    "url": "git+https://github.com/kitopy/astrion.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/kitopy/Astria/issues"
+    "url": "https://github.com/kitopy/astrion/issues"
   },
-  "homepage": "https://github.com/kitopy/Astria#readme",
+  "homepage": "https://github.com/kitopy/astrion#readme",
   "dependencies": {
     "maplibre-gl": "^6.18.0",
     "phaser": "^4.2.1",
