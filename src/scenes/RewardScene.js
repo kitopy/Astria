@@ -12,8 +12,9 @@ function whatFailed(m) {
   return { text: 'La antena no pudo enviar todas las fotos.', part: 'antenna' };
 }
 
-// Last step of the mission. Success: a celebration with the two photos taken (already analyzed in
-// Observe). Failure: what was missing, the part to blame blinking on the satellite, and one button to fix it.
+// Last screen of the game. Success: the one celebration, with the two photos taken (already analyzed in
+// Observe) and a button to play again. Failure: what was missing, the part to blame blinking on the
+// satellite, and one button to fix it.
 export class RewardScene extends Phaser.Scene {
   constructor() {
     super('Reward');
@@ -55,8 +56,8 @@ export class RewardScene extends Phaser.Scene {
           <img src="${shot.image}" alt="Foto del Chaco, ${shot.year}">
           <figcaption>${shot.year >= 2020 ? 'Hoy' : shot.year}</figcaption>
         </figure>`).join('');
-      ui.area('actions').innerHTML = actionButton('finish', 'Terminar ›', true);
-      ui.bind({ finish: () => this.scene.start('Finale') });
+      ui.area('actions').innerHTML = actionButton('again', 'Jugar de nuevo', true);
+      ui.bind({ again: () => this.scene.start('Menu') });
     } else {
       const failed = whatFailed(m);
       below.innerHTML = `<p class="ws-result-reason">${failed.text}</p>`;
