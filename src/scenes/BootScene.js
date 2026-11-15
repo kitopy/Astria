@@ -2,6 +2,24 @@ import Phaser from 'phaser';
 import { DESIGN, centerDesignArea } from '../ui/layout.js';
 import { prepareEarth } from '../ui/earth3d.js';
 
+const VOICE_KEY = 'astria-noah-voice';
+
+// localStorage can fail (private window, blocked storage): then the voice just starts on.
+function readVoicePreference() {
+  try {
+    return localStorage.getItem(VOICE_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
+function saveVoicePreference(on) {
+  try {
+    localStorage.setItem(VOICE_KEY, on ? 'on' : 'off');
+  } catch {
+    /* Saving is optional. */
+  }
+}
+
 // Loads every image and font once, before the game starts.
 // Other scenes then just use the keys ('bg-menu', 'Cinzel', ...).
 export class BootScene extends Phaser.Scene {
@@ -39,8 +57,12 @@ export class BootScene extends Phaser.Scene {
 
   create() {
     prepareEarth(); // starts loading the 3D Earth in the background; it's ready by the workshop
-    // NOAH's voice starts ON: it helps players who read more slowly. The toggle can turn it off.
-    if (this.registry.get('noahVoice') === undefined) this.registry.set('noahVoice', true);
+    // NOAH's voice starts ON: it helps players who read more slowly. The toggle can turn it off,
+    // and that choice is remembered after reloading the page.
+    if (this.registry.get('noahVoice') === undefined) this.registry.set('noahVoice', readVoicePreference());
+    // Every voice switch (station, workshop, flight, investigation) changes this registry value,
+    // so saving here covers all of them.
+    this.registry.events.on('changedata-noahVoice', (_parent, value) => saveVoicePreference(value));
     const localHost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
     this.scene.start(localHost && new URLSearchParams(window.location.search).get('dev') === '1' ? 'DevTools' : 'Menu');
   }
