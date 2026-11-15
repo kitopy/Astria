@@ -19,16 +19,6 @@ const SNAP_DISTANCE = 300; // dropping a piece closer than this to the satellite
 const AUTO_NEXT_MS = 1500; // after mounting a part for the first time, go to the next one by itself
 const OPTION_SLIDE = 140; // how far (px) the options slide in from / out to the sides between steps
 
-// The number that matters for each part type, plus mass and cost (shown under an option on hover).
-function partNumbers(kind, part) {
-  const key = {
-    camera: `${part.power} de energía por foto`,
-    solar: `+${part.generation} de energía con luz`,
-    battery: `Guarda ${part.capacity} de energía`,
-    antenna: `Envía ${part.rate} bloques`,
-  }[kind];
-  return `${key} · ${part.mass} kg · ${part.cost} créditos`;
-}
 
 // Step 1 of the mission: assemble the satellite one part at a time, then review.
 export class BuildScene extends Phaser.Scene {
@@ -322,9 +312,9 @@ export class BuildScene extends Phaser.Scene {
     // Dark shadow keeps the labels readable over the bright clouds of the Earth.
     const name = this.add.text(0, 160, part.name, { fontFamily: 'Audiowide', fontSize: '32px', color: '#ffffff' }).setOrigin(0.5).setPadding(10).setShadow(0, 2, '#0b0618', 10, false, true);
     const benefit = this.add.text(0, 205, part.benefit, { fontFamily: 'Quicksand', fontSize: '22px', fontStyle: 'bold', color: '#e9defc' }).setOrigin(0.5).setPadding(10).setShadow(0, 2, '#0b0618', 10, false, true);
-    // Hidden until the pointer is over the option: the trade-off and the numbers.
+    // Hidden until the pointer is over the option: the trade-off, in words.
     const details = this.add
-      .text(0, 250, `Pero ${part.tradeoff.toLowerCase()}\n${partNumbers(kind, part)}`, {
+      .text(0, 250, `Pero ${part.tradeoff.toLowerCase()}`, { // the trade-off in words, no numbers
         fontFamily: 'Quicksand', fontSize: '19px', fontStyle: 'bold', color: CSS.pink, align: 'center', lineSpacing: 6,
         wordWrap: { width: 380 },
         backgroundColor: 'rgba(28, 10, 51, 0.88)', // readable over the bright clouds of the Earth
