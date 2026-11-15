@@ -142,10 +142,34 @@ function speakWithBrowser(text) {
 // In development, every line NOAH says is collected here, so scripts can list what needs recording.
 if (import.meta.env.DEV) window.__noahLines = new Set();
 
+// NOAH never talks over a dialog: a line asked for while a dialog is open waits until it closes
+// (only the latest one; if another dialog opens right away, it keeps waiting).
+let pending = null;
+let waitingOn = null; // the dialog the pending line waits for
+function waitForDialog(dialog, text) {
+  pending = text;
+  if (waitingOn === dialog) return; // already listening to this dialog: only the text is updated
+  waitingOn = dialog;
+  dialog.addEventListener('close', () => {
+    if (waitingOn !== dialog) return;
+    const line = pending;
+    pending = null;
+    waitingOn = null;
+    if (line !== null) setTimeout(() => noahSpeak(line), 150); // after the closing animation
+  }, { once: true });
+}
+
 // Says the text with NOAH's voice (stops whatever she was saying before).
 // The "NOAH // TITLE" first line used on some screens is a label, so it isn't read.
 export function noahSpeak(text) {
-  noahStop();
+  noahStop({ keepPending: true });
+  const openDialog = document.querySelector('dialog[open]');
+  if (openDialog) {
+    waitForDialog(openDialog, text);
+    return;
+  }
+  pending = null; // no dialog open: nothing is waiting any more
+  waitingOn = null;
   if (import.meta.env.DEV) window.__noahLines.add(speechText(text));
   const key = voiceKey(text);
   if (recorded.has(key)) {
@@ -156,7 +180,11 @@ export function noahSpeak(text) {
 }
 
 // Stops NOAH (recorded clip or browser voice). Use it instead of speechSynthesis.cancel().
-export function noahStop() {
+export function noahStop({ keepPending = false } = {}) {
+  if (!keepPending) {
+    pending = null;
+    waitingOn = null;
+  }
   stopClip();
   window.speechSynthesis?.cancel();
 }

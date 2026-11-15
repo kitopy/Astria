@@ -4,6 +4,7 @@
 //   npm run voice -- --dry-run    show which lines would be generated and how many characters (credits)
 //   npm run voice                 generate the missing MP3s into public/assets/voice/
 //   npm run voice -- --prune      also delete the MP3s of lines the game no longer says
+//   npm run voice -- --force      record every line again (e.g. after changing the voice or model)
 //
 // Needs a .env.local file (never committed, see .gitignore) with:
 //   ELEVENLABS_API_KEY=sk_...
@@ -62,7 +63,7 @@ for (const text of [...workshopLines(catalog, REFRAME_ENERGY), ...otherLines, ..
 
 mkdirSync(OUT_DIR, { recursive: true });
 const manifest = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, 'utf8')) : { lines: {} };
-const missing = [...lines].filter(([key]) => !existsSync(new URL(`${key}.mp3`, OUT_DIR)));
+const missing = [...lines].filter(([key]) => args.has('--force') || !existsSync(new URL(`${key}.mp3`, OUT_DIR)));
 const characters = missing.reduce((sum, [, text]) => sum + text.length, 0);
 
 console.log(`${lines.size} líneas en total, ${missing.length} sin audio (${characters} caracteres ≈ créditos).`);
@@ -89,7 +90,10 @@ for (const [i, [key, text]] of (apiKey ? missing : []).entries()) { // --prune w
     headers: { 'xi-api-key': apiKey, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
     body: JSON.stringify({
       text,
-      model_id: 'eleven_multilingual_v2',
+      // Turbo v2.5 lets us force Spanish (language_code). Multilingual v2 guesses the language per
+      // line and sometimes read short lines with an English accent.
+      model_id: 'eleven_turbo_v2_5',
+      language_code: 'es',
       // Lower stability = more expressive; style adds intensity. Tuned for a confident, "epic" guide.
       voice_settings: { stability: 0.4, similarity_boost: 0.8, style: 0.35, use_speaker_boost: true },
     }),

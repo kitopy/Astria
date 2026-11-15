@@ -4,6 +4,7 @@ import { catalog, readDesign } from '../game/design.js';
 import { atGate, changeSpeed, initialFlight, pauseFlight, startFlight } from '../game/chaco-flight.js';
 
 const AUTO_FLY_MS = 1200; // pause before the satellite moves on by itself (time to see what happened)
+const AUTO_FLY_FIRST_MS = 2400; // before the very first departure, so the opening line isn't cut
 import { beginReframe, cloudCover, drawObstacle, initialVisibility, obstacleInfo, tickVisibility } from '../game/chaco-visibility.js';
 import { preloadArt } from '../ui/mission-ui.js';
 import { canCapture, createChacoHUD, satellitePreview } from '../ui/chaco-hud.js';
@@ -114,7 +115,9 @@ export class TestScene extends Phaser.Scene {
       && this.visibility.status !== 'blocked' && this.visibility.status !== 'adjusting'
       && this.flight.gate < 3 && !canCapture(this.mission, this.specs, this.flight);
     if (!waiting || document.hidden) { this.autoFlyIn = null; return; }
-    this.autoFlyIn = (this.autoFlyIn ?? AUTO_FLY_MS) - delta;
+    // The first departure waits longer: NOAH's opening line starts when the welcome dialog closes.
+    const wait = this.flight.progress === 0 ? AUTO_FLY_FIRST_MS : AUTO_FLY_MS;
+    this.autoFlyIn = (this.autoFlyIn ?? wait) - delta;
     if (this.autoFlyIn > 0) return;
     this.autoFlyIn = null;
     this.flight = startFlight(this.flight);
