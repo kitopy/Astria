@@ -86,7 +86,7 @@ const observe = [
 
 // FinaleScene
 const finale = [
-  'NOAH // ¡GRACIAS, EXPLORADOR!\nDetrás de cada misión hay personas que diseñan, prueban y descubren.\nVos también podés construir, descubrir y explorar el universo.',
+  '¡Gracias, explorador! Vos también podés explorar el universo.',
 ];
 
 export const otherLines = [...station, ...flight, ...reward, ...observe, ...finale];
