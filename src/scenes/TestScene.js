@@ -11,11 +11,13 @@ import { ChacoMap } from '../ui/chaco-map.js';
 import { SatelliteSensor } from '../ui/satellite-sensor.js';
 import { centerDesignArea } from '../ui/layout.js';
 
+// Dev picker (?dev=1): each scenario starts a little before its stop, so the arrival plays like in the
+// normal game (the satellite flies in, the map follows it, the stop's menu or dialog opens).
 const DEBUG_SCENARIOS = {
-  'first-observation': { gate: 1, progress: .25, phase: 1, captured: [], photoPhases: [], energy: 'full' },
-  'second-observation': { gate: 2, progress: .75, phase: 2, captured: [1], photoPhases: [1], energy: 'full' },
+  'first-observation': { gate: 0, progress: .17, phase: 0, captured: [], photoPhases: [], energy: 'full' },
+  'second-observation': { gate: 1, progress: .65, phase: 1, captured: [1], photoPhases: [1], energy: 'full' },
   'return-low-battery': { gate: 2, progress: .75, phase: 2, captured: [1], photoPhases: [1], energy: 0 },
-  transmission: { gate: 3, progress: 1, phase: 3, captured: [1, 2], photoPhases: [1, 2], energy: 'full' },
+  transmission: { gate: 2, progress: .92, phase: 2, captured: [1, 2], photoPhases: [1, 2], energy: 'full' },
 };
 
 export class TestScene extends Phaser.Scene {
