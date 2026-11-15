@@ -104,28 +104,9 @@
   right: 60px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end; /* only the voice switch, on the right */
 }
 
-.ws-steps { display: flex; align-items: center; list-style: none; margin: 0; padding: 0; }
-.ws-steps li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'Audiowide', sans-serif;
-  font-size: 20px;
-  color: var(--muted);
-  padding: 10px 22px 10px 10px;
-  border: 1.5px solid rgba(208, 144, 240, 0.3);
-  border-radius: 40px;
-  background: rgba(20, 8, 45, 0.6);
-}
-.ws-steps li + li { margin-left: 44px; position: relative; }
-.ws-steps li + li::before { content: ''; position: absolute; left: -44px; top: 50%; width: 44px; height: 2px; background: rgba(208, 144, 240, 0.4); }
-.ws-steps span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid currentColor; font-size: 16px; }
-.ws-steps li.done { color: var(--lilac); border-color: var(--line); }
-.ws-steps li.current { color: var(--glow); border-color: var(--glow); }
-.ws-steps li.current span { background: var(--glow); color: var(--deep); border-color: var(--glow); }
 
 .ws-left,
 .ws-right {

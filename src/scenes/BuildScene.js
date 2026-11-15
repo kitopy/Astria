@@ -68,7 +68,7 @@ export class BuildScene extends Phaser.Scene {
       .setShadow(0, 0, CSS.glow, 28, false, true);
     this.options = [];
 
-    this.ui = mount(this, 0, { wizard: true });
+    this.ui = mount(this, { wizard: true });
     this.ui.bind({
       next: () => this.goTo(this.nextStep()),
       goto: (button) => this.goTo(button.dataset.kind === 'review' ? REVIEW : kinds.indexOf(button.dataset.kind)),

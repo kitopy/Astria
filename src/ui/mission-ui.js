@@ -6,13 +6,12 @@ import { noahSpeak, noahStop } from './noahVoice.js';
 // Phaser draws the background and the satellite; this module puts an HTML layer on top
 // with the panels, NOAH and the buttons. Styles are in workshop.css.
 //
-//   ┌──────────── top bar: Menú · 1 Construir — 2 Probar — 3 Descubrir · Voz ───────────┐
+//   ┌──────────────────────────────────────────────────────── top bar: Voz de NOAH ───┐
 //   │ [left panel]               satellite (Phaser)                     [right panel] │
 //   │                            [center: meters / caption]                           │
 //   └──────────── NOAH message ─────────────────────────────────── [action buttons] ───┘
 
 const BASE = import.meta.env.BASE_URL;
-const STEPS = ['Construir', 'Probar', 'Descubrir'];
 
 export function preloadArt(scene) {
   for (const key of ['earth', 'satellite-modules']) {
@@ -57,20 +56,16 @@ export function actionButton(action, label, primary = false, disabled = false) {
   return `<button data-action="${action}" class="ws-btn ${primary ? 'ws-primary' : ''}" ${disabled ? 'disabled' : ''}>${label}</button>`;
 }
 
-// Builds the HTML layer for a step (0 = Construir, 1 = Probar, 2 = Descubrir) and returns helpers:
+// Builds the HTML layer of a mission screen and returns helpers:
 //   ui.area(name)   → the element to fill: 'left' | 'right' | 'center' | 'actions'
 //   ui.say(text)    → NOAH message (read aloud if the voice is on)
 //   ui.bind({...})  → click handlers by data-action
 // options.wizard: step-by-step layout (narrow summary on the left, the current task on the right).
-export function mount(scene, step, options = {}) {
+export function mount(scene, options = {}) {
   const root = document.createElement('div');
   root.className = options.wizard ? 'ws ws--wizard' : 'ws';
   root.innerHTML = `
     <header class="ws-top">
-      <button class="ws-btn ws-small" data-action="menu">‹ Menú</button>
-      <ol class="ws-steps" aria-label="Etapas de la misión">
-        ${STEPS.map((name, i) => `<li class="${i < step ? 'done' : i === step ? 'current' : ''}" ${i === step ? 'aria-current="step"' : ''}><span>${i < step ? '✓' : i + 1}</span>${name}</li>`).join('')}
-      </ol>
       <button class="ws-btn ws-small" data-action="voice" aria-pressed="false"></button>
     </header>
     <section class="ws-panel ws-left" data-area="left"></section>
@@ -122,7 +117,7 @@ export function mount(scene, step, options = {}) {
     },
 
     bind(handlers) {
-      const all = { menu: () => scene.scene.start('Menu'), ...handlers };
+      const all = handlers;
       root.addEventListener('click', (event) => {
         const button = event.target.closest('button[data-action]');
         if (!button || button.disabled) return;

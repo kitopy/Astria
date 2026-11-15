@@ -34,7 +34,7 @@ export class RewardScene extends Phaser.Scene {
     const m = this.mission;
     const s = stats(catalog, this.design);
     const success = m.delivered >= 2;
-    const ui = mount(this, 2);
+    const ui = mount(this);
 
     ui.area('left').innerHTML = `
       <h2 class="ws-title">Resultados</h2>
