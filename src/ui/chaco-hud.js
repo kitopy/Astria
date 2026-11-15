@@ -241,7 +241,7 @@ export function createChacoHUD(scene, design, onAction) {
       const pop=root.querySelector('.photo-pop');
       const pair=shots.length>=2;
       const shown=pair?shots.slice(0,2):[shot];
-      pop.innerHTML=`${pair?'<h2>¡Mirá cómo cambió!</h2>':''}<div class="photo-pop-row">${shown.map(()=>'<figure><img alt=""><figcaption></figcaption></figure>').join('')}</div>`;
+      pop.innerHTML=`<div class="photo-pop-row">${shown.map(()=>'<figure><img alt=""><figcaption></figcaption></figure>').join('')}</div>`;
       pop.querySelectorAll('figure').forEach((figure,i)=>{
         figure.querySelector('img').src=shown[i].image;
         figure.querySelector('img').alt=`Foto del Chaco, ${shown[i].year}`;
