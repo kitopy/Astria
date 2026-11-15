@@ -36,6 +36,7 @@ export function createChacoHUD(scene, design, onAction) {
     <p class="status-sun" data-hud="sun">Con luz solar</p>
   </aside>
   <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2></div><div class="sensor-window"><canvas aria-label="Vista recreada del Chaco con imágenes de archivo"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record" data-hud="sensor-year">ARCHIVO · 1985</span></div><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
+  <figure class="photo-pop hud-panel" aria-live="polite" hidden><img alt=""><figcaption></figcaption></figure>
   <section class="flight-action-menu hud-panel" aria-label="Ventana de observación" hidden>
     <h2 data-hud="action-title">El Chaco está a la vista</h2>
     <div class="flight-action-choices">
@@ -225,22 +226,36 @@ export function createChacoHUD(scene, design, onAction) {
       root.dataset.command=command;
       root.querySelectorAll('.console-action').forEach(button=>button.classList.toggle('is-cued',button.dataset.flight===command));
     },
+    // The photo that was just taken, in a box next to the satellite for a few seconds.
+    showPhoto(shot){
+      const pop=root.querySelector('.photo-pop');
+      pop.querySelector('img').src=shot.image;
+      pop.querySelector('img').alt=`Foto del Chaco, ${shot.year}`;
+      pop.querySelector('figcaption').textContent=`Foto ${shot.year}`;
+      pop.hidden=false;
+      pop.classList.remove('is-new');void pop.offsetWidth;pop.classList.add('is-new'); // replay the entrance
+      this.positionActionMenu();
+      clearTimeout(this.photoTimer);
+      this.photoTimer=setTimeout(()=>{pop.hidden=true;},3500);
+    },
+    // Keeps the boxes that belong to the satellite (photo menu, last photo) next to it while the map moves.
     positionActionMenu(){
-      const menu = root.querySelector('.flight-action-menu');
-      if (menu.hidden || window.innerWidth <= 800) return;
       const satellite = root.querySelector('.map-satellite');
-      if (!satellite) return;
+      if (!satellite || window.innerWidth <= 800) return;
       const marker = satellite.getBoundingClientRect();
       const bounds = root.getBoundingClientRect();
       const gap = 20;
-      const right = marker.right - bounds.left + gap;
-      const left = right + menu.offsetWidth <= bounds.width - gap
-        ? right
-        : marker.left - bounds.left - menu.offsetWidth - gap;
-      const top = Math.max(75, Math.min(marker.top - bounds.top - 25, bounds.height - menu.offsetHeight - 175));
-      menu.style.left = `${Math.max(gap, left)}px`;
-      menu.style.top = `${top}px`;
+      for (const box of root.querySelectorAll('.flight-action-menu, .photo-pop')) {
+        if (box.hidden) continue;
+        const right = marker.right - bounds.left + gap;
+        const left = right + box.offsetWidth <= bounds.width - gap
+          ? right
+          : marker.left - bounds.left - box.offsetWidth - gap;
+        const top = Math.max(75, Math.min(marker.top - bounds.top - 25, bounds.height - box.offsetHeight - 175));
+        box.style.left = `${Math.max(gap, left)}px`;
+        box.style.top = `${top}px`;
+      }
     },
-    destroy(){noahStop();root.remove();}
+    destroy(){clearTimeout(this.photoTimer);noahStop();root.remove();}
   };
 }

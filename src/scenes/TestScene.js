@@ -82,7 +82,7 @@ export class TestScene extends Phaser.Scene {
         this.updateSensor();
         const shot=action==='capture'?this.sensor.capture(this.mission.phase):null;
         this.mission = action === 'capture' ? capture(this.mission, this.specs) : transmit(this.mission, this.specs);
-        if(shot)this.sensorShots.push(shot);
+        if(shot){this.sensorShots.push(shot);this.hud.showPhoto(shot);}
         this.sensorShots.forEach((photo,i)=>{photo.delivered=i<this.mission.delivered;});
         this.hud.showShots(this.sensorShots);
         if(shot){const panel=this.hud.root.querySelector('.sensor-window');panel.classList.remove('taking-photo');void panel.offsetWidth;panel.classList.add('taking-photo');}
