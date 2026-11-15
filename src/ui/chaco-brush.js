@@ -27,7 +27,7 @@ export function createChacoComparison(scene, onAction) {
           <span class="brush-year brush-year-after"><b>2025</b><small>Tu misión · captura simulada</small></span>
           <span class="brush-year brush-year-before"><b>1985</b><small>Dentro de la lupa · archivo NASA</small></span>
           <span class="brush-analysis-toast" data-ui="toast" role="status" aria-live="polite"></span>
-          <span class="brush-cursor" aria-hidden="true"><b>1985</b><small>ARCHIVO NASA</small></span>
+          <span class="brush-cursor" aria-hidden="true"><b>1985</b></span>
           <span class="brush-help">Mové la lupa · Tocá para registrar</span>
           <span class="brush-pins" aria-hidden="true"></span>
         </div>
@@ -101,13 +101,12 @@ export function createChacoComparison(scene, onAction) {
   async function showDiscoveryImpact() {
     const choice = await showDialog(scene, {
       title: '40 años de cambio',
-      text: 'Antes, el bosque era más continuo. Ahora lo atraviesan grandes claros y parcelas.',
+      text: 'Donde había bosque, hoy hay claros.',
       body: `<div class="chaco-impact">
-        <figure><figcaption><strong>1985</strong><span>Archivo NASA</span></figcaption><img src="${base}${comparisonCase.before}" alt="Chaco en 1985: bosque más continuo"></figure>
-        <figure><figcaption><strong>2025</strong><span>Vista de tu misión · simulada</span></figcaption><img src="${base}${comparisonCase.after}" alt="El mismo sector del Chaco en 2025: claros y parcelas entre el bosque"></figure>
-        <p>El mismo lugar, a la misma escala. Comparaste un cambio real del paisaje.</p>
+        <figure><figcaption><strong>1985</strong></figcaption><img src="${base}${comparisonCase.before}" alt="Chaco en 1985: bosque más continuo"></figure>
+        <figure><figcaption><strong>Hoy</strong></figcaption><img src="${base}${comparisonCase.after}" alt="El mismo sector del Chaco en 2025: claros y parcelas entre el bosque"></figure>
       </div>`,
-      actions: [{ label: 'Completar misión', value: 'finish', primary: true }],
+      actions: [{ label: 'Terminar misión', value: 'finish', primary: true }],
     });
     if (choice === 'finish' && root.isConnected) onAction('finish');
   }
@@ -235,15 +234,16 @@ export function createChacoComparison(scene, onAction) {
       while (state.phase === 'interpret' && root.isConnected) {
         const choice = await showDialog(scene, {
           title: '¿Qué descubriste?',
-          text: state.answer ? 'Mirá otra vez: ¿en qué año había más bosque continuo?' : 'Compará tus observaciones. ¿Qué le pasó al bosque?',
+          text: state.answer ? 'Mirá otra vez: ¿cuándo había más bosque?' : '¿Qué le pasó al bosque?',
           body: `<div class="chaco-analysis-preview" aria-label="Comparación del mismo sector en dos fechas">
-            <figure><img src="${base}${comparisonCase.before}" alt="Bosque del Chaco en 1985"><figcaption>1985 · Archivo NASA</figcaption></figure>
-            <figure><img src="${base}${comparisonCase.after}" alt="El mismo sector del Chaco en 2025"><figcaption>2025 · Misión simulada</figcaption></figure>
+            <figure><img src="${base}${comparisonCase.before}" alt="Bosque del Chaco en 1985"><figcaption>1985</figcaption></figure>
+            <figure><img src="${base}${comparisonCase.after}" alt="El mismo sector del Chaco en 2025"><figcaption>Hoy</figcaption></figure>
           </div>`,
           dismissable: false,
           actions: [
-            { label: 'Antes había más bosque', value: 'vegetation', primary: true },
+            // All answers look the same: highlighting one would give the answer away.
             { label: 'Ahora hay más bosque', value: 'growth' },
+            { label: 'Antes había más bosque', value: 'vegetation' },
             { label: 'Apareció un lago', value: 'water' },
           ],
         });
@@ -322,7 +322,7 @@ export function createChacoComparison(scene, onAction) {
     reset();
     showDialog(scene, {
       title: 'Detectives del Chaco',
-      text: 'La imagen es de 2025. La lupa muestra el mismo lugar en 1985. Buscá dos cambios y tocá para registrarlos.',
+      text: 'La lupa muestra el bosque en 1985. Buscá dos lugares que cambiaron y tocalos.',
       actions: [{ label: 'Investigar', value: 'start', primary: true }],
     });
   }).catch(() => say('No se pudieron cargar las imágenes. Volvé a resultados y probá otra vez.'));
