@@ -15,6 +15,17 @@ ASTRION is an educational web game for the NASA Space Apps Challenge. Players de
 - **UI text and NOAH's lines:** Spanish with *voseo* ("Elegí", "Arrastrá", "Podés").
 - **Code, comments, commit messages and docs for developers:** English.
 
+## Game design direction
+
+The game should feel simple and alive, not like a control panel. Before adding anything, ask: does a 10-year-old need this to play?
+
+- **The game moves by itself.** Only stop and ask the player when there is a real choice or action (mount a part, take the photo, send the photos). Never add a button just to "continue", "pause", "change speed" or "recenter".
+- **Interruptions are dialogs.** Welcome messages, checks and surprise problems use `showDialog()` (high-tech frame, short animation, one or two buttons). Not panels that pile up on the screen.
+- **One action at a time.** If a menu has a main action, don't add a second "skip" option next to it.
+- **Few words.** A title plus one short sentence is usually enough. NOAH's lines are one or two short sentences, and don't repeat what a dialog or button already says.
+- **No extra screens, links or info buttons** (videos, credits, "real case") in the middle of the mission. Put them at the end or not at all.
+- **Ask the team before adding a new feature to a screen** that has already been polished.
+
 ## Visual design: clean, not "AI-looking"
 
 - **No emoji or decorative symbols** (✦, 🚀, ✨) in UI text, labels or buttons.

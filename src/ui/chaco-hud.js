@@ -18,10 +18,16 @@ export function satellitePreview(design) {
   const wing = `solar-${design.solar}`;
   return `<div class="flight-satellite ${design.solar === 'large' ? 'extended' : ''}">${part(wing,'preview-wing left')}${part(wing,'preview-wing right')}${part('body','preview-body')}${part(`camera-${design.camera}`,'preview-camera')}${part(`battery-${design.battery}`,'preview-battery')}${part(`antenna-${design.antenna}`,'preview-antenna')}</div>`;
 }
+// True when the satellite is stopped over the forest and can take this pass's photo.
+export function canCapture(mission, specs, flight) {
+  const phase = flight.gate;
+  return atGate(flight) && [1, 2].includes(phase) && !mission.captured.includes(phase) && mission.energy >= specs.cameraPower;
+}
+
 export function createChacoHUD(scene, design, onAction) {
   const root = document.createElement('section'); root.className = 'chaco-game'; root.setAttribute('aria-label','Guardianes del Chaco: operación del satélite');
   root.innerHTML = `<div class="chaco-map" aria-label="Mapa geográfico de Paraguay"></div><div class="chaco-shadow"></div><div class="weather-fog" aria-hidden="true"></div>
-  <div class="chaco-top-actions"><button data-flight="case">Caso real NASA</button><button data-flight="voice" aria-pressed="false">Voz de NOAH: apagada</button></div>
+  <div class="chaco-top-actions"><button data-flight="voice" aria-pressed="false">Voz de NOAH: apagada</button></div>
   <aside class="chaco-status hud-panel" aria-label="Estado de la misión">
     <div class="status-row"><span>Batería</span><strong data-hud="energy"></strong></div>
     <progress data-hud="battery" aria-label="Energía disponible"></progress>
@@ -29,8 +35,7 @@ export function createChacoHUD(scene, design, onAction) {
     <div class="status-row"><span>Fotos enviadas</span><strong data-hud="delivered">0/2</strong></div>
     <p class="status-sun" data-hud="sun">Con luz solar</p>
   </aside>
-  <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2><span data-hud="sensor-state">Preparando</span></div><div class="sensor-window"><canvas aria-label="Vista recreada del Chaco con imágenes de archivo"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record" data-hud="sensor-year">ARCHIVO · 1985</span></div><p>Archivo Landsat / NASA · observación recreada</p><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
-  <div class="chaco-map-tools"><button data-flight="recenter" aria-label="Volver a centrar Paraguay">Centrar Paraguay</button><button data-flight="speed">Velocidad ×1</button><button data-flight="workshop">Volver al taller</button></div>
+  <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2></div><div class="sensor-window"><canvas aria-label="Vista recreada del Chaco con imágenes de archivo"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record" data-hud="sensor-year">ARCHIVO · 1985</span></div><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
   <section class="flight-action-menu hud-panel" aria-label="Ventana de observación" hidden>
     <h2 data-hud="action-title">El Chaco está a la vista</h2>
     <div class="flight-action-choices">
@@ -48,24 +53,12 @@ export function createChacoHUD(scene, design, onAction) {
   </aside>
   <section class="chaco-bottom"><div class="chaco-noah hud-panel"><span class="chaco-noah-icon" aria-hidden="true">N</span><div><strong>NOAH</strong><p data-hud="noah" aria-live="polite"></p></div><button data-flight="listen" aria-label="Escuchar el mensaje de NOAH">Escuchar</button></div>
   <div class="chaco-controls orbital-console" aria-label="Panel de mando del satélite">
-    <div class="orbital-console-head" data-hud="command-title">Preparando sistema</div>
     <div class="orbital-console-actions">
-      <button data-flight="travel" class="console-action" disabled><span class="console-icon" aria-hidden="true"></span><span class="console-label">Rumbo al Chaco</span></button>
-      <button data-flight="capture" class="console-action" disabled><span class="console-icon" aria-hidden="true"></span><span class="console-label">Tomar foto</span></button>
-      <button data-flight="transmit" class="console-action" disabled><span class="console-icon" aria-hidden="true"></span><span class="console-label">Enviar fotos</span></button>
-      <button data-flight="pause" class="console-action" disabled><span class="console-icon" aria-hidden="true"></span><span class="console-label">Pausar</span></button>
+      <button data-flight="transmit" class="console-action" hidden><span class="console-icon" aria-hidden="true"></span><span class="console-label">Enviar fotos</span></button>
       <button data-flight="finish" class="console-action" hidden><span class="console-icon" aria-hidden="true"></span><span class="console-label">Ver resultados</span></button>
     </div>
   </div></section>
-  <footer class="chaco-sources"><span>Mapa real · recorrido simulado</span><span>NASA GIBS · Natural Earth · MapLibre</span></footer>
-  <dialog class="chaco-case" aria-labelledby="chaco-case-title">
-    <button data-flight="close-case" class="close-case">Cerrar</button>
-    <h2 id="chaco-case-title">Un caso real de nuestro país</h2>
-    <p>NASA fotografió este bosque desde 1985 hasta 2025.</p>
-    <video muted loop playsinline preload="metadata" src="${base}data/chaco-landsat-nasa.mp4" aria-label="Serie histórica Landsat del Chaco paraguayo, 1985 a 2025"></video>
-    <p>El video es real. Tu viaje en el juego es simulado.</p>
-    <p class="case-credit">NASA’s Goddard Space Flight Center · Ross K. Walter (SSAI) · <a href="https://svs.gsfc.nasa.gov/15026/" target="_blank" rel="noopener">Ver en NASA</a></p>
-  </dialog>`;
+  <footer class="chaco-sources"><span>Mapa real · recorrido simulado</span><span>NASA GIBS · Natural Earth · MapLibre</span></footer>`;
   document.body.append(root);
   const get = key => root.querySelector(`[data-hud="${key}"]`);
   // Welcome: the shared game dialog (ui/dialog.js). The flight waits until it's closed.
@@ -118,17 +111,13 @@ export function createChacoHUD(scene, design, onAction) {
     else if(action==='listen')speak();
     else onAction(action);
   });
-  const dialog=root.querySelector('dialog');
-  dialog.addEventListener('close',()=>root.querySelector('video').pause());
   if(!window.speechSynthesis)root.querySelectorAll('[data-flight="voice"],[data-flight="listen"]').forEach(button=>button.disabled=true);
   return {
     root, mapElement:root.querySelector('.chaco-map'), sensorCanvas:root.querySelector('.sensor-window canvas'), ready:false,
     get introOpen(){return introOpen;},
-    get caseOpen(){return dialog.open;},
     setSensorYear(year){get('sensor-year').textContent=`ARCHIVO · ${year}`;},
     showShots(shots){const tray=root.querySelector('.sensor-thumbnails');tray.replaceChildren();for(const [i,shot]of shots.entries()){const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=shot.image;img.alt=`Vista de archivo del Chaco, ${shot.year??`foto ${i+1}`}`;caption.textContent=`${shot.year??`Foto ${i+1}`}${shot.delivered?' · enviada':' · a bordo'}`;figure.append(img,caption);tray.append(figure);}},
     say(text){message=text;get('noah').textContent=text;if(voice)speak();},
-    showCase(){dialog.showModal();const video=root.querySelector('video');video.currentTime=0;video.play().catch(()=>{});}, closeCase(){dialog.close();},
     updateWeather(flight,visibility){
       const cover=cloudCover(flight,visibility), status=visibility.status;
       const info=obstacleInfo(visibility), intensity=obstacleIntensity(flight,visibility);
@@ -146,25 +135,18 @@ export function createChacoHUD(scene, design, onAction) {
     },
     update(mission,specs,flight,visibility){
       const gate=atGate(flight), phase=flight.gate;
-      const info=obstacleInfo(visibility);
       const obstructed=['blocked','adjusting'].includes(visibility.status);
       this.updateWeather(flight,visibility);
-      get('sensor-state').textContent=obstructed&&visibility.kind!=='signal'?(visibility.status==='adjusting'?'Ajustando sensor':info.label):flight.running?'Explorando':gate&&[1,2].includes(phase)?'Sobre el bosque':'En espera';
       root.classList.toggle('panels-deployed',flight.progress>0||flight.running);
       get('captured').textContent=`${mission.captured.length}/2`;get('delivered').textContent=`${mission.delivered}/2`;
       get('energy').textContent=`${mission.energy}/${specs.capacity}`;get('battery').max=specs.capacity;get('battery').value=mission.energy;
             get('sun').textContent=phases[mission.phase].sun?'Con luz solar':'En la sombra: sin recarga';
       root.classList.toggle('in-shadow',!phases[mission.phase].sun);
       const control=action=>root.querySelector(`[data-flight="${action}"]`);
-      control('travel').hidden=phase===3||flight.running;control('travel').disabled=!this.ready||this.introOpen||obstructed;
       if(visibility.status==='blocked'&&this.ready&&!this.introOpen&&!obstacleOpen)openObstacle(visibility,mission.energy);
-      control('travel').querySelector('.console-label').textContent=!gate?'Reanudar viaje':['Rumbo al Chaco','Siguiente pasada','Regreso a Asunción'][phase];
-      control('pause').hidden=!flight.running;control('pause').disabled=!flight.running;
-      control('capture').disabled=!this.ready||!gate||![1,2].includes(phase)||mission.captured.includes(phase)||mission.energy<specs.cameraPower;
-      control('capture').hidden=!gate||![1,2].includes(phase)||mission.captured.includes(phase);
-      control('capture').querySelector('.console-label').textContent=`Tomar foto · −${specs.cameraPower}`;
-      // Only when the photo can be taken: with too little battery, the console offers to keep flying instead.
-      const actionAvailable = this.ready && !this.introOpen && gate && [1, 2].includes(phase) && !mission.captured.includes(phase) && !obstructed && !control('capture').disabled;
+      // The satellite flies by itself (TestScene). Only two moments ask the player to act:
+      // over the forest, the photo menu next to the satellite; in Asunción, send and see the results.
+      const actionAvailable = this.ready && !this.introOpen && !obstructed && canCapture(mission,specs,flight);
       const actionMenu = root.querySelector('.flight-action-menu');
       actionMenu.hidden = !actionAvailable;
       root.classList.toggle('action-menu-open', actionAvailable);
@@ -175,15 +157,12 @@ export function createChacoHUD(scene, design, onAction) {
         this.positionActionMenu();
       }
       control('transmit').disabled=!this.ready||!gate||phase!==3||mission.sent||!mission.photos.length||mission.energy<specs.antennaPower;
-      control('transmit').hidden=phase!==3||mission.sent;
+      control('transmit').hidden=phase!==3||mission.sent||control('transmit').disabled;
       control('transmit').querySelector('.console-label').textContent=`Enviar fotos · −${specs.antennaPower}`;
-      control('finish').hidden=phase!==3;control('finish').querySelector('.console-label').textContent=mission.sent?'Ver resultados':'Revisar resultados';
-      const command=obstructed?'reframe':flight.running?'pause':phase===3?(control('transmit').disabled?'finish':'transmit'):!control('capture').hidden&&!control('capture').disabled?'capture':'travel';
-      const titles={travel:'Ruta',capture:'Cámara',transmit:'Antena',finish:'Misión',reframe:'Ajuste',pause:'En vuelo'};
+      control('finish').hidden=phase!==3||!control('transmit').hidden;
+      const command=phase===3?(control('transmit').hidden?'finish':'transmit'):'';
       root.dataset.command=command;
-      get('command-title').textContent=!this.ready?'Preparando sistema':titles[command];
-      root.querySelectorAll('.console-action').forEach(button=>button.classList.toggle('is-cued',button.dataset.flight===command&&!button.disabled));
-      control('speed').textContent=`Velocidad ×${flight.speed}`;
+      root.querySelectorAll('.console-action').forEach(button=>button.classList.toggle('is-cued',button.dataset.flight===command));
     },
     positionActionMenu(){
       const menu = root.querySelector('.flight-action-menu');
@@ -201,6 +180,6 @@ export function createChacoHUD(scene, design, onAction) {
       menu.style.left = `${Math.max(gap, left)}px`;
       menu.style.top = `${top}px`;
     },
-    destroy(){noahStop();root.querySelector('video').pause();root.remove();}
+    destroy(){noahStop();root.remove();}
   };
 }

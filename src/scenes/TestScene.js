@@ -2,9 +2,11 @@ import Phaser from 'phaser';
 import { advance, capture, launch, stats, transmit } from '../game/model.js';
 import { catalog, readDesign } from '../game/design.js';
 import { atGate, changeSpeed, initialFlight, pauseFlight, startFlight } from '../game/chaco-flight.js';
-import { beginReframe, cloudCover, drawObstacle, initialVisibility, obstacleInfo, REFRAME_ENERGY, tickVisibility } from '../game/chaco-visibility.js';
+
+const AUTO_FLY_MS = 1200; // pause before the satellite moves on by itself (time to see what happened)
+import { beginReframe, cloudCover, drawObstacle, initialVisibility, obstacleInfo, tickVisibility } from '../game/chaco-visibility.js';
 import { preloadArt } from '../ui/mission-ui.js';
-import { createChacoHUD, satellitePreview } from '../ui/chaco-hud.js';
+import { canCapture, createChacoHUD, satellitePreview } from '../ui/chaco-hud.js';
 import { ChacoMap } from '../ui/chaco-map.js';
 import { SatelliteSensor } from '../ui/satellite-sensor.js';
 import { centerDesignArea } from '../ui/layout.js';
@@ -23,7 +25,8 @@ export class TestScene extends Phaser.Scene {
     this.specs = stats(catalog, this.design);
     this.mission = this.specs.valid ? launch(this.specs) : null;
     this.debugScenario = Object.hasOwn(DEBUG_SCENARIOS, data.debugScenario) ? data.debugScenario : null;
-    this.flight = initialFlight(); this.mapClock = 0; this.sensorShots=[];
+    this.flight = changeSpeed(initialFlight()); // always ×2
+    this.mapClock = 0; this.autoFlyIn = null; this.sensorShots=[];
     let storage;
     try { storage = window.localStorage; } catch { /* Use the registry if storage is unavailable. */ }
     const kind = this.mission && !this.debugScenario ? drawObstacle(storage, this.registry.get('lastObstacle')) : 'clouds';
@@ -31,7 +34,7 @@ export class TestScene extends Phaser.Scene {
     this.visibility = initialVisibility(kind);
     if (this.debugScenario && this.mission) {
       const scenario = DEBUG_SCENARIOS[this.debugScenario];
-      this.flight = { progress: scenario.progress, gate: scenario.gate, running: false, speed: 1 };
+      this.flight = { progress: scenario.progress, gate: scenario.gate, running: false, speed: 2 };
       const photos = scenario.photoPhases.map(phase => ({ phase, quality: this.specs.quality, remaining: this.specs.data }));
       this.mission = {
         ...this.mission,
@@ -50,7 +53,7 @@ export class TestScene extends Phaser.Scene {
     if (!this.mission) { this.scene.start('Build', { design: this.design }); return; }
     this.hud = createChacoHUD(this, this.design, action => this.handleAction(action));
     this.sensor=new SatelliteSensor(this.hud.sensorCanvas,this.design,()=>{if(this.hud){this.hud.ready=!!this.missionMap?.ready;this.render();}},message=>this.hud?.say(message));
-    this.hud.say('Vamos a explorar el Chaco con imágenes de archivo de 1985 y 2025. El viaje recrea dos observaciones: cuidá la energía y enviá las dos fotos.');
+    this.hud.say('Vamos al Chaco: tomamos dos fotos del bosque y las enviamos a la Tierra.');
     this.missionMap = new ChacoMap(this.hud.mapElement,
       () => { this.hud.ready = this.sensor.ready; this.render(); this.missionMap.update(this.flight); },
       () => { this.hud.say('No se pudo preparar una parte del mapa. Podés volver al taller o recargar la página.'); },
@@ -65,23 +68,13 @@ export class TestScene extends Phaser.Scene {
   }
   handleAction(action) {
     if (action === 'intro-closed') { this.render(); return; }
-    if (action === 'travel' && this.hud.ready && !['blocked','adjusting'].includes(this.visibility.status)) {
-      const gate = this.flight.gate;
-      this.flight = startFlight(this.flight);
-      this.hud.say(gate === 0 ? '¡En marcha! Seguí tu satélite hasta el bosque del Chaco paraguayo.' : 'Seguimos el recorrido. Las observaciones se obtienen en pasos separados, con el tiempo acelerado para este juego.');
-    } else if (action === 'reframe' && this.hud.ready) {
+    if (action === 'reframe' && this.hud.ready) {
       try {
         const next = beginReframe(this.mission, this.visibility);
         this.mission = next.mission; this.visibility = next.visibility;
-        this.hud.say(`${obstacleInfo(this.visibility).explanation} El ajuste usa ${REFRAME_ENERGY} de energía.`);
+        this.hud.say(obstacleInfo(this.visibility).explanation);
       } catch (error) { this.hud.say(error.message); }
-    } else if (action === 'pause') {
-      this.flight = pauseFlight(this.flight); this.hud.say('Vuelo en pausa. Podés revisar la batería y los datos con calma. Reanudá cuando quieras.');
-    } else if (action === 'speed') this.flight = changeSpeed(this.flight);
-    else if (action === 'recenter') this.missionMap.recenter();
-    else if (action === 'case') { this.flight = pauseFlight(this.flight); this.hud.showCase(); }
-    else if (action === 'close-case') this.hud.closeCase();
-    else if (action === 'workshop') { this.scene.start('Build', { design: this.design }); return; }
+    } else if (action === 'workshop') { this.scene.start('Build', { design: this.design }); return; }
     else if (action === 'finish' && this.flight.gate === 3) { this.scene.start('Reward', { design: this.design, mission: this.mission, captures:this.sensorShots, caseStudy: 'chaco-paraguay' }); return; }
     else if (['capture', 'transmit'].includes(action)) {
       if (!atGate(this.flight)) return;
@@ -95,13 +88,29 @@ export class TestScene extends Phaser.Scene {
         if(shot){const panel=this.hud.root.querySelector('.sensor-window');panel.classList.remove('taking-photo');void panel.offsetWidth;panel.classList.add('taking-photo');}
         this.missionMap.effect(action, this.flight);
         this.hud.say(action === 'capture'
-          ? `¡Imagen obtenida! La cámara usó ${this.specs.cameraPower} de energía y generó ${this.specs.data} ${this.specs.data === 1 ? 'bloque' : 'bloques'} de datos. Ahora necesitamos llevar esa información a la Tierra.`
-          : `En Asunción recibimos ${this.mission.delivered} imágenes completas. ${this.mission.photos.length ? 'Quedaron datos a bordo. Una antena de mayor capacidad puede ayudar en otro intento.' : '¡Lograste entregar tus observaciones!'}`);
+          ? '¡Foto guardada!'
+          : this.mission.photos.length
+            ? `Llegaron ${this.mission.delivered} de 2 fotos. La antena no alcanzó para enviar todo.`
+            : '¡Llegaron las dos fotos!');
       } catch (error) { this.hud.say(error.message); }
     }
     this.render();
   }
   render() { this.hud?.update(this.mission, this.specs, this.flight, this.visibility); }
+  // The satellite moves on by itself whenever there is nothing to do where it stopped:
+  // at the start, after the photo (or when there is no battery for it), and after a surprise is fixed.
+  // It only waits for the player over the forest (photo menu) and in Asunción (send, results).
+  autoFly(delta) {
+    const waiting = !this.flight.running && this.hud.ready && !this.hud.introOpen
+      && this.visibility.status !== 'blocked' && this.visibility.status !== 'adjusting'
+      && this.flight.gate < 3 && !canCapture(this.mission, this.specs, this.flight);
+    if (!waiting || document.hidden) { this.autoFlyIn = null; return; }
+    this.autoFlyIn = (this.autoFlyIn ?? AUTO_FLY_MS) - delta;
+    if (this.autoFlyIn > 0) return;
+    this.autoFlyIn = null;
+    this.flight = startFlight(this.flight);
+    this.render();
+  }
   updateSensor() {
     this.sensor.update(this.flight.progress, {
       clouds: cloudCover(this.flight, this.visibility),
@@ -114,14 +123,15 @@ export class TestScene extends Phaser.Scene {
     const before = this.flight.gate;
     const previousVisibility = this.visibility.status;
     const seconds = Math.min(delta / 1000, .08);
-    const next = tickVisibility(this.flight, this.visibility, document.hidden || this.hud.caseOpen ? 0 : seconds);
+    const next = tickVisibility(this.flight, this.visibility, document.hidden ? 0 : seconds);
     this.flight = next.flight; this.visibility = next.visibility;
-    if (!document.hidden && !this.hud.caseOpen) this.sensorTime += delta;
+    if (!document.hidden) this.sensorTime += delta;
+    this.autoFly(delta);
     if (previousVisibility !== this.visibility.status) {
       this.updateSensor();
       this.hud.say(this.visibility.status === 'blocked'
         ? `${obstacleInfo(this.visibility).title} ${obstacleInfo(this.visibility).short}` // same words as the warning dialog
-        : `${obstacleInfo(this.visibility).resolved} El ajuste consumió ${REFRAME_ENERGY} de energía. Cuidá la reserva que queda.`);
+        : obstacleInfo(this.visibility).resolved);
       this.render();
     }
     if (this.flight.gate !== before) {
@@ -132,11 +142,11 @@ export class TestScene extends Phaser.Scene {
         ? 'Llegamos al bosque del Chaco.' // the action menu next to the satellite shows what to do
         : phase === 2
           ? this.mission.energy >= this.specs.cameraPower
-            ? 'Segunda pasada. En este paso ilustramos al satélite en sombra: no hay recarga solar. La cámara funciona con la batería.'
-            : 'Llegamos a la segunda pasada, pero la batería no alcanza para esta cámara. Podés continuar hasta la estación y revisar el diseño al terminar.'
+            ? 'Segunda pasada, en la sombra: la cámara usa la batería.'
+            : 'No queda batería para otra foto. Volvemos a Asunción.'
           : this.mission.energy >= this.specs.antennaPower
-            ? 'Estamos en la ventana de comunicación con nuestra estación ficticia de Asunción. Transmití las imágenes antes de ver los resultados.'
-            : 'Llegamos al contacto terrestre, pero falta energía para la antena. Los resultados te ayudarán a mejorar el diseño.';
+            ? 'Llegamos a Asunción. ¡Enviá tus fotos!'
+            : 'Llegamos a Asunción, pero no queda energía para enviar.';
       this.hud.say(message); this.render();
     }
     this.mapClock += delta;

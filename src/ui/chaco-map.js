@@ -18,6 +18,7 @@ export class ChacoMap {
       container, center: [-59.2, -23.3], zoom: this.baseZoom, pitch: 18, bearing: -8,
       minZoom: 3.5, maxZoom: 7, maxBounds: [[-75, -35], [-43, -12]],
       attributionControl: false, renderWorldCopies: false,
+      interactive: false, // the camera follows the satellite by itself; dragging would make it stop following
       style: { version: 8, sources: {
         terrain: { type: 'image', url: `${base}data/paraguay-bluemarble.jpg`, coordinates: [[-75, -12], [-43, -12], [-43, -35], [-75, -35]] },
         countries: { type: 'geojson', data: `${base}data/paraguay-region.geojson` },
@@ -37,8 +38,6 @@ export class ChacoMap {
     });
     this.onResize = () => { this.baseZoom = zoomForSize(); if (this.follow) this.map.jumpTo({ zoom: this.baseZoom }); };
     window.addEventListener('resize', this.onResize);
-    this.map.dragRotate.disable(); this.map.touchZoomRotate.disableRotation();
-    this.map.on('dragstart', () => { this.follow = false; });
     this.map.on('error', event => onError?.(event.error?.message ?? 'No se pudo cargar el mapa.'));
     this.map.on('load', () => {
       this.ready = true;
