@@ -69,7 +69,7 @@ export class BuildScene extends Phaser.Scene {
 
     this.ui = mount(this, 0, { wizard: true });
     this.ui.bind({
-      next: () => this.goTo(this.step + 1),
+      next: () => this.goTo(this.nextStep()),
       goto: (button) => this.goTo(button.dataset.kind === 'review' ? REVIEW : kinds.indexOf(button.dataset.kind)),
       launch: () => {
         if (stats(catalog, this.design).valid) this.scene.start('Test', { design: { ...this.design } });
@@ -158,6 +158,12 @@ export class BuildScene extends Phaser.Scene {
     if (kind === 'body') return 'Estructura del satélite';
     const part = catalog[kind].options.find((option) => option.id === this.design[kind]);
     return `${catalog[kind].label} ${part.name.toLowerCase()}`;
+  }
+
+  // Where to go after the current part: the first part still missing, or the review if none is.
+  nextStep() {
+    const missing = kinds.findIndex((kind) => !this.placed.has(kind));
+    return missing === -1 ? REVIEW : missing;
   }
 
   get kind() {
@@ -375,32 +381,25 @@ export class BuildScene extends Phaser.Scene {
     return option;
   }
 
-  // The piece flies into its slot, the satellite shows it with a small bump, and:
-  //  - the first time a part type is mounted, the screen moves on to the next part by itself;
-  //  - when changing a part already mounted, the options stay so she can compare calmly.
+  // The piece flies into its slot, the satellite shows it with a small bump, and then the screen
+  // moves on by itself: to the next part still missing, or to the review once all are mounted
+  // (also after changing a part that was already there).
   mount(kind, part, option) {
     if (this.advancing) return;
-    const firstTime = !this.placed.has(kind);
+    const changed = this.placed.has(kind);
     const slot = this.art.slots(kind)[0];
     const flying = this.partImage(kind, part.id, option.x, option.y - 20);
     this.tweens.killTweensOf(option);
 
-    if (firstTime) {
-      // The part has left its circle for good: hide that option and dim the other one.
-      this.advancing = true;
-      this.options.forEach((o) => o.disableInteractive());
-      option.setAlpha(0);
-      for (const other of this.options) {
-        // Hover details would stay stuck: the pointer-out event no longer fires once input is off.
-        this.tweens.killTweensOf(other.details);
-        other.details.setAlpha(0);
-        if (other !== option) this.tweens.add({ targets: other, alpha: 0.35, scale: 0.95, duration: 250 });
-      }
-    } else if (option.dragged) {
-      // The held part becomes the flying one; the option reappears in its place afterwards.
-      option.setAlpha(0).setPosition(option.home.x, option.home.y).setScale(1);
-      option.lift(false);
-      this.tweens.add({ targets: option, alpha: 1, delay: 380, duration: 250 });
+    // The part has left its circle for good: hide that option and dim the other one.
+    this.advancing = true;
+    this.options.forEach((o) => o.disableInteractive());
+    option.setAlpha(0);
+    for (const other of this.options) {
+      // Hover details would stay stuck: the pointer-out event no longer fires once input is off.
+      this.tweens.killTweensOf(other.details);
+      other.details.setAlpha(0);
+      if (other !== option) this.tweens.add({ targets: other, alpha: 0.35, scale: 0.95, duration: 250 });
     }
 
     this.tweens.add({
@@ -424,14 +423,12 @@ export class BuildScene extends Phaser.Scene {
         this.drawSlot();
         this.options.forEach((o) => o.list[0].setStrokeStyle(3, COLORS.glow, o === option ? 1 : 0));
         this.renderHud();
-        // When it moves on by itself, this line stays silent: the next part's spoken intro would cut it anyway.
-        this.ui.say(mountLine(part, !firstTime), { silent: firstTime });
-        if (firstTime) {
-          const stepAtMount = this.step;
-          this.time.delayedCall(AUTO_NEXT_MS, () => {
-            if (this.step === stepAtMount) this.goTo(this.step + 1); // unless she already moved on
-          });
-        }
+        // Shown but not spoken: the next screen's spoken intro would cut it anyway.
+        this.ui.say(mountLine(part, changed), { silent: true });
+        const stepAtMount = this.step;
+        this.time.delayedCall(AUTO_NEXT_MS, () => {
+          if (this.step === stepAtMount) this.goTo(this.nextStep()); // unless she already moved on
+        });
       },
     });
   }
@@ -453,7 +450,8 @@ export class BuildScene extends Phaser.Scene {
     if (this.advancing) {
       next = ''; // it moves on by itself in a moment; a button appearing and vanishing would only distract
     } else if (this.kind && this.placed.has(this.kind)) {
-      next = actionButton('next', this.step === REVIEW - 1 ? 'Revisar ›' : `Siguiente: ${catalog[kinds[this.step + 1]].label} ›`, true);
+      const target = this.nextStep();
+      next = actionButton('next', target === REVIEW ? 'Revisar ›' : `Siguiente: ${catalog[kinds[target]].label} ›`, true);
     } else if (!this.kind) {
       next = actionButton('launch', 'Lanzar ›', true, !stats(catalog, this.design).valid);
     }
