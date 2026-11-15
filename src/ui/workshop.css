@@ -290,6 +290,21 @@
 .ws-slot { border-color: rgba(208, 144, 240, 0.7); background: rgba(28, 10, 51, 0.6); }
 .ws-mini-meters .ws-meter-bar { background: rgba(255, 255, 255, 0.22); }
 
+/* Name of the satellite part under the pointer (Build). */
+.ws-part-tip {
+  position: absolute;
+  z-index: 50;
+  pointer-events: none;
+  white-space: nowrap;
+  padding: 8px 14px;
+  font-size: 20px;
+  color: var(--soft);
+  background: rgba(28, 10, 51, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.ws-part-tip[hidden] { display: none; }
+
 /* Subtle cue that the Chaco comparison is the next step after a successful flight. */
 .ws-next-comparison {
   animation: ws-next-glow 5s ease-in-out infinite;

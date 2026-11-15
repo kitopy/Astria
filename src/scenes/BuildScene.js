@@ -83,6 +83,8 @@ export class BuildScene extends Phaser.Scene {
       },
     });
 
+    this.addPartTooltips();
+
     // With the welcome dialog open, the first title waits and is typed once the dialog closes.
     this.titleOnHold = this.showBuildIntroOnStart;
     this.showStep();
@@ -96,6 +98,43 @@ export class BuildScene extends Phaser.Scene {
         this.typeTitle(this.titleTarget);
       });
     }
+  }
+
+  // Hovering a part already on the satellite shows its name in a small box next to the pointer.
+  // Parts not mounted yet are hidden, and Phaser ignores hidden objects, so they show nothing.
+  addPartTooltips() {
+    const tip = document.createElement('div');
+    tip.className = 'ws-part-tip';
+    tip.hidden = true;
+    this.ui.root.append(tip);
+
+    const parts = [
+      ...this.art.wings.map((image) => [image, 'solar']),
+      [this.art.body, 'body'],
+      ...Object.entries(this.art.components).map(([kind, image]) => [image, kind]),
+    ];
+    for (const [image, kind] of parts) {
+      image.setInteractive();
+      image.on('pointerover', (pointer) => {
+        if (pointer.isDown) return; // not while dragging a part onto the satellite
+        tip.textContent = this.partName(kind);
+        tip.hidden = false;
+      });
+      image.on('pointerout', () => (tip.hidden = true));
+    }
+
+    this.input.on('pointermove', (pointer) => {
+      if (pointer.isDown) tip.hidden = true;
+      tip.style.left = `${pointer.worldX + 18}px`;
+      tip.style.top = `${pointer.worldY + 24}px`;
+    });
+  }
+
+  // "Cámara esencial", "Batería de reserva"... or the body.
+  partName(kind) {
+    if (kind === 'body') return 'Estructura del satélite';
+    const part = catalog[kind].options.find((option) => option.id === this.design[kind]);
+    return `${catalog[kind].label} ${part.name.toLowerCase()}`;
   }
 
   get kind() {
