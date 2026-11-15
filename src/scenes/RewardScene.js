@@ -50,34 +50,24 @@ export class RewardScene extends Phaser.Scene {
       <p>${success ? 'Diseñaste. Probaste. Descubriste.' : 'Tu próxima idea puede cambiar el resultado.'}</p>`;
 
     const right=ui.area('right');
-    right.classList.toggle('ws-next-comparison', success);
     right.innerHTML=`<h2 class="ws-title">El Chaco: antes y después</h2>
       <div class="saved-sensor-photos historical-sensor-photos">
         <figure><img src="${BASE}${comparisonCase.before}" alt="Antes: Chaco paraguayo en ${comparisonCase.beforeYear}" data-year="${comparisonCase.beforeYear}"><figcaption>Antes · ${comparisonCase.beforeYear}</figcaption></figure>
         <figure><img src="${BASE}${comparisonCase.after}" alt="Después: el mismo sector en ${comparisonCase.afterYear}" data-year="${comparisonCase.afterYear}"><figcaption>Después · ${comparisonCase.afterYear}</figcaption></figure>
-      </div><p class="ws-story">El mismo sector, cuarenta años después. Son imágenes de archivo Landsat / NASA: tu misión recrea la observación. Ahora podés investigar qué cambió.</p>`;
+      </div><p class="ws-story">El mismo sector, cuarenta años después. Son imágenes de archivo Landsat / NASA: tu misión recrea la observación.</p>`;
 
-    if (success) {
-      const nextLabel = document.createElement('span');
-      nextLabel.className = 'ws-next-label';
-      nextLabel.textContent = 'SIGUIENTE MISIÓN';
-      right.prepend(nextLabel);
-    }
-
-    // The full historical pair is shared with the investigation screen.
+    // After a successful mission the photos were already analyzed (Observe), so this is the last step.
     ui.area('actions').innerHTML = success
-      ? actionButton('improve', 'Volver al taller') + actionButton('observe', 'Investigar el Chaco ›', true)
+      ? actionButton('improve', 'Volver al taller') + actionButton('finish', 'Terminar ›', true)
       : actionButton('improve', 'Mejorar mi satélite ›', true);
 
     ui.bind({
       improve: () => this.scene.start('Build', { design: this.design, focus: 'review' }),
-      observe: () => this.scene.start('Observe', { design: this.design, mission: this.mission, captures: this.captures }),
+      finish: () => this.scene.start('Finale'),
     });
 
     ui.say(success
-      ? this.captures.length
-        ? '¡Lo lograste! Las dos fotos llegaron a la Tierra. Revisalas y después practicá cómo comparar imágenes.'
-        : '¡Lo lograste! Tu satélite tomó y envió las dos fotos. Vamos a ver qué descubriste.'
+      ? '¡Lo lograste! Las dos fotos llegaron a la Tierra.'
       : 'Los resultados nos ayudan a diseñar mejor. Guardé tus piezas para que puedas ajustar tu satélite.');
   }
 }

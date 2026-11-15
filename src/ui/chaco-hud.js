@@ -142,7 +142,8 @@ export function createChacoHUD(scene, design, onAction) {
           figure.classList.add(complete ? 'arrived' : 'missing');
           figure.querySelector('figcaption').textContent = complete ? '¡Llegó!' : 'No llegó completa';
         });
-        button.textContent = 'Ver resultados';
+        // Both photos arrived: next comes analyzing them; otherwise the results.
+        button.textContent = results.every(Boolean) && results.length >= 2 ? 'Analizar las fotos' : 'Ver resultados';
         button.dataset.done = 'yes';
         button.disabled = false;
         button.focus({ preventScroll: true });

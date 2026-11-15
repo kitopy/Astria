@@ -11,7 +11,6 @@ export function createChacoComparison(scene, onAction) {
   root.innerHTML = `
     <header class="brush-header">
       <strong>ASTRION</strong>
-      <button data-action="back">Resultados</button>
       <button data-action="voice" aria-pressed="false">Voz de NOAH</button>
     </header>
     <div class="brush-intro">
@@ -50,7 +49,7 @@ export function createChacoComparison(scene, onAction) {
         <button class="brush-primary" data-action="mark" disabled>Marcar hallazgo</button>
         <button class="brush-secondary" data-action="reset">Empezar de nuevo</button>
         <fieldset class="brush-question" hidden><legend>¿Qué muestran las dos fechas?</legend><button data-answer="vegetation">Antes había más bosque continuo</button><button data-answer="growth">Ahora hay más bosque continuo</button><button data-answer="water">Apareció un lago</button></fieldset>
-        <div class="brush-result" hidden><strong>Encontraste el cambio</strong><p>En esta serie, el bosque de 1985 se ve más continuo. En 2025 aparecen claros y parcelas. Las imágenes muestran el cambio; por sí solas no explican todas sus causas.</p><button class="brush-primary" data-action="finish">Completar misión</button></div>
+        <div class="brush-result" hidden><strong>Encontraste el cambio</strong><p>En esta serie, el bosque de 1985 se ve más continuo. En 2025 aparecen claros y parcelas. Las imágenes muestran el cambio; por sí solas no explican todas sus causas.</p><button class="brush-primary" data-action="finish">Ver resultados</button></div>
       </aside>
     </main>
     <footer class="brush-credit">Imágenes Landsat de 1985 y 2025 de <a href="${comparisonCase.source}" target="_blank" rel="noopener">NASA</a>. La captura de 2025 y el viaje son simulados en el juego.</footer>`;

@@ -77,7 +77,12 @@ export class TestScene extends Phaser.Scene {
         this.hud.say(obstacleInfo(this.visibility).explanation);
       } catch (error) { this.hud.say(error.message); }
     } else if (action === 'workshop') { this.scene.start('Build', { design: this.design }); return; }
-    else if (action === 'finish' && this.flight.gate === 3) { this.scene.start('Reward', { design: this.design, mission: this.mission, captures:this.sensorShots, caseStudy: 'chaco-paraguay' }); return; }
+    else if (action === 'finish' && this.flight.gate === 3) {
+      // Both photos arrived: first analyze them (Observe), then the results. Otherwise straight to the results.
+      const result = { design: this.design, mission: this.mission, captures: this.sensorShots, caseStudy: 'chaco-paraguay' };
+      this.scene.start(this.mission.delivered >= 2 ? 'Observe' : 'Reward', result);
+      return;
+    }
     else if (['capture', 'transmit'].includes(action)) {
       if (!atGate(this.flight)) return;
       try {
