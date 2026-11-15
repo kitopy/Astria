@@ -1,4 +1,3 @@
-import { catalog } from '../game/design.js';
 import { noahSpeak, noahStop } from './noahVoice.js';
 import { showDialog } from './dialog.js';
 import { phases } from '../game/model.js';
@@ -22,13 +21,16 @@ export function satellitePreview(design) {
 export function createChacoHUD(scene, design, onAction) {
   const root = document.createElement('section'); root.className = 'chaco-game'; root.setAttribute('aria-label','Guardianes del Chaco: operación del satélite');
   root.innerHTML = `<div class="chaco-map" aria-label="Mapa geográfico de Paraguay"></div><div class="chaco-shadow"></div><div class="weather-fog" aria-hidden="true"></div>
-  <header class="chaco-header"><strong>ASTRION<span>✦</span></strong><span>Guardianes del Chaco</span><button data-flight="case">Caso real NASA</button><button data-flight="voice" aria-pressed="false">Voz de NOAH: apagada</button></header>
-  <div class="chaco-title"><h1>Tu misión <span>sobre Paraguay</span></h1><p>Observá el bosque. Cuidá la energía. Enviá tus descubrimientos.</p></div>
-  <aside class="chaco-objective hud-panel"><h2>Dos imágenes del Chaco</h2><div><span>Obtenidas</span><strong data-hud="captured">0/2</strong></div><div><span>Enviadas</span><strong data-hud="delivered">0/2</strong></div><p data-hud="status" role="status">Preparando mapa…</p></aside>
-  <aside class="chaco-telemetry hud-panel"><div><span>Batería</span><strong data-hud="energy"></strong><progress data-hud="battery" aria-label="Energía disponible"></progress></div><div><span>Datos a bordo</span><strong data-hud="data">0</strong></div><div><span data-hud="sun">Con luz solar</span><small>Energía por acción y por etapa</small></div></aside>
-  <aside class="chaco-design hud-panel"><h2>Tu satélite</h2>${satellitePreview(design)}<p>${catalog.camera.options.find(p=>p.id===design.camera).name} · ${catalog.battery.options.find(p=>p.id===design.battery).name}</p></aside>
+  <div class="chaco-top-actions"><button data-flight="case">Caso real NASA</button><button data-flight="voice" aria-pressed="false">Voz de NOAH: apagada</button></div>
+  <aside class="chaco-status hud-panel" aria-label="Estado de la misión">
+    <div class="status-row"><span>Batería</span><strong data-hud="energy"></strong></div>
+    <progress data-hud="battery" aria-label="Energía disponible"></progress>
+    <div class="status-row"><span>Fotos tomadas</span><strong data-hud="captured">0/2</strong></div>
+    <div class="status-row"><span>Fotos enviadas</span><strong data-hud="delivered">0/2</strong></div>
+    <p class="status-sun" data-hud="sun">Con luz solar</p>
+  </aside>
   <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2><span data-hud="sensor-state">Preparando</span></div><div class="sensor-window"><canvas aria-label="Vista recreada del Chaco con imágenes de archivo"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record" data-hud="sensor-year">ARCHIVO · 1985</span></div><p>Archivo Landsat / NASA · observación recreada</p><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
-  <div class="chaco-map-tools"><button data-flight="recenter" aria-label="Volver a centrar Paraguay">Centrar Paraguay</button><button data-flight="speed">Velocidad ×1</button></div>
+  <div class="chaco-map-tools"><button data-flight="recenter" aria-label="Volver a centrar Paraguay">Centrar Paraguay</button><button data-flight="speed">Velocidad ×1</button><button data-flight="workshop">Volver al taller</button></div>
   <aside class="visibility-challenge hud-panel" aria-label="Imprevisto de la misión" hidden>
     <span class="weather-tag" data-hud="obstacle-tag">IMPREVISTO DEL TRAYECTO</span>
     <h2 data-hud="weather-title">Buscá un claro</h2>
@@ -47,9 +49,8 @@ export function createChacoHUD(scene, design, onAction) {
       <button data-flight="pause" class="console-action" disabled><span class="console-icon" aria-hidden="true"></span><span class="console-label">Pausar</span></button>
       <button data-flight="finish" class="console-action" hidden><span class="console-icon" aria-hidden="true"></span><span class="console-label">Ver resultados</span></button>
     </div>
-  </div>
-  <ol class="chaco-timeline"><li>Preparación</li><li>Primera pasada</li><li>Segunda pasada</li><li>Contacto terrestre</li></ol></section>
-  <footer class="chaco-sources"><span>Mapa real · recorrido simulado</span><span>NASA GIBS · Natural Earth · MapLibre</span><button data-flight="workshop">Volver al taller</button></footer>
+  </div></section>
+  <footer class="chaco-sources"><span>Mapa real · recorrido simulado</span><span>NASA GIBS · Natural Earth · MapLibre</span></footer>
   <dialog class="chaco-case" aria-labelledby="chaco-case-title"><button data-flight="close-case" class="close-case">Cerrar</button><h2 id="chaco-case-title">Un caso real de nuestro país</h2><p>NASA documentó cambios del bosque en el Chaco paraguayo con imágenes Landsat de <strong>1985 a 2025</strong>.</p><video controls playsinline preload="metadata" src="${base}data/chaco-landsat-nasa.mp4" aria-label="Serie histórica Landsat del Chaco paraguayo"></video><p class="case-credit">NASA’s Goddard Space Flight Center · Ross K. Walter (SSAI).</p><p>Este video es real y de archivo. Tu satélite, el recorrido, las observaciones que obtenés jugando y la estación terrestre son simulados. La imagen base del mapa es un mosaico Blue Marble; no es una imagen en vivo.</p><a href="https://svs.gsfc.nasa.gov/15026/" target="_blank" rel="noopener">Ver la fuente de NASA</a></dialog>`;
   document.body.append(root);
   const get = key => root.querySelector(`[data-hud="${key}"]`);
@@ -114,10 +115,8 @@ export function createChacoHUD(scene, design, onAction) {
       root.classList.toggle('panels-deployed',flight.progress>0||flight.running);
       get('captured').textContent=`${mission.captured.length}/2`;get('delivered').textContent=`${mission.delivered}/2`;
       get('energy').textContent=`${mission.energy}/${specs.capacity}`;get('battery').max=specs.capacity;get('battery').value=mission.energy;
-      get('data').textContent=mission.photos.reduce((sum,p)=>sum+p.remaining,0);
-      get('sun').textContent=phases[mission.phase].sun?'Con luz solar':'Satélite en sombra (simulada)';
+            get('sun').textContent=phases[mission.phase].sun?'Con luz solar':'En la sombra: sin recarga';
       root.classList.toggle('in-shadow',!phases[mission.phase].sun);
-      get('status').textContent=!this.ready?'Preparando mapa…':obstructed?`Imprevisto: ${info.label}`:flight.running?'En vuelo · seguimiento activo':gate?['Listo para salir','Oportunidad de observar','Segunda oportunidad de observar','Contacto con Asunción'][phase]:'Vuelo en pausa';
       const control=action=>root.querySelector(`[data-flight="${action}"]`);
       control('travel').hidden=phase===3||flight.running;control('travel').disabled=!this.ready||this.introOpen||obstructed;
       control('reframe').disabled=!this.ready||visibility.status!=='blocked'||mission.energy<REFRAME_ENERGY;
@@ -137,7 +136,6 @@ export function createChacoHUD(scene, design, onAction) {
       get('command-title').textContent=!this.ready?'Preparando sistema':titles[command];
       root.querySelectorAll('.console-action').forEach(button=>button.classList.toggle('is-cued',button.dataset.flight===command&&!button.disabled));
       control('speed').textContent=`Velocidad ×${flight.speed}`;
-      root.querySelectorAll('.chaco-timeline li').forEach((item,i)=>{item.classList.toggle('active',i===phase);item.classList.toggle('done',i<phase);});
     },
     destroy(){noahStop();root.querySelector('video').pause();root.remove();}
   };
