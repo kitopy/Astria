@@ -7,10 +7,20 @@ An educational web game made for the **NASA Space Apps Challenge 2026**, challen
 [Space Mission Design Game](https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/).
 Made for kids aged **9 to 12**. The game is in Spanish, with a voiced AI guide called NOAH.
 
+![Mission accomplished](docs/screenshots/09-mission-accomplished.jpg)
+
+## Screenshots
+
 | | |
 | --- | --- |
 | ![Title screen](docs/screenshots/01-menu.jpg) | ![Building the satellite](docs/screenshots/02-workshop.jpg) |
 | Title screen | Building the satellite, part by part |
+| ![Pre-flight check](docs/screenshots/03-review.jpg) | ![Taking a photo over the Chaco](docs/screenshots/04-flight-photo.jpg) |
+| Pre-flight check: energy, photo sending and rocket | Flying over Paraguay: the photo menu next to the satellite |
+| ![Surprise problem](docs/screenshots/05-surprise-problem.jpg) | ![The two photos](docs/screenshots/06-photos-1985-today.jpg) |
+| A surprise problem: the camera is shaking | The two photos: the Chaco in 1985 and today |
+| ![Sending the photos](docs/screenshots/07-send-to-earth.jpg) | ![Investigation with the lens](docs/screenshots/08-investigation.jpg) |
+| Sending the photos to the Asunción ground station | Investigating: the lens shows the same place in 1985 |
 
 ## The problem
 
