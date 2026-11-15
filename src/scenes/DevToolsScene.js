@@ -1,5 +1,17 @@
 import Phaser from 'phaser';
 import { readDesign } from '../game/design.js';
+import { comparisonCase } from '../game/chaco-comparison.js';
+
+// End of the game (after the image analysis), with a ready-made mission result.
+// The two "photos" are the archive images, since there was no real flight.
+const ARCHIVE_PHOTOS = [
+  { image: `${import.meta.env.BASE_URL}${comparisonCase.before}`, year: comparisonCase.beforeYear },
+  { image: `${import.meta.env.BASE_URL}${comparisonCase.after}`, year: comparisonCase.afterYear },
+];
+const RESULTS = {
+  success: { captured: [1, 2], delivered: 2, sent: true, photos: [] },
+  antenna: { captured: [1, 2], delivered: 0, sent: true, photos: [{ phase: 1, remaining: 1 }, { phase: 2, remaining: 3 }] },
+};
 
 const PARTS = [
   ['camera', 'Cámara'],
@@ -32,6 +44,8 @@ export class DevToolsScene extends Phaser.Scene {
         <div class="ws-devtools-buttons">${FLIGHT_STAGES.map(([stage, label]) => `<button data-dev-stage="${stage}">${label}</button>`).join('')}</div>
         <h2>Investigar el Chaco</h2>
         <div class="ws-devtools-buttons"><button data-dev-observe>Comparación de imágenes</button></div>
+        <h2>Final</h2>
+        <div class="ws-devtools-buttons"><button data-dev-result="success">Resultados · misión cumplida</button><button data-dev-result="antenna">Resultados · faltó algo</button></div>
         <button class="ws-devtools-normal" data-dev-normal>Ir al juego normal</button>
       </section>`;
     document.body.append(root);
@@ -48,6 +62,11 @@ export class DevToolsScene extends Phaser.Scene {
         return;
       }
       const design = readDesign();
+      if (button.dataset.devResult) {
+        const mission = RESULTS[button.dataset.devResult];
+        this.scene.start('Reward', { design, mission, captures: mission.delivered >= 2 ? ARCHIVE_PHOTOS : [] });
+        return;
+      }
       if (button.dataset.devPart) {
         this.scene.start('Build', { design, focus: button.dataset.devPart });
       } else if (button.dataset.devStage) {

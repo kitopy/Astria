@@ -24,7 +24,7 @@ export class RewardScene extends Phaser.Scene {
   init(data = {}) {
     this.design = readDesign(data.design);
     this.mission = data.mission ?? null;
-    this.captures=(data.captures??[]).filter(shot=>typeof shot.image==='string'&&shot.image.startsWith('data:image/jpeg;base64,'));
+    this.captures = (data.captures ?? []).filter((shot) => typeof shot.image === 'string'); // camera photos (or archive images in dev)
   }
 
   preload() {
