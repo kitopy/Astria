@@ -213,10 +213,8 @@
 .photo-pop img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid #d090f0}
 .photo-pop figcaption{margin-top:8px;font-family:'Audiowide',sans-serif;font-size:15px;color:#ffd9a8}
 .photo-pop.is-new{animation:photo-pop-in .45s cubic-bezier(.2,.9,.3,1.3) both}
-.photo-pop.is-new img{animation:photo-flash .6s ease-out both}
 @keyframes photo-pop-in{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
-@keyframes photo-flash{from{filter:brightness(2.4)}to{filter:none}}
-@media(prefers-reduced-motion:reduce){.photo-pop.is-new,.photo-pop.is-new img{animation:none}}
+@media(prefers-reduced-motion:reduce){.photo-pop.is-new{animation:none}}
 
 /* ---------- Surprise problems shown on the map, around the satellite ----------
    --obstacle-strength goes from 0 (far / fixed) to 1 (stopped by the problem); it grows as the satellite
@@ -290,3 +288,18 @@
 /* Shaky camera: the view trembles and blurs, calmer while it's being fixed. */
 .chaco-game[data-obstacle=camera]:not([data-visibility=clear]) .obstacle-view{filter:blur(calc(var(--obstacle-strength,0) * 1.6px));animation:map-shake .14s linear infinite}
 @media(prefers-reduced-motion:reduce){.obstacle-view{animation:none!important}}
+
+/* Photo being "rendered" by the satellite: a scan line goes down the picture; above it the photo is sharp,
+   below it still blurry and pixelated. The caption appears when the scan ends. */
+.photo-frame{position:relative;overflow:hidden;border:1px solid #d090f0}
+.photo-pop .photo-frame img{border:0}
+.photo-low{filter:blur(5px) saturate(.5) brightness(.8)}
+.photo-sharp{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.photo-scan{position:absolute;left:0;right:0;top:0;height:3px;background:#fff0ff;box-shadow:0 0 12px 3px #f0b0f0;opacity:0}
+.photo-pop .rendering .photo-sharp{animation:photo-render 1.4s linear both}
+.photo-pop .rendering .photo-scan{animation:photo-scan 1.4s linear both}
+.photo-pop .rendering figcaption{animation:photo-caption .3s 1.4s ease-out both}
+@keyframes photo-render{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes photo-scan{0%{top:0;opacity:1}98%{top:calc(100% - 3px);opacity:1}100%{top:calc(100% - 3px);opacity:0}}
+@keyframes photo-caption{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.photo-pop .rendering .photo-sharp,.photo-pop .rendering .photo-scan,.photo-pop .rendering figcaption{animation:none}}

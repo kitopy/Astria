@@ -245,18 +245,21 @@ export function createChacoHUD(scene, design, onAction) {
       const pop=root.querySelector('.photo-pop');
       const pair=shots.length>=2;
       const shown=pair?shots.slice(0,2):[shot];
-      pop.innerHTML=`<div class="photo-pop-row">${shown.map(()=>'<figure><img alt=""><figcaption></figcaption></figure>').join('')}</div>`;
+      // Each photo: a blurry low-quality layer, the sharp photo on top revealed by a scan line.
+      pop.innerHTML=`<div class="photo-pop-row">${shown.map(()=>'<figure><div class="photo-frame"><img class="photo-low" alt=""><img class="photo-sharp" alt=""><span class="photo-scan"></span></div><figcaption></figcaption></figure>').join('')}</div>`;
       pop.querySelectorAll('figure').forEach((figure,i)=>{
-        figure.querySelector('img').src=shown[i].image;
-        figure.querySelector('img').alt=`Foto del Chaco, ${shown[i].year}`;
+        figure.querySelectorAll('img').forEach((img)=>{img.src=shown[i].image;});
+        figure.querySelector('.photo-sharp').alt=`Foto del Chaco, ${shown[i].year}`;
         figure.querySelector('figcaption').textContent=photoLabel(shown[i].year);
+        // Only the photo just taken is "rendered"; the earlier one is already there.
+        figure.classList.toggle('rendering',shown[i]===shot);
       });
       pop.classList.toggle('is-pair',pair);
       pop.hidden=false;
       pop.classList.remove('is-new');void pop.offsetWidth;pop.classList.add('is-new'); // replay the entrance
       this.positionActionMenu();
       clearTimeout(this.photoTimer);
-      this.photoTimer=setTimeout(()=>{pop.hidden=true;},pair?5000:3500);
+      this.photoTimer=setTimeout(()=>{pop.hidden=true;},pair?5500:4500);
     },
     // Keeps the boxes that belong to the satellite (photo menu, last photo) next to it while the map moves.
     positionActionMenu(){
