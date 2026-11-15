@@ -1,6 +1,7 @@
 import { SatelliteAssembly, frames } from './satellite.js';
 import { hideEarth, showEarth } from './earth3d.js';
 import { noahSpeak, noahStop } from './noahVoice.js';
+import { addShootingStars } from './starfield.js';
 
 // Shared screen layout for the three mission steps (Build, Test, Reward).
 // Phaser draws the background and the satellite; this module puts an HTML layer on top
@@ -23,6 +24,9 @@ export function preloadArt(scene) {
 export function addArt(scene, design) {
   showEarth();
   scene.events.once('shutdown', hideEarth);
+  // Lots of shooting stars in the sky above the Earth.
+  // every: [shortest, longest] wait between two of them, in milliseconds (1000 = 1 second).
+  addShootingStars(scene, { every: [300, 900] });
   return new SatelliteAssembly(scene, 960, 450, design);
 }
 

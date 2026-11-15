@@ -87,12 +87,20 @@ export function addStarfield(scene) {
   scene.events.on('update', onUpdate);
   scene.events.once('shutdown', () => scene.events.off('update', onUpdate));
 
-  scheduleShootingStar(scene);
+  addShootingStars(scene);
+}
+
+// Shooting stars crossing the sky now and then, behind everything else in the scene.
+// Used by the menu (with the starfield) and by the screens with the rotating Earth.
+// options.every: [min, max] pause in ms between two shooting stars.
+export function addShootingStars(scene, { every = [1200, 3000] } = {}) {
+  makeTextures(scene);
+  scheduleShootingStar(scene, every);
 }
 
 // Launches a shooting star, then schedules the next one after a random pause.
-function scheduleShootingStar(scene) {
-  scene.time.delayedCall(Phaser.Math.Between(1200, 3000), () => {
+function scheduleShootingStar(scene, every) {
+  scene.time.delayedCall(Phaser.Math.Between(every[0], every[1]), () => {
     const v = visibleArea(scene);
     const angle = Phaser.Math.Between(20, 35); // degrees below horizontal, moving down-right
     const startX = Phaser.Math.Between(v.x, v.x + v.width * 0.6);
@@ -106,7 +114,8 @@ function scheduleShootingStar(scene) {
       .setAngle(angle)
       .setScale(0.8)
       .setAlpha(0)
-      .setBlendMode(Phaser.BlendModes.ADD);
+      // Normal blending: "add" is invisible where the game canvas is transparent (over the 3D Earth).
+      .setDepth(-1); // behind the scene's other objects (satellite, parts)
 
     scene.tweens.add({
       targets: streak,
@@ -119,6 +128,6 @@ function scheduleShootingStar(scene) {
     // Fade in quickly, then fade out before it ends.
     scene.tweens.add({ targets: streak, alpha: 1, duration: 200, yoyo: true, hold: 500 });
 
-    scheduleShootingStar(scene);
+    scheduleShootingStar(scene, every);
   });
 }
