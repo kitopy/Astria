@@ -3,6 +3,7 @@ import { feedback, stats } from '../game/model.js';
 import { catalog, readDesign } from '../game/design.js';
 import { actionButton, addArt, mount, preloadArt } from '../ui/mission-ui.js';
 import { centerDesignArea } from '../ui/layout.js';
+import { comparisonCase } from '../game/chaco-comparison.js';
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -44,39 +45,33 @@ export class RewardScene extends Phaser.Scene {
       <ul class="ws-feedback">${feedback(m, s).map((line) => `<li>${line}</li>`).join('')}</ul>
       <details class="ws-details"><summary>Bitácora de la misión</summary><ol>${m.log.map((line) => `<li>${line}</li>`).join('')}</ol></details>`;
 
-    ui.area('right').innerHTML = `
-      <h2 class="ws-title">${success ? 'Tu hallazgo' : 'Un nuevo intento'}</h2>
-      <p class="ws-story">${success
-        ? 'Tus fotos muestran que en una zona del bosque hay menos árboles. Detectar ese cambio es el comienzo de una investigación.'
-        : 'El resultado depende de tus elecciones. Volvé al taller, cambiá una pieza y compará qué sucede.'}</p>
-      <h3>Lo que aprendimos</h3>
-      <p class="ws-story">La cámara necesita energía, la batería guarda una cantidad limitada y las fotos tienen que llegar a la Tierra. Las piezas trabajan juntas.</p>
-      <details class="ws-details">
-        <summary>¿Qué estamos simplificando?</summary>
-        <p>La energía, el presupuesto y los datos usan unidades de juego. Las etapas no representan órbitas ni tiempos reales. El bosque y sus cambios son simulados.</p>
-        <p>La Tierra del fondo es real: imagen Blue Marble de NASA/Goddard Scientific Visualization Studio.</p>
-        <a href="${BASE}FUENTES.md" target="_blank" rel="noopener">Fuentes y reglas</a>
-      </details>`;
-
     ui.area('center').innerHTML = `
       <h1 class="ws-headline">${success ? '¡Misión cumplida!' : 'Cada prueba enseña algo'}</h1>
       <p>${success ? 'Diseñaste. Probaste. Descubriste.' : 'Tu próxima idea puede cambiar el resultado.'}</p>`;
 
-    if(this.captures.length){
-      const right=ui.area('right');
-      right.innerHTML='<h2 class="ws-title">Lo que capturó tu cámara</h2><div class="saved-sensor-photos"></div><p class="ws-story">Estas fotos guardan la vista de tu sensor sobre el mosaico de archivo de NASA. No representan fechas distintas ni demuestran cambios reales del bosque.</p>';
-      const tray=right.querySelector('.saved-sensor-photos');
-      this.captures.forEach((shot,i)=>{const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=shot.image;img.alt=`Captura ${i+1} del visor`;caption.textContent=`Foto ${i+1} · ${shot.delivered?'recibida en Tierra':'a bordo'}`;figure.append(img,caption);tray.append(figure);});
+    const right=ui.area('right');
+    right.classList.toggle('ws-next-comparison', success);
+    right.innerHTML=`<h2 class="ws-title">El Chaco: antes y después</h2>
+      <div class="saved-sensor-photos historical-sensor-photos">
+        <figure><img src="${BASE}${comparisonCase.before}" alt="Antes: Chaco paraguayo en ${comparisonCase.beforeYear}" data-year="${comparisonCase.beforeYear}"><figcaption>Antes · ${comparisonCase.beforeYear}</figcaption></figure>
+        <figure><img src="${BASE}${comparisonCase.after}" alt="Después: el mismo sector en ${comparisonCase.afterYear}" data-year="${comparisonCase.afterYear}"><figcaption>Después · ${comparisonCase.afterYear}</figcaption></figure>
+      </div><p class="ws-story">El mismo sector, cuarenta años después. Son imágenes de archivo Landsat / NASA: tu misión recrea la observación. Ahora podés investigar qué cambió.</p>`;
+
+    if (success) {
+      const nextLabel = document.createElement('span');
+      nextLabel.className = 'ws-next-label';
+      nextLabel.textContent = 'SIGUIENTE MISIÓN';
+      right.prepend(nextLabel);
     }
 
-    // The saved frames are shown above; Observe remains a separate comparison exercise.
+    // The full historical pair is shared with the investigation screen.
     ui.area('actions').innerHTML = success
-      ? actionButton('improve', 'Volver al taller') + actionButton('observe', this.captures.length?'Ejercicio de comparación ›':'Ver mis fotos ›', true)
+      ? actionButton('improve', 'Volver al taller') + actionButton('observe', 'Investigar el Chaco ›', true)
       : actionButton('improve', 'Mejorar mi satélite ›', true);
 
     ui.bind({
       improve: () => this.scene.start('Build', { design: this.design, focus: 'review' }),
-      observe: () => this.scene.start('Observe'),
+      observe: () => this.scene.start('Observe', { design: this.design, mission: this.mission, captures: this.captures }),
     });
 
     ui.say(success

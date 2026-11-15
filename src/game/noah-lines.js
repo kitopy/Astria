@@ -4,7 +4,7 @@
 
 // One sentence per part: what it does in the mission.
 export const PART_TEXT = {
-  camera: 'La cámara es la que toma las fotos del bosque.',
+  camera: 'Esta cámara fotografía el Chaco desde el espacio. Sus imágenes nos ayudan a descubrir cómo cambia el bosque.',
   solar: 'Los paneles dan energía con la luz del Sol.',
   battery: 'La batería guarda energía para cuando no hay sol.',
   antenna: 'La antena envía las fotos a la Tierra.',

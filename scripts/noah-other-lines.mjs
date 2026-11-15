@@ -27,7 +27,10 @@ const station = [
 
 // TestScene + game logic errors (Cesar's flight over the Chaco)
 const flight = [
-  'Estamos en Paraguay. Prepará tu misión para observar dos veces una zona del Chaco. Al llegar al bosque, el vuelo se pausará para que puedas decidir.',
+  'Vamos a explorar el Chaco con imágenes de archivo de 1985 y 2025. El viaje recrea dos observaciones: cuidá la energía y enviá las dos fotos.',
+  // ui/satellite-sensor.js (error messages, rare)
+  'No se pudieron preparar las imágenes del Chaco. Recargá la página para reintentar.',
+  'La cámara todavía está preparando la vista. Esperá un momento.',
   'No se pudo preparar una parte del mapa. Podés volver al taller o recargar la página.',
   '¡En marcha! Seguí tu satélite hasta el bosque del Chaco paraguayo.',
   'Seguimos el recorrido. Las observaciones se obtienen en pasos separados, con el tiempo acelerado para este juego.',

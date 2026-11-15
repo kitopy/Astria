@@ -289,3 +289,158 @@
 .ws-next .ws-btn { animation: ws-pop 0.35s ease-out; }
 .ws-slot { border-color: rgba(208, 144, 240, 0.7); background: rgba(28, 10, 51, 0.6); }
 .ws-mini-meters .ws-meter-bar { background: rgba(255, 255, 255, 0.22); }
+
+/* Subtle cue that the Chaco comparison is the next step after a successful flight. */
+.ws-next-comparison {
+  animation: ws-next-glow 5s ease-in-out infinite;
+  border-color: rgba(208, 144, 240, 0.72);
+}
+.ws-next-label {
+  display: inline-block;
+  margin: 0 0 10px;
+  color: #eadbff;
+  font-family: 'Audiowide', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  animation: ws-next-label-glow 5s ease-in-out infinite;
+}
+.ws-next-comparison > .ws-title { text-shadow: 0 0 10px rgba(240, 176, 240, 0.22); }
+@keyframes ws-next-glow {
+  0%, 100% { box-shadow: 0 12px 40px rgba(10, 4, 25, 0.45); border-color: rgba(208, 144, 240, 0.55); }
+  50% { box-shadow: 0 12px 46px rgba(10, 4, 25, 0.45), 0 0 18px rgba(208, 144, 240, 0.2); border-color: rgba(232, 199, 255, 0.78); }
+}
+@keyframes ws-next-label-glow {
+  0%, 100% { opacity: 0.82; }
+  50% { opacity: 1; text-shadow: 0 0 12px rgba(232, 199, 255, 0.34); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-next-comparison, .ws-next-label { animation: none; }
+}
+
+.ws-build-intro {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  pointer-events: auto;
+  background: rgba(7, 11, 29, 0.76);
+  backdrop-filter: blur(4px);
+  animation: build-intro-veil-in 0.38s ease-out both;
+}
+.ws-build-intro-card {
+  width: min(520px, 100%);
+  padding: 34px 38px 32px;
+  border: 1px solid #bba3eb;
+  border-radius: 26px;
+  color: #f8faf6;
+  text-align: center;
+  background: linear-gradient(145deg, #241d44f5, #111d31f5 76%);
+  box-shadow: 0 24px 90px rgba(5, 7, 20, 0.58), 0 0 32px rgba(167, 136, 239, 0.15);
+  animation: build-intro-card-in 0.4s ease-out both;
+}
+.ws-build-intro-mark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  color: #e4d3ff;
+  font-size: 28px;
+  background: #71519f;
+  border: 1px solid #d3bdff;
+  box-shadow: 0 0 18px rgba(167, 136, 239, 0.2);
+}
+.ws-build-intro-kicker {
+  color: #d7c2ff;
+  font-family: 'Audiowide', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2.2px;
+}
+.ws-build-intro-card h2 {
+  margin: 14px 0 10px;
+  font-family: 'Audiowide', sans-serif;
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 400;
+  line-height: 1.2;
+  color: #fff;
+}
+.ws-build-intro-card p {
+  max-width: 410px;
+  margin: 0 auto 22px;
+  color: #e4e8f4;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.ws-build-intro-card .ws-btn {
+  min-width: 170px;
+  min-height: 48px;
+  color: #17220b;
+  font-size: 16px;
+  background: #b9f566;
+  border: 1px solid #b9f566;
+  box-shadow: 0 3px 0 #73a13d;
+}
+.ws-build-intro-card .ws-btn:hover:not(:disabled) { background: #d2ff99; }
+.ws-build-intro.is-leaving { pointer-events: none; animation: build-intro-veil-out 0.32s ease-in forwards; }
+.ws-build-intro.is-leaving .ws-build-intro-card { animation: build-intro-card-out 0.32s ease-in forwards; }
+@keyframes build-intro-veil-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes build-intro-card-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes build-intro-veil-out { to { opacity: 0; } }
+@keyframes build-intro-card-out { to { opacity: 0; transform: translateY(-5px); } }
+@media (max-width: 700px) {
+  .ws-build-intro-card { padding: 28px 22px; border-radius: 22px; }
+  .ws-build-intro-card p { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-build-intro, .ws-build-intro-card { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
+
+.ws-devtools {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  padding: 28px;
+  color: #f8f3ff;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  background: radial-gradient(ellipse at 50% 25%, #39245c, #100b1d 72%);
+}
+.ws-devtools-card {
+  width: min(920px, 100%);
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid #aa8aca;
+  border-radius: 28px;
+  background: rgba(39, 26, 58, .94);
+  box-shadow: 0 24px 100px #0008;
+}
+.ws-devtools-kicker { color: #d8bfff; font-family: 'Audiowide', sans-serif; font-size: 12px; letter-spacing: 2px; }
+.ws-devtools-card h1 { margin: 14px 0; font-family: 'Audiowide', sans-serif; font-size: clamp(28px, 5vw, 42px); font-weight: 400; }
+.ws-devtools-card>p { max-width: 720px; color: #e0d5ef; font-size: 18px; line-height: 1.5; }
+.ws-devtools-card h2 { margin: 28px 0 12px; color: #f3d5ff; font-size: 18px; }
+.ws-devtools-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.ws-devtools button {
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 1px solid #b899d8;
+  border-radius: 14px;
+  color: #fff;
+  font: 700 16px 'Quicksand', system-ui, sans-serif;
+  background: #3a2b52;
+  cursor: pointer;
+  transition: transform .16s ease, background .16s ease, box-shadow .16s ease;
+}
+.ws-devtools button:hover { transform: translateY(-2px); background: #594176; box-shadow: 0 6px 18px #11091c88; }
+.ws-devtools button:focus-visible { outline: 3px solid #d2ff99; outline-offset: 3px; }
+.ws-devtools button[data-dev-stage="return-low-battery"] { border-color: #d2ff99; color: #e5ffc7; }
+.ws-devtools-normal { margin-top: 28px; background: transparent !important; }
+@media (max-width: 600px) {
+  .ws-devtools { padding: 14px; }
+  .ws-devtools-card { border-radius: 20px; }
+  .ws-devtools-buttons { display: grid; grid-template-columns: 1fr 1fr; }
+  .ws-devtools button { padding: 9px 10px; font-size: 14px; }
+}

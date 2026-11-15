@@ -29,5 +29,25 @@
     ],
     "credit": "NASA’s Goddard Space Flight Center; Ross K. Walter (SSAI)",
     "sha256": "879cd86d60fbe6b336508c2d858d1f3e4b6ec3a044cf87d47adf1e5bbcb32fd5"
+  },
+  "comparison": {
+    "sourcePage": "https://svs.gsfc.nasa.gov/15026/",
+    "sourceVideo": "data/chaco-landsat-nasa.mp4",
+    "sourceVideoSha256": "879cd86d60fbe6b336508c2d858d1f3e4b6ec3a044cf87d47adf1e5bbcb32fd5",
+    "method": "Uncropped 1920x1080 video frames extracted with browser Canvas JPEG quality 0.94; year labels inspected visually.",
+    "status": "preliminary-frames-final-image-review-pending",
+    "before": {
+      "file": "data/chaco-compare-1985.jpg",
+      "year": 1985,
+      "videoSecond": 0.05,
+      "sha256": "121661cb2ce8d07c1a632dbce08dab9c1ae39b35baa67d7fb42c1673bca2268c"
+    },
+    "after": {
+      "file": "data/chaco-compare-2025.jpg",
+      "year": 2025,
+      "videoSecond": 7.25,
+      "sha256": "010e35a5b0b3b41e7bc072f9ba63a71b961bb1d46fef43cb082bf8f0d91e4ca6"
+    },
+    "credit": "NASA’s Goddard Space Flight Center; Ross K. Walter (SSAI)"
   }
 }

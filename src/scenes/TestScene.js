@@ -9,18 +9,39 @@ import { ChacoMap } from '../ui/chaco-map.js';
 import { SatelliteSensor } from '../ui/satellite-sensor.js';
 import { centerDesignArea } from '../ui/layout.js';
 
+const DEBUG_SCENARIOS = {
+  'first-observation': { gate: 1, progress: .25, phase: 1, captured: [], photoPhases: [], energy: 'full' },
+  'second-observation': { gate: 2, progress: .75, phase: 2, captured: [1], photoPhases: [1], energy: 'full' },
+  'return-low-battery': { gate: 2, progress: .75, phase: 2, captured: [1], photoPhases: [1], energy: 0 },
+  transmission: { gate: 3, progress: 1, phase: 3, captured: [1, 2], photoPhases: [1, 2], energy: 'full' },
+};
+
 export class TestScene extends Phaser.Scene {
   constructor() { super('Test'); }
   init(data = {}) {
     this.design = readDesign(data.design ?? this.registry.get('satelliteDesign'));
     this.specs = stats(catalog, this.design);
     this.mission = this.specs.valid ? launch(this.specs) : null;
-    this.flight = initialFlight(); this.mapClock = 0; this.sensorShots=[];this.sensorFootprintGate=-1;
+    this.debugScenario = Object.hasOwn(DEBUG_SCENARIOS, data.debugScenario) ? data.debugScenario : null;
+    this.flight = initialFlight(); this.mapClock = 0; this.sensorShots=[];
     let storage;
     try { storage = window.localStorage; } catch { /* Use the registry if storage is unavailable. */ }
-    const kind = this.mission ? drawObstacle(storage, this.registry.get('lastObstacle')) : 'clouds';
-    if (this.mission) this.registry.set('lastObstacle', kind);
+    const kind = this.mission && !this.debugScenario ? drawObstacle(storage, this.registry.get('lastObstacle')) : 'clouds';
+    if (this.mission && !this.debugScenario) this.registry.set('lastObstacle', kind);
     this.visibility = initialVisibility(kind);
+    if (this.debugScenario && this.mission) {
+      const scenario = DEBUG_SCENARIOS[this.debugScenario];
+      this.flight = { progress: scenario.progress, gate: scenario.gate, running: false, speed: 1 };
+      const photos = scenario.photoPhases.map(phase => ({ phase, quality: this.specs.quality, remaining: this.specs.data }));
+      this.mission = {
+        ...this.mission,
+        phase: scenario.phase,
+        energy: scenario.energy === 'full' ? this.specs.capacity : scenario.energy,
+        photos,
+        captured: [...scenario.captured],
+      };
+      this.visibility = { ...this.visibility, status: 'clear' };
+    }
     this.sensorTime = 0;
   }
   preload() { preloadArt(this); }
@@ -28,8 +49,8 @@ export class TestScene extends Phaser.Scene {
     centerDesignArea(this);
     if (!this.mission) { this.scene.start('Build', { design: this.design }); return; }
     this.hud = createChacoHUD(this, this.design, action => this.handleAction(action));
-    this.sensor=new SatelliteSensor(this.hud.sensorCanvas,this.design,()=>{if(this.hud){this.hud.ready=!!this.missionMap?.ready;this.render();}});
-    this.hud.say('Estamos en Paraguay. Prepará tu misión para observar dos veces una zona del Chaco. Al llegar al bosque, el vuelo se pausará para que puedas decidir.');
+    this.sensor=new SatelliteSensor(this.hud.sensorCanvas,this.design,()=>{if(this.hud){this.hud.ready=!!this.missionMap?.ready;this.render();}},message=>this.hud?.say(message));
+    this.hud.say('Vamos a explorar el Chaco con imágenes de archivo de 1985 y 2025. El viaje recrea dos observaciones: cuidá la energía y enviá las dos fotos.');
     this.missionMap = new ChacoMap(this.hud.mapElement,
       () => { this.hud.ready = this.sensor.ready; this.render(); this.missionMap.update(this.flight); },
       () => { this.hud.say('No se pudo preparar una parte del mapa. Podés volver al taller o recargar la página.'); },
@@ -43,6 +64,7 @@ export class TestScene extends Phaser.Scene {
     this.render();
   }
   handleAction(action) {
+    if (action === 'intro-closed') { this.render(); return; }
     if (action === 'travel' && this.hud.ready && !['blocked','adjusting'].includes(this.visibility.status)) {
       const gate = this.flight.gate;
       this.flight = startFlight(this.flight);
@@ -85,6 +107,7 @@ export class TestScene extends Phaser.Scene {
       clouds: cloudCover(this.flight, this.visibility),
       adjustment: this.visibility.kind === 'clouds' ? this.visibility.adjustment : 0, time: this.sensorTime
     });
+    if (this.sensor.frame) this.hud.setSensorYear(this.sensor.frame.year);
   }
   update(_time, delta) {
     if (!this.hud || !this.hud.ready) return;
@@ -96,7 +119,6 @@ export class TestScene extends Phaser.Scene {
     if (!document.hidden && !this.hud.caseOpen) this.sensorTime += delta;
     if (previousVisibility !== this.visibility.status) {
       this.updateSensor();
-      this.missionMap.setFootprint(this.sensor.footprint);
       this.hud.say(this.visibility.status === 'blocked'
         ? `${obstacleInfo(this.visibility).label}. ${obstacleInfo(this.visibility).message} Resolverlo cuesta ${REFRAME_ENERGY} de energía.`
         : `${obstacleInfo(this.visibility).resolved} El ajuste consumió ${REFRAME_ENERGY} de energía. Cuidá la reserva que queda.`);
@@ -105,7 +127,6 @@ export class TestScene extends Phaser.Scene {
     if (this.flight.gate !== before) {
       this.mission = advance(this.mission, this.specs);
       this.updateSensor();
-      this.missionMap.setFootprint(this.sensor.footprint);
       const phase = this.flight.gate;
       const message = phase === 1
         ? 'Llegamos al bosque del Chaco. El recorrido se detuvo: activá Observar para obtener la primera imagen.'
@@ -124,10 +145,6 @@ export class TestScene extends Phaser.Scene {
       this.missionMap.update(this.flight);
       this.updateSensor();
       this.hud.updateWeather(this.flight, this.visibility);
-      if (this.flight.running || this.visibility.status === 'adjusting' || this.sensorFootprintGate !== this.flight.gate) {
-        this.sensorFootprintGate = this.flight.gate;
-        this.missionMap.setFootprint(this.sensor.footprint);
-      }
     }
   }
 }

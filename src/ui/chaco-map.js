@@ -23,8 +23,7 @@ export class ChacoMap {
         countries: { type: 'geojson', data: `${base}data/paraguay-region.geojson` },
         route: { type: 'geojson', data: line(ROUTE) },
         trail: { type: 'geojson', data: line([ASUNCION, ASUNCION]) },
-        downlink: { type: 'geojson', data: line([ASUNCION, ASUNCION]) },
-        footprint: { type: 'geojson', data: {type:'FeatureCollection',features:[]} }
+        downlink: { type: 'geojson', data: line([ASUNCION, ASUNCION]) }
       }, layers: [
         { id: 'background', type: 'background', paint: { 'background-color': '#142e30' } },
         { id: 'terrain', type: 'raster', source: 'terrain' },
@@ -33,9 +32,7 @@ export class ChacoMap {
         { id: 'paraguay', type: 'line', source: 'countries', filter: ['==', ['get', 'code'], 'PRY'], paint: { 'line-color': '#b9f5c1', 'line-width': 2.5 } },
         { id: 'route', type: 'line', source: 'route', layout: { 'line-join': 'round' }, paint: { 'line-color': '#cfb5ff', 'line-width': 2.5, 'line-dasharray': [3, 2], 'line-opacity': .8 } },
         { id: 'trail', type: 'line', source: 'trail', layout: { 'line-join': 'round' }, paint: { 'line-color': '#b9f566', 'line-width': 3.5 } },
-        { id: 'downlink', type: 'line', source: 'downlink', paint: { 'line-color': '#b9f566', 'line-width': 4, 'line-dasharray': [1, 2], 'line-opacity': 0 } },
-        { id: 'sensor-fill', type:'fill',source:'footprint',paint:{'fill-color':'#f0b0f0','fill-opacity':.12}},
-        { id: 'sensor-frame', type:'line',source:'footprint',paint:{'line-color':'#f0b0f0','line-width':2}}
+        { id: 'downlink', type: 'line', source: 'downlink', paint: { 'line-color': '#b9f566', 'line-width': 4, 'line-dasharray': [1, 2], 'line-opacity': 0 } }
       ] }
     });
     this.onResize = () => { this.baseZoom = zoomForSize(); if (this.follow) this.map.jumpTo({ zoom: this.baseZoom }); };
@@ -100,7 +97,6 @@ export class ChacoMap {
       this.map.setPaintProperty('downlink', 'line-opacity', 1);
     }
   }
-  setFootprint(coordinates){if(this.ready&&coordinates)this.map.getSource('footprint').setData({type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[coordinates]}});}
   recenter() {
     this.follow = true;
     this.map.easeTo({ center: [-59.2, -23.3], zoom: this.baseZoom, pitch: 18, bearing: -8,

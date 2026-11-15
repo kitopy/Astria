@@ -161,7 +161,7 @@ export function noahStop() {
   window.speechSynthesis?.cancel();
 }
 
-// Speaks only if the player has NOAH's voice turned on.
-export function speakIfEnabled(scene, text) {
-  if (scene.registry.get('noahVoice')) noahSpeak(text);
+// Speaks only if the player has NOAH's voice turned on (force: speak anyway).
+export function speakIfEnabled(scene, text, { force = false } = {}) {
+  if (force || scene.registry.get('noahVoice')) noahSpeak(text);
 }
