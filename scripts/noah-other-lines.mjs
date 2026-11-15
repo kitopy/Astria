@@ -68,8 +68,7 @@ for (const delivered of [0, 1, 2]) {
 
 // RewardScene
 const reward = [
-  '¡Lo lograste! Las dos fotos llegaron a la Tierra. Revisalas y después practicá cómo comparar imágenes.',
-  '¡Lo lograste! Tu satélite tomó y envió las dos fotos. Vamos a ver qué descubriste.',
+  '¡Lo lograste! Las dos fotos llegaron a la Tierra.',
   'Los resultados nos ayudan a diseñar mejor. Guardé tus piezas para que puedas ajustar tu satélite.',
 ];
 
@@ -89,7 +88,7 @@ const observe = [
 
 // FinaleScene
 const finale = [
-  'NOAH // ¡GRACIAS, EXPLORADOR!\nDetrás de cada misión hay personas que diseñan, prueban y descubren.\nVos también podés construir, descubrir y explorar el universo.',
+  '¡Gracias, explorador! Vos también podés explorar el universo.',
 ];
 
 export const otherLines = [...station, ...flight, ...reward, ...observe, ...finale];

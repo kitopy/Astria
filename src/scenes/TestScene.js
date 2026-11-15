@@ -10,6 +10,7 @@ import { canCapture, createChacoHUD, satellitePreview } from '../ui/chaco-hud.js
 import { ChacoMap } from '../ui/chaco-map.js';
 import { SatelliteSensor } from '../ui/satellite-sensor.js';
 import { centerDesignArea } from '../ui/layout.js';
+import { sfx } from '../ui/sfx.js';
 
 // Dev picker (?dev=1): each scenario starts a little before its stop, so the arrival plays like in the
 // normal game (the satellite flies in, the map follows it, the stop's menu or dialog opens).
@@ -77,14 +78,19 @@ export class TestScene extends Phaser.Scene {
         this.hud.say(obstacleInfo(this.visibility).explanation);
       } catch (error) { this.hud.say(error.message); }
     } else if (action === 'workshop') { this.scene.start('Build', { design: this.design }); return; }
-    else if (action === 'finish' && this.flight.gate === 3) { this.scene.start('Reward', { design: this.design, mission: this.mission, captures:this.sensorShots, caseStudy: 'chaco-paraguay' }); return; }
+    else if (action === 'finish' && this.flight.gate === 3) {
+      // Both photos arrived: first analyze them (Observe), then the results. Otherwise straight to the results.
+      const result = { design: this.design, mission: this.mission, captures: this.sensorShots, caseStudy: 'chaco-paraguay' };
+      this.scene.start(this.mission.delivered >= 2 ? 'Observe' : 'Reward', result);
+      return;
+    }
     else if (['capture', 'transmit'].includes(action)) {
       if (!atGate(this.flight)) return;
       try {
         this.updateSensor();
         const shot=action==='capture'?this.sensor.capture(this.mission.phase):null;
         this.mission = action === 'capture' ? capture(this.mission, this.specs) : transmit(this.mission, this.specs);
-        if(shot){this.sensorShots.push(shot);this.hud.showPhoto(shot,this.sensorShots);}
+        if(shot){this.sensorShots.push(shot);this.hud.showPhoto(shot,this.sensorShots);sfx.shutter();}
         this.sensorShots.forEach((photo,i)=>{photo.delivered=i<this.mission.delivered;});
         this.hud.showShots(this.sensorShots);
         if(shot){const panel=this.hud.root.querySelector('.sensor-window');panel.classList.remove('taking-photo');void panel.offsetWidth;panel.classList.add('taking-photo');}
@@ -130,6 +136,8 @@ export class TestScene extends Phaser.Scene {
     if (!document.hidden) this.sensorTime += delta;
     this.autoFly(delta);
     if (previousVisibility !== this.visibility.status) {
+      if (this.visibility.status === 'blocked') sfx.alert();
+      else if (this.visibility.status === 'clear') sfx.fixed();
       this.updateSensor();
       this.hud.say(this.visibility.status === 'blocked'
         ? '¡Un imprevisto!' // the box next to the satellite says what happened

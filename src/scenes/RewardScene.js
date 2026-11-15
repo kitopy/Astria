@@ -1,13 +1,21 @@
 import Phaser from 'phaser';
-import { feedback, stats } from '../game/model.js';
+import { stats } from '../game/model.js';
 import { catalog, readDesign } from '../game/design.js';
 import { actionButton, addArt, mount, preloadArt } from '../ui/mission-ui.js';
 import { centerDesignArea } from '../ui/layout.js';
-import { comparisonCase } from '../game/chaco-comparison.js';
+import { sfx } from '../ui/sfx.js';
 
-const BASE = import.meta.env.BASE_URL;
+// What went wrong, in one short sentence, and the part that fixes it (same order as the flight:
+// photos first, then sending them).
+function whatFailed(m) {
+  if (m.captured.length < 2) return { text: 'La batería no alcanzó para las dos fotos.', part: 'battery' };
+  if (!m.sent) return { text: 'No quedó energía para enviar las fotos.', part: 'battery' };
+  return { text: 'La antena no pudo enviar todas las fotos.', part: 'antenna' };
+}
 
-// Step 3: what happened in the mission and what to improve.
+// Last screen of the game. Success: the one celebration, with the two photos taken (already analyzed in
+// Observe) and a button to play again. Failure: what was missing, the part to blame blinking on the
+// satellite, and one button to fix it.
 export class RewardScene extends Phaser.Scene {
   constructor() {
     super('Reward');
@@ -30,54 +38,44 @@ export class RewardScene extends Phaser.Scene {
       return;
     }
 
-    addArt(this, this.design);
+    const art = addArt(this, this.design);
     const m = this.mission;
-    const s = stats(catalog, this.design);
     const success = m.delivered >= 2;
     const ui = mount(this);
+    ui.root.classList.add('ws--result');
 
-    ui.area('left').innerHTML = `
-      <h2 class="ws-title">Resultados</h2>
-      <div class="ws-stats">
-        <div><strong>${m.captured.length}/2</strong><span>fotos tomadas</span></div>
-        <div><strong>${m.delivered}/2</strong><span>llegaron a la Tierra</span></div>
-      </div>
-      <ul class="ws-feedback">${feedback(m, s).map((line) => `<li>${line}</li>`).join('')}</ul>
-      <details class="ws-details"><summary>Bitácora de la misión</summary><ol>${m.log.map((line) => `<li>${line}</li>`).join('')}</ol></details>`;
+    ui.area('center').innerHTML = `<h1 class="ws-headline ws-result-title">${success ? '¡Misión cumplida!' : '¡Casi!'}</h1>`;
 
-    ui.area('center').innerHTML = `
-      <h1 class="ws-headline">${success ? '¡Misión cumplida!' : 'Cada prueba enseña algo'}</h1>
-      <p>${success ? 'Diseñaste. Probaste. Descubriste.' : 'Tu próxima idea puede cambiar el resultado.'}</p>`;
+    const below = document.createElement('div');
+    below.className = 'ws-result-below';
+    ui.root.append(below);
 
-    const right=ui.area('right');
-    right.classList.toggle('ws-next-comparison', success);
-    right.innerHTML=`<h2 class="ws-title">El Chaco: antes y después</h2>
-      <div class="saved-sensor-photos historical-sensor-photos">
-        <figure><img src="${BASE}${comparisonCase.before}" alt="Antes: Chaco paraguayo en ${comparisonCase.beforeYear}" data-year="${comparisonCase.beforeYear}"><figcaption>Antes · ${comparisonCase.beforeYear}</figcaption></figure>
-        <figure><img src="${BASE}${comparisonCase.after}" alt="Después: el mismo sector en ${comparisonCase.afterYear}" data-year="${comparisonCase.afterYear}"><figcaption>Después · ${comparisonCase.afterYear}</figcaption></figure>
-      </div><p class="ws-story">El mismo sector, cuarenta años después. Son imágenes de archivo Landsat / NASA: tu misión recrea la observación. Ahora podés investigar qué cambió.</p>`;
+    if (success) sfx.success();
+    else sfx.almost();
 
     if (success) {
-      const nextLabel = document.createElement('span');
-      nextLabel.className = 'ws-next-label';
-      nextLabel.textContent = 'SIGUIENTE MISIÓN';
-      right.prepend(nextLabel);
+      // The two photos of the mission, as a trophy (only when they exist: the dev shortcuts have none).
+      below.innerHTML = this.captures.slice(0, 2).map((shot, i) => `
+        <figure class="ws-result-photo" style="animation-delay:${0.3 + i * 0.2}s">
+          <img src="${shot.image}" alt="Foto del Chaco, ${shot.year}">
+          <figcaption>${shot.year >= 2020 ? 'Hoy' : shot.year}</figcaption>
+        </figure>`).join('');
+      // Credits of the real data used in the mission, small, at the very end (not during play).
+      const credits = document.createElement('p');
+      credits.className = 'ws-credits';
+      credits.textContent = 'Imágenes: NASA Landsat · Mapa: NASA GIBS y Natural Earth (MapLibre) · Recorrido simulado';
+      ui.root.append(credits);
+      ui.area('actions').innerHTML = actionButton('again', 'Jugar de nuevo', true);
+      ui.bind({ again: () => this.scene.start('Menu') });
+    } else {
+      const failed = whatFailed(m);
+      below.innerHTML = `<p class="ws-result-reason">${failed.text}</p>`;
+      ui.area('actions').innerHTML = actionButton('fix', `Cambiar ${catalog[failed.part].label.toLowerCase()} ›`, true);
+      ui.bind({ fix: () => this.scene.start('Build', { design: this.design, focus: failed.part }) });
+      // The part to change blinks on the satellite (the same "just mounted" highlight, repeated).
+      const blink = () => art.applyDesign(this.design, failed.part);
+      this.time.delayedCall(600, blink);
+      this.time.addEvent({ delay: 2200, loop: true, callback: blink });
     }
-
-    // The full historical pair is shared with the investigation screen.
-    ui.area('actions').innerHTML = success
-      ? actionButton('improve', 'Volver al taller') + actionButton('observe', 'Investigar el Chaco ›', true)
-      : actionButton('improve', 'Mejorar mi satélite ›', true);
-
-    ui.bind({
-      improve: () => this.scene.start('Build', { design: this.design, focus: 'review' }),
-      observe: () => this.scene.start('Observe', { design: this.design, mission: this.mission, captures: this.captures }),
-    });
-
-    ui.say(success
-      ? this.captures.length
-        ? '¡Lo lograste! Las dos fotos llegaron a la Tierra. Revisalas y después practicá cómo comparar imágenes.'
-        : '¡Lo lograste! Tu satélite tomó y envió las dos fotos. Vamos a ver qué descubriste.'
-      : 'Los resultados nos ayudan a diseñar mejor. Guardé tus piezas para que puedas ajustar tu satélite.');
   }
 }

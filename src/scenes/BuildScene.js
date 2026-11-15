@@ -4,6 +4,7 @@ import { catalog, readDesign, saveDesign } from '../game/design.js';
 import { actionButton, addArt, meter, mount, partThumb, preloadArt } from '../ui/mission-ui.js';
 import { centerDesignArea } from '../ui/layout.js';
 import { showDialog } from '../ui/dialog.js';
+import { sfx } from '../ui/sfx.js';
 import { COLORS, CSS } from '../ui/palette.js';
 import { contentBounds } from '../ui/satellite.js';
 import { mountLine, partIntro, reviewLine } from '../game/noah-lines.js';
@@ -19,16 +20,6 @@ const SNAP_DISTANCE = 300; // dropping a piece closer than this to the satellite
 const AUTO_NEXT_MS = 1500; // after mounting a part for the first time, go to the next one by itself
 const OPTION_SLIDE = 140; // how far (px) the options slide in from / out to the sides between steps
 
-// The number that matters for each part type, plus mass and cost (shown under an option on hover).
-function partNumbers(kind, part) {
-  const key = {
-    camera: `${part.power} de energía por foto`,
-    solar: `+${part.generation} de energía con luz`,
-    battery: `Guarda ${part.capacity} de energía`,
-    antenna: `Envía ${part.rate} bloques`,
-  }[kind];
-  return `${key} · ${part.mass} kg · ${part.cost} créditos`;
-}
 
 // Step 1 of the mission: assemble the satellite one part at a time, then review.
 export class BuildScene extends Phaser.Scene {
@@ -316,14 +307,15 @@ export class BuildScene extends Phaser.Scene {
   addOption(kind, part, x, y) {
     const isChosen = this.placed.has(kind) && this.design[kind] === part.id;
 
-    const ring = this.add.circle(0, -20, 150).setStrokeStyle(3, COLORS.glow, isChosen ? 1 : 0).setFillStyle(COLORS.panel, 0.55);
+    // No disc behind the part: only a pink outline around the part already mounted (when changing it).
+    const ring = this.add.circle(0, -20, 150).setStrokeStyle(3, COLORS.glow, isChosen ? 1 : 0);
     const picture = this.partImage(kind, part.id, 0, -20);
     // Dark shadow keeps the labels readable over the bright clouds of the Earth.
     const name = this.add.text(0, 160, part.name, { fontFamily: 'Audiowide', fontSize: '32px', color: '#ffffff' }).setOrigin(0.5).setPadding(10).setShadow(0, 2, '#0b0618', 10, false, true);
     const benefit = this.add.text(0, 205, part.benefit, { fontFamily: 'Quicksand', fontSize: '22px', fontStyle: 'bold', color: '#e9defc' }).setOrigin(0.5).setPadding(10).setShadow(0, 2, '#0b0618', 10, false, true);
-    // Hidden until the pointer is over the option: the trade-off and the numbers.
+    // Hidden until the pointer is over the option: the trade-off, in words.
     const details = this.add
-      .text(0, 250, `Pero ${part.tradeoff.toLowerCase()}\n${partNumbers(kind, part)}`, {
+      .text(0, 250, `Pero ${part.tradeoff.toLowerCase()}`, { // the trade-off in words, no numbers
         fontFamily: 'Quicksand', fontSize: '19px', fontStyle: 'bold', color: CSS.pink, align: 'center', lineSpacing: 6,
         wordWrap: { width: 380 },
         backgroundColor: 'rgba(28, 10, 51, 0.88)', // readable over the bright clouds of the Earth
@@ -431,6 +423,7 @@ export class BuildScene extends Phaser.Scene {
         this.art.applyDesign(this.design, kind);
         // Small bump of the whole satellite: the part clicked into place.
         this.tweens.add({ targets: this.art, scale: SATELLITE.scale * 1.04, duration: 110, yoyo: true, ease: 'Sine.out' });
+        sfx.pop();
         this.drawSlot();
         this.options.forEach((o) => o.list[0].setStrokeStyle(3, COLORS.glow, o === option ? 1 : 0));
         this.renderHud();

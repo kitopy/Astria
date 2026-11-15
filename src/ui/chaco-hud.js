@@ -1,16 +1,14 @@
 import { noahSpeak, noahStop } from './noahVoice.js';
 import { showDialog } from './dialog.js';
+import { frames } from './satellite.js';
+import { sfx } from './sfx.js';
 import { phases } from '../game/model.js';
 import { atGate } from '../game/chaco-flight.js';
 import { cloudCover, obstacleInfo, obstacleIntensity, REFRAME_ENERGY } from '../game/chaco-visibility.js';
 import './chaco.css';
 
 const base = import.meta.env.BASE_URL;
-const partRect = {
-  body: [50,50,340,350], 'solar-small':[440,110,350,230], 'solar-large':[800,105,450,240],
-  'camera-simple':[70,460,300,330], 'camera-detail':[425,470,395,320], 'battery-light':[900,470,240,320],
-  'battery-long':[35,885,380,340], 'antenna-basic':[500,870,240,350], 'antenna-fast':[820,835,430,390]
-};
+const partRect = frames; // same atlas rectangles as the workshop (ui/satellite.js)
 function part(frame, className) {
   return `<svg class="${className}" viewBox="${partRect[frame].join(' ')}" aria-hidden="true"><image href="${base}assets/satellite-modules.png" width="1280" height="1280"/></svg>`;
 }
@@ -40,11 +38,15 @@ export function createChacoHUD(scene, design, onAction) {
   root.innerHTML = `<div class="chaco-map" aria-label="Mapa geográfico de Paraguay"></div><div class="chaco-shadow"></div><div class="weather-fog" aria-hidden="true"></div>
   <div class="chaco-top-actions"><button data-flight="voice" aria-pressed="false">Voz de NOAH: apagada</button></div>
   <aside class="chaco-status hud-panel" aria-label="Estado de la misión">
-    <div class="status-row"><span>Batería</span><strong data-hud="energy"></strong></div>
-    <progress data-hud="battery" aria-label="Energía disponible"></progress>
-    <div class="status-row"><span>Fotos tomadas</span><strong data-hud="captured">0/2</strong></div>
-    <div class="status-row"><span>Fotos enviadas</span><strong data-hud="delivered">0/2</strong></div>
-    <p class="status-sun" data-hud="sun">Con luz solar</p>
+    <div class="status-battery">
+      <span class="status-battery-icon" aria-hidden="true"></span>
+      <span class="status-battery-bar"><i data-hud="battery-fill"></i></span>
+      <strong data-hud="energy"></strong>
+    </div>
+    <div class="status-photos" data-hud="photos" aria-label="Fotos">
+      <span class="photo-slot"></span><span class="photo-slot"></span>
+      <span class="status-sun" data-hud="sun" title="Luz del Sol"></span>
+    </div>
   </aside>
   <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2></div><div class="sensor-window"><canvas aria-label="Vista recreada del Chaco con imágenes de archivo"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record" data-hud="sensor-year">ARCHIVO · 1985</span></div><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
   <div class="photo-pop hud-panel" aria-live="polite" hidden></div>
@@ -71,7 +73,7 @@ export function createChacoHUD(scene, design, onAction) {
       <button data-flight="finish" class="console-action" hidden><span class="console-icon" aria-hidden="true"></span><span class="console-label">Ver resultados</span></button>
     </div>
   </div></section>
-  <footer class="chaco-sources"><span>Mapa real · recorrido simulado</span><span>NASA GIBS · Natural Earth · MapLibre</span></footer>`;
+`;
   document.body.append(root);
   const get = key => root.querySelector(`[data-hud="${key}"]`);
   // Welcome: the shared game dialog (ui/dialog.js). The flight waits until it's closed.
@@ -135,6 +137,8 @@ export function createChacoHUD(scene, design, onAction) {
         const fill = figure.querySelector('.send-bar i');
         fill.style.transitionDuration = `${FILL_MS * share}ms`;
         setTimeout(() => { fill.style.width = `${share * 100}%`; }, start);
+        // Data blips while this bar fills.
+        for (let t = 0; t < FILL_MS * share; t += 150) setTimeout(() => sfx.blip(Math.floor(t / 150)), start + t);
         start += FILL_MS * share;
         return share === 1;
       });
@@ -145,7 +149,9 @@ export function createChacoHUD(scene, design, onAction) {
           figure.classList.add(complete ? 'arrived' : 'missing');
           figure.querySelector('figcaption').textContent = complete ? '¡Llegó!' : 'No llegó completa';
         });
-        button.textContent = 'Ver resultados';
+        if (results.every(Boolean)) sfx.done(); else sfx.almost();
+        // Both photos arrived: next comes analyzing them; otherwise the results.
+        button.textContent = results.every(Boolean) && results.length >= 2 ? 'Analizar las fotos' : 'Ver resultados';
         button.dataset.done = 'yes';
         button.disabled = false;
         button.focus({ preventScroll: true });
@@ -214,9 +220,18 @@ export function createChacoHUD(scene, design, onAction) {
       const obstructed=['blocked','adjusting'].includes(visibility.status);
       this.updateWeather(flight,visibility);
       root.classList.toggle('panels-deployed',flight.progress>0||flight.running);
-      get('captured').textContent=`${mission.captured.length}/2`;get('delivered').textContent=`${mission.delivered}/2`;
-      get('energy').textContent=`${mission.energy}/${specs.capacity}`;get('battery').max=specs.capacity;get('battery').value=mission.energy;
-            get('sun').textContent=phases[mission.phase].sun?'Con luz solar':'En la sombra: sin recarga';
+      // Status with few numbers: a battery bar with the current charge, two photo slots
+      // (empty, taken, sent) and a sun that dims while the satellite is in the shadow.
+      const charge=specs.capacity?mission.energy/specs.capacity:0;
+      get('battery-fill').style.width=`${Math.round(charge*100)}%`;
+      get('battery-fill').classList.toggle('low',charge<.3);
+      get('energy').textContent=mission.energy;
+      get('photos').querySelectorAll('.photo-slot').forEach((slot,i)=>{
+        slot.classList.toggle('sent',i<mission.delivered);
+        slot.classList.toggle('taken',i>=mission.delivered&&i<mission.captured.length);
+      });
+      get('photos').setAttribute('aria-label',`Fotos: ${mission.captured.length} tomadas, ${mission.delivered} enviadas`);
+      get('sun').title=phases[mission.phase].sun?'Con luz del Sol':'En la sombra: sin recarga';
       root.classList.toggle('in-shadow',!phases[mission.phase].sun);
       const control=action=>root.querySelector(`[data-flight="${action}"]`);
       // Fix button of the surprise problem; without energy for it, back to the workshop instead.
@@ -265,6 +280,8 @@ export function createChacoHUD(scene, design, onAction) {
       this.positionActionMenu();
       clearTimeout(this.photoTimer);
       this.photoTimer=setTimeout(()=>{pop.hidden=true;},pair?5500:4500);
+      clearTimeout(this.renderTimer);
+      this.renderTimer=setTimeout(()=>sfx.done(),1400); // when the scan line finishes
     },
     // Keeps the boxes that belong to the satellite (photo menu, last photo) next to it while the map moves.
     positionActionMenu(){
@@ -284,6 +301,6 @@ export function createChacoHUD(scene, design, onAction) {
         box.style.top = `${top}px`;
       }
     },
-    destroy(){clearTimeout(this.photoTimer);noahStop();root.remove();}
+    destroy(){clearTimeout(this.photoTimer);clearTimeout(this.renderTimer);noahStop();root.remove();}
   };
 }

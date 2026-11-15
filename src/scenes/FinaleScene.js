@@ -2,16 +2,16 @@ import Phaser from 'phaser';
 import { speakIfEnabled } from '../ui/noahVoice.js';
 import { DESIGN, addCoverBackground, centerDesignArea, visibleArea } from '../ui/layout.js';
 import { COLORS, CSS } from '../ui/palette.js';
+import { addNeonButton } from '../ui/neonButton.js';
 
-// What the player did, and which real job does that work.
+// What the player did, in a few words each.
 const ACHIEVEMENTS = [
-  { title: 'DISEÑASTE', text: 'Elegiste las piezas de tu satélite,\ncomo un equipo de ingeniería espacial.' },
-  { title: 'PROBASTE', text: 'Pusiste tu diseño a prueba\ny cuidaste la energía.' },
-  { title: 'DESCUBRISTE', text: 'Comparaste fotos de la Tierra,\ncomo un equipo de científicos.' },
+  { title: 'DISEÑASTE', text: 'Tu propio satélite' },
+  { title: 'PROBASTE', text: 'Una misión al Chaco' },
+  { title: 'DESCUBRISTE', text: 'Cómo cambió el bosque' },
 ];
 
-const NOAH_LINE =
-  'NOAH // ¡GRACIAS, EXPLORADOR!\nDetrás de cada misión hay personas que diseñan, prueban y descubren.\nVos también podés construir, descubrir y explorar el universo.';
+const NOAH_LINE = '¡Gracias, explorador! Vos también podés explorar el universo.';
 
 // Closing celebration after the Observe scene.
 export class FinaleScene extends Phaser.Scene {
@@ -36,40 +36,23 @@ export class FinaleScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setShadow(0, 4, '#3b1d63', 12);
 
+    ACHIEVEMENTS.forEach((item, i) => this.addCard(width / 2 + (i - 1) * 520, 400, item, i));
+
+    // NOAH's goodbye: one line in the dialog panel of the original art.
+    this.add.image(width / 2, 660, 'panel-dialog').setDisplaySize(1100, 220);
     this.add
-      .text(width / 2, 260, 'Tu satélite llegó a la órbita y sus fotos llegaron a la Tierra.', {
-        fontFamily: 'Quicksand',
-        fontSize: '40px',
-        fontStyle: 'bold',
-        color: '#ffffff',
-      })
-      .setOrigin(0.5)
-      .setShadow(0, 2, '#000000', 8);
-
-    ACHIEVEMENTS.forEach((item, i) => this.addCard(width / 2 + (i - 1) * 540, 480, item, i));
-
-    // NOAH dialog box, same position as in the Observe scene.
-    this.add.image(362, 683, 'panel-dialog').setOrigin(0).setDisplaySize(1189, 274);
-    this.add.text(458, 745, NOAH_LINE, {
-      fontFamily: 'Audiowide',
-      fontSize: '24px',
-      color: '#ffffff',
-      lineSpacing: 10,
-    });
+      .text(width / 2, 660, NOAH_LINE, { fontFamily: 'Quicksand', fontSize: '34px', fontStyle: 'bold', color: '#ffffff', align: 'center', wordWrap: { width: 900 } })
+      .setOrigin(0.5);
     speakIfEnabled(this, NOAH_LINE);
 
-    this.add
-      .text(1450, 905, 'VOLVER AL INICIO ›', { fontFamily: 'Audiowide', fontSize: '30px', color: CSS.glow })
-      .setOrigin(1, 1)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerup', () => this.scene.start('Menu'));
+    addNeonButton(this, width / 2, 900, 'JUGAR DE NUEVO', () => this.scene.start('Menu'), { width: 620, height: 110, fontSize: 38 });
   }
 
   // One achievement card. Cards appear one after the other (delay grows with index).
   addCard(x, y, { title, text }, index) {
-    const bg = this.add.rectangle(0, 0, 480, 230, COLORS.panel, 0.85).setStrokeStyle(4, COLORS.orchid);
+    const bg = this.add.rectangle(0, 0, 460, 170, COLORS.panel, 0.85).setStrokeStyle(4, COLORS.orchid);
     const titleText = this.add
-      .text(0, -60, title, { fontFamily: 'Audiowide', fontSize: '40px', color: CSS.gold })
+      .text(0, -30, title, { fontFamily: 'Audiowide', fontSize: '40px', color: CSS.gold })
       .setOrigin(0.5);
     const body = this.add
       .text(0, 30, text, { fontFamily: 'Quicksand', fontSize: '28px', fontStyle: 'bold', color: '#ffffff', align: 'center' })
