@@ -74,6 +74,8 @@ const reward = [
 
 // ObserveScene brush investigation
 const observe = [
+  '¡Buen ojo! Primer hallazgo registrado. ¡Vamos por el segundo!',
+  '¡Lo lograste! Los dos hallazgos están listos. ¿Qué descubriste?',
   'Podés pintar sin apuro. Elegí un sector que te llame la atención.',
   'Ya podés marcar este lugar como hallazgo.',
   'Buscá otro sector, más lejos del primero.',

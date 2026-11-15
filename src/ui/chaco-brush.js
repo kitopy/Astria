@@ -1,5 +1,6 @@
 import { answerComparison, comparisonCase, initialComparison, markComparisonChange, MIN_BRUSH_LENGTH } from '../game/chaco-comparison.js';
 import { speakIfEnabled } from './noahVoice.js';
+import { showDialog } from './dialog.js';
 import './chaco-brush.css';
 
 const base = import.meta.env.BASE_URL;
@@ -14,39 +15,39 @@ export function createChacoComparison(scene, onAction) {
       <button data-action="voice" aria-pressed="false">Voz de NOAH</button>
     </header>
     <div class="brush-intro">
-      <div><h1>Descubrí qué cambió</h1><p>Pintá un sector claro de 2025 para revelar cómo se veía el mismo lugar en 1985.</p></div>
+      <div><h1>Investigá el Chaco</h1></div>
       <span>IMÁGENES LANDSAT / NASA</span>
     </div>
     <main class="brush-layout">
       <section class="brush-viewer" aria-label="Comparación interactiva de imágenes">
-        <div class="brush-stage" aria-label="Pintá para revelar la imagen de 1985">
+        <div class="brush-stage" aria-label="Lupa comparativa: imagen de 2025 con archivo de 1985">
           <img src="${base}${comparisonCase.after}" alt="Sector del Chaco paraguayo en 2025, imagen Landsat de NASA" draggable="false">
           <canvas class="brush-reveal" aria-label="Zonas de 1985 reveladas"></canvas>
           <span class="brush-region">SECTOR DE ESTUDIO · CHACO PARAGUAYO</span>
-          <span class="brush-year brush-year-after">VISTA DE TU MISIÓN · 2025<small>Captura simulada</small></span>
-          <span class="brush-year brush-year-before">BAJO EL PINCEL · 1985<small>Archivo NASA</small></span>
-          <span class="brush-cursor" aria-hidden="true"></span>
-          <span class="brush-help">Arrastrá el pincel por un sector claro.</span>
+          <span class="brush-year brush-year-after"><b>2025</b><small>Tu misión · captura simulada</small></span>
+          <span class="brush-year brush-year-before"><b>1985</b><small>Dentro de la lupa · archivo NASA</small></span>
+          <span class="brush-analysis-toast" data-ui="toast" role="status" aria-live="polite"></span>
+          <span class="brush-cursor" aria-hidden="true"><b>1985</b><small>ARCHIVO NASA</small></span>
+          <span class="brush-help">Mové la lupa · Tocá para registrar</span>
           <span class="brush-pins" aria-hidden="true"></span>
         </div>
-        <div class="brush-viewer-bar"><span>El pincel revela el mismo lugar, 40 años antes.</span><button data-action="toggle-year">Ver 1985 completo</button></div>
+        <div class="brush-viewer-bar"><span>Fuera de la lupa: 2025 · Dentro: 1985</span><button data-action="toggle-year">Ver 1985 completo</button></div>
       </section>
       <aside class="brush-panel" aria-label="Tu investigación">
-        <div class="brush-panel-head"><span>INVESTIGACIÓN</span><span data-ui="count">0 / 2 HALLAZGOS</span></div>
+        <div class="brush-panel-head"><span>ANÁLISIS</span></div>
         <div class="brush-location">
-          <svg viewBox="0 0 130 120" role="img" aria-label="Paraguay con la región occidental destacada">
-            <defs><clipPath id="brush-paraguay-clip"><path data-map="clip"></path></clipPath></defs>
-            <path data-map="shape" class="brush-country"></path>
-            <g clip-path="url(#brush-paraguay-clip)"><rect x="0" y="0" width="72" height="120" class="brush-chaco"></rect></g>
-            <path data-map="outline" class="brush-outline"></path>
-          </svg>
-          <div><span>¿DÓNDE MIRÁS?</span><strong>Chaco paraguayo</strong><small>Región occidental de Paraguay. NASA no indica una coordenada exacta para este recorte.</small></div>
+          <strong>Chaco paraguayo</strong>
+          <div class="brush-mini-view" aria-label="Vista general de la imagen: el recuadro sigue la lupa">
+            <img src="${base}${comparisonCase.after}" alt="Vista general del sector observado">
+            <span class="brush-mini-target"></span>
+          </div>
+          <small>Tu lupa en la imagen</small>
         </div>
         <h2 data-ui="title">Buscá dos cambios</h2>
         <p data-ui="task">En 2025 aparecen grandes sectores claros. Pasá el pincel por uno y fijate qué había allí en 1985.</p>
-        <div class="brush-findings"><div data-finding="0"><b>01</b><span>Primer sector por explorar</span></div><div data-finding="1"><b>02</b><span>Segundo sector por explorar</span></div></div>
+        <div class="brush-findings"><div data-finding="0"><b>01</b><span>Por encontrar</span></div><div data-finding="1"><b>02</b><span>Por encontrar</span></div></div>
         <p class="brush-message" data-ui="message" role="status" aria-live="polite"></p>
-        <button class="brush-primary" data-action="mark" disabled>Marcar hallazgo</button>
+        <button class="brush-primary" data-action="mark" disabled>Marcar este cambio</button>
         <button class="brush-secondary" data-action="reset">Empezar de nuevo</button>
         <fieldset class="brush-question" hidden><legend>¿Qué muestran las dos fechas?</legend><button data-answer="vegetation">Antes había más bosque continuo</button><button data-answer="growth">Ahora hay más bosque continuo</button><button data-answer="water">Apareció un lago</button></fieldset>
         <div class="brush-result" hidden><strong>Encontraste el cambio</strong><p>En esta serie, el bosque de 1985 se ve más continuo. En 2025 aparecen claros y parcelas. Las imágenes muestran el cambio; por sí solas no explican todas sus causas.</p><button class="brush-primary" data-action="finish">Ver resultados</button></div>
@@ -57,6 +58,9 @@ export function createChacoComparison(scene, onAction) {
 
   const find = selector => root.querySelector(selector);
   const stage = find('.brush-stage');
+  stage.append(find('.brush-location'), find('.brush-findings'));
+  stage.append(find('.brush-panel'));
+  find('.brush-viewer-bar').append(find('[data-action="reset"]'));
   stage.style.backgroundImage = `url("${base}${comparisonCase.before}")`;
   const currentImage = find('.brush-stage img');
   const reveal = find('.brush-reveal');
@@ -72,10 +76,18 @@ export function createChacoComparison(scene, onAction) {
   let samples = [];
   let ready = false;
   let message = '';
+  let toastTimer;
+  let lastLensPoint = { x: .5, y: .48 };
 
   function say(text) {
     message = text;
     find('[data-ui="message"]').textContent = text;
+    const toast = find('[data-ui="toast"]');
+    toast.textContent = text;
+    toast.classList.remove('show');
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
     speakIfEnabled(scene, text);
   }
 
@@ -84,6 +96,20 @@ export function createChacoComparison(scene, onAction) {
     const enabled = !!scene.registry.get('noahVoice');
     button.textContent = `Voz de NOAH: ${enabled ? 'activada' : 'apagada'}`;
     button.setAttribute('aria-pressed', String(enabled));
+  }
+
+  async function showDiscoveryImpact() {
+    const choice = await showDialog(scene, {
+      title: '40 años de cambio',
+      text: 'Antes, el bosque era más continuo. Ahora lo atraviesan grandes claros y parcelas.',
+      body: `<div class="chaco-impact">
+        <figure><figcaption><strong>1985</strong><span>Archivo NASA</span></figcaption><img src="${base}${comparisonCase.before}" alt="Chaco en 1985: bosque más continuo"></figure>
+        <figure><figcaption><strong>2025</strong><span>Vista de tu misión · simulada</span></figcaption><img src="${base}${comparisonCase.after}" alt="El mismo sector del Chaco en 2025: claros y parcelas entre el bosque"></figure>
+        <p>El mismo lugar, a la misma escala. Comparaste un cambio real del paisaje.</p>
+      </div>`,
+      actions: [{ label: 'Completar misión', value: 'finish', primary: true }],
+    });
+    if (choice === 'finish' && root.isConnected) onAction('finish');
   }
 
   function pointFromEvent(event) {
@@ -104,47 +130,50 @@ export function createChacoComparison(scene, onAction) {
   }
 
   function paintAt(point) {
+    lastLensPoint = point;
+    const target = find('.brush-mini-target');
+    target.style.left = `${point.x * 100}%`;
+    target.style.top = `${point.y * 100}%`;
+    const cursor = find('.brush-cursor');
+    cursor.style.left = `${point.x * 100}%`;
+    cursor.style.top = `${point.y * 100}%`;
     const x = point.x * mask.width;
     const y = point.y * mask.height;
-    const previous = lastPoint ?? point;
-    maskContext.strokeStyle = '#fff';
-    maskContext.lineWidth = mask.width * .077;
-    maskContext.lineCap = 'round';
+    maskContext.clearRect(0, 0, mask.width, mask.height);
+    maskContext.fillStyle = '#fff';
     maskContext.beginPath();
-    maskContext.moveTo(previous.x * mask.width, previous.y * mask.height);
-    maskContext.lineTo(x, y);
-    maskContext.stroke();
-    const wasReady = paintedLength >= MIN_BRUSH_LENGTH;
-    paintedLength += Math.hypot(point.x - previous.x, point.y - previous.y);
-    samples.push(point);
+    // Match the circular HUD in screen space, even when the image is resized.
+    maskContext.ellipse(x, y, mask.width * .12, mask.height * .12 * stage.clientWidth / stage.clientHeight, 0, 0, Math.PI * 2);
+    maskContext.fill();
+    paintedLength = MIN_BRUSH_LENGTH;
+    samples = [point];
     lastPoint = point;
     stage.classList.add('has-paint');
     revealArchive();
     find('[data-action="mark"]').disabled = paintedLength < MIN_BRUSH_LENGTH;
-    if (!wasReady && paintedLength >= MIN_BRUSH_LENGTH) say('Ya podés marcar este lugar como hallazgo.');
   }
 
   function render() {
     root.dataset.phase = state.phase;
-    find('[data-ui="count"]').textContent = `${state.findings.length} / 2 HALLAZGOS`;
+    find('.brush-panel-head').dataset.found = String(state.findings.length);
     find('[data-action="mark"]').hidden = state.phase !== 'explore';
     find('.brush-question').hidden = state.phase !== 'interpret';
     find('.brush-result').hidden = state.phase !== 'complete';
     const title = state.findings.length === 0 ? 'Buscá dos cambios'
       : state.phase === 'explore' ? 'Encontrá otro sector'
-      : state.phase === 'interpret' ? 'Dos lugares investigados' : 'Misión completada';
+      : state.phase === 'interpret' ? '2 de 2 · Análisis listo' : 'Misión completada';
     find('[data-ui="title"]').textContent = title;
     find('[data-ui="task"]').textContent = state.findings.length === 0
-      ? 'En 2025 aparecen grandes sectores claros. Pasá el pincel por uno y fijate qué había allí en 1985.'
+      ? 'Tocá dos sectores para compararlos.'
       : state.phase === 'explore' ? 'Buscá otro claro y revelá cómo era ese lugar en 1985.'
-      : state.phase === 'interpret' ? 'Mirá los dos lugares que pintaste y elegí qué cambió.'
+      : state.phase === 'interpret' ? '¿Qué cambió en los sectores que comparaste?'
       : 'Encontraste dos lugares donde cambió el paisaje.';
     find('.brush-findings').querySelectorAll('[data-finding]').forEach((item, index) => {
       item.classList.toggle('found', index < state.findings.length);
       item.querySelector('span').textContent = index < state.findings.length
-        ? `Sector ${index + 1} marcado` : `${index === 0 ? 'Primer' : 'Segundo'} sector por explorar`;
+        ? 'Encontrado' : 'Por encontrar';
     });
-    find('[data-action="mark"]').textContent = state.findings.length ? 'Marcar segundo hallazgo' : 'Marcar hallazgo';
+    find('[data-action="mark"]').textContent = 'Marcar este cambio';
     const pins = find('.brush-pins');
     pins.replaceChildren();
     state.findings.forEach((point, index) => {
@@ -169,10 +198,11 @@ export function createChacoComparison(scene, onAction) {
     find('[data-action="toggle-year"]').textContent = 'Ver 1985 completo';
     find('[data-action="mark"]').disabled = true;
     render();
-    say('Podés pintar sin apuro. Elegí un sector que te llame la atención.');
+    paintAt({ x: .5, y: .48 });
+    find('[data-ui="toast"]').classList.remove('show');
   }
 
-  function markFinding() {
+  async function markFinding() {
     if (samples.length === 0 || paintedLength < MIN_BRUSH_LENGTH) return;
     const sum = samples.reduce((result, point) => ({ x: result.x + point.x, y: result.y + point.y }), { x: 0, y: 0 });
     const center = { x: sum.x / samples.length, y: sum.y / samples.length };
@@ -188,10 +218,42 @@ export function createChacoComparison(scene, onAction) {
     find('[data-action="mark"]').disabled = true;
     render();
     say(state.phase === 'interpret'
-      ? 'Los dos lugares están listos. ¿Qué cambió entre 1985 y 2025?'
-      : 'Primer hallazgo marcado. Explorá otra parte de la imagen.');
-    if (state.phase === 'interpret' && window.innerWidth <= 700) {
-      find('.brush-panel').scrollIntoView({ block: 'start', behavior: 'smooth' });
+      ? '¡Lo lograste! Los dos hallazgos están listos. ¿Qué descubriste?'
+      : '¡Buen ojo! Primer hallazgo registrado. ¡Vamos por el segundo!');
+    if (state.phase === 'interpret') {
+      find('.brush-question').hidden = true;
+      find('[data-ui="toast"]').classList.remove('show');
+      const acknowledged = await showDialog(scene, {
+        title: '¡Encontraste los dos!',
+        dismissable: false,
+        autoCloseMs: 3000,
+        showCountdown: false,
+        body: '<span class="chaco-found-notice" hidden></span>',
+        actions: [{ label: 'OK', value: 'ok', primary: true }],
+      });
+      if (acknowledged !== 'ok' || !root.isConnected) return;
+      while (state.phase === 'interpret' && root.isConnected) {
+        const choice = await showDialog(scene, {
+          title: '¿Qué descubriste?',
+          text: state.answer ? 'Mirá otra vez: ¿en qué año había más bosque continuo?' : 'Compará tus observaciones. ¿Qué le pasó al bosque?',
+          body: `<div class="chaco-analysis-preview" aria-label="Comparación del mismo sector en dos fechas">
+            <figure><img src="${base}${comparisonCase.before}" alt="Bosque del Chaco en 1985"><figcaption>1985 · Archivo NASA</figcaption></figure>
+            <figure><img src="${base}${comparisonCase.after}" alt="El mismo sector del Chaco en 2025"><figcaption>2025 · Misión simulada</figcaption></figure>
+          </div>`,
+          dismissable: false,
+          actions: [
+            { label: 'Antes había más bosque', value: 'vegetation', primary: true },
+            { label: 'Ahora hay más bosque', value: 'growth' },
+            { label: 'Apareció un lago', value: 'water' },
+          ],
+        });
+        if (!choice || !root.isConnected) return;
+        state = answerComparison(state, choice);
+      }
+      if (root.isConnected && state.phase === 'complete') {
+        render();
+        showDiscoveryImpact();
+      }
     }
   }
 
@@ -210,14 +272,17 @@ export function createChacoComparison(scene, onAction) {
     const point = pointFromEvent(event);
     find('.brush-cursor').style.left = `${point.x * 100}%`;
     find('.brush-cursor').style.top = `${point.y * 100}%`;
-    if (painting) paintAt(point);
+    if (ready && !stage.classList.contains('show-before')) paintAt(point);
   });
   const stopPainting = () => {
     painting = false;
     lastPoint = null;
     stage.classList.remove('painting');
   };
-  stage.addEventListener('pointerup', stopPainting);
+  stage.addEventListener('pointerup', () => {
+    if (painting) markFinding();
+    stopPainting();
+  });
   stage.addEventListener('pointercancel', stopPainting);
 
   root.addEventListener('click', event => {
@@ -229,6 +294,7 @@ export function createChacoComparison(scene, onAction) {
       say(state.phase === 'complete'
         ? 'El bosque de 1985 se ve más continuo. En 2025 aparecen claros y parcelas.'
         : 'Mirá otra vez: ¿en qué año se ve más bosque continuo?');
+      if (state.phase === 'complete') showDiscoveryImpact();
       return;
     }
     const action = button.dataset.action;
@@ -236,6 +302,7 @@ export function createChacoComparison(scene, onAction) {
     else if (action === 'reset') reset();
     else if (action === 'toggle-year') {
       const showingArchive = stage.classList.toggle('show-before');
+      find('.brush-year-before small').textContent = showingArchive ? 'Archivo histórico · NASA' : 'Dentro de la lupa · archivo NASA';
       button.textContent = showingArchive ? 'Volver a 2025' : 'Ver 1985 completo';
     } else if (action === 'voice') {
       scene.registry.set('noahVoice', !scene.registry.get('noahVoice'));
@@ -253,26 +320,24 @@ export function createChacoComparison(scene, onAction) {
     }
     ready = true;
     reset();
+    showDialog(scene, {
+      title: 'Detectives del Chaco',
+      text: 'La imagen es de 2025. La lupa muestra el mismo lugar en 1985. Buscá dos cambios y tocá para registrarlos.',
+      actions: [{ label: 'Investigar', value: 'start', primary: true }],
+    });
   }).catch(() => say('No se pudieron cargar las imágenes. Volvé a resultados y probá otra vez.'));
 
-  fetch(`${base}data/paraguay-region.geojson`).then(response => response.json()).then(data => {
-    if (!root.isConnected) return;
-    const country = data.features.find(feature => feature.properties.code === 'PRY');
-    const coordinates = country.geometry.coordinates[0];
-    const longitudes = coordinates.map(point => point[0]);
-    const latitudes = coordinates.map(point => point[1]);
-    const west = Math.min(...longitudes);
-    const north = Math.max(...latitudes);
-    const scale = Math.min(106 / (Math.max(...longitudes) - west), 96 / (north - Math.min(...latitudes)));
-    const path = coordinates.map(([longitude, latitude], index) =>
-      `${index ? 'L' : 'M'}${(12 + (longitude - west) * scale).toFixed(1)},${(12 + (north - latitude) * scale).toFixed(1)}`
-    ).join(' ') + ' Z';
-    root.querySelectorAll('[data-map]').forEach(element => element.setAttribute('d', path));
-  }).catch(() => {
-    find('.brush-location small').textContent = 'Región occidental de Paraguay. Localizador no disponible.';
+  const resizeObserver = new ResizeObserver(() => {
+    if (ready) paintAt(lastLensPoint);
   });
+  resizeObserver.observe(stage);
 
   updateVoice();
   render();
-  return { destroy() { window.speechSynthesis?.cancel(); root.remove(); } };
+  return { destroy() {
+    clearTimeout(toastTimer);
+    resizeObserver.disconnect();
+    window.speechSynthesis?.cancel();
+    root.remove();
+  } };
 }
