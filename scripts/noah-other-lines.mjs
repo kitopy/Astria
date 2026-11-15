@@ -22,7 +22,7 @@ function allDesigns() {
 
 // StationScene (mission briefing)
 const station = [
-  'Hola, exploradora. Soy NOAH. El bosque del Chaco paraguayo está cambiando: vamos a construir un satélite para fotografiarlo desde el espacio.',
+  'Hola, exploradores. Soy NOAH. El bosque del Chaco paraguayo está cambiando: vamos a construir un satélite para fotografiarlo desde el espacio.',
 ];
 
 // TestScene + game logic errors (Cesar's flight over the Chaco)
@@ -87,7 +87,7 @@ const observe = [
 
 // FinaleScene
 const finale = [
-  'NOAH // ¡GRACIAS, EXPLORADORA!\nDetrás de cada misión hay personas que diseñan, prueban y descubren.\nVos también podés construir, descubrir y explorar el universo.',
+  'NOAH // ¡GRACIAS, EXPLORADOR!\nDetrás de cada misión hay personas que diseñan, prueban y descubren.\nVos también podés construir, descubrir y explorar el universo.',
 ];
 
 export const otherLines = [...station, ...flight, ...reward, ...observe, ...finale];

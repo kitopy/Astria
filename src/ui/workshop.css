@@ -252,7 +252,6 @@
 .ws-slot.current { border: 2px solid var(--glow); }
 .ws-slot:hover:not(:disabled) { background: rgba(208, 144, 240, 0.15); }
 .ws-slot:disabled { opacity: 0.35; cursor: default; }
-.ws-slot-review { width: auto; padding: 0 16px; font-family: 'Audiowide', sans-serif !important; font-size: 16px !important; }
 .ws-mini-meters { display: grid; grid-template-columns: 230px 230px; gap: 28px; }
 .ws-mini-meters .ws-meter + .ws-meter { margin-top: 0; }
 .ws-mini-meters .ws-meter-head span { font-size: 14px; }

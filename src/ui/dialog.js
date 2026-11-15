@@ -41,8 +41,10 @@ export function showDialog(scene, { title, text = '', body = '', dismissable = t
       dialog.remove();
       resolve(result);
     };
+    let closing = false;
     const close = (value) => {
       if (!dialog.open) return;
+      closing = true;
       result = value;
       dialog.classList.add('is-leaving');
       setTimeout(() => {
@@ -51,6 +53,7 @@ export function showDialog(scene, { title, text = '', body = '', dismissable = t
       }, 260);
     };
     const onShutdown = () => {
+      closing = true;
       if (dialog.open) dialog.close();
       finish();
     };
@@ -63,6 +66,13 @@ export function showDialog(scene, { title, text = '', body = '', dismissable = t
     dialog.addEventListener('cancel', (event) => {
       event.preventDefault();
       if (dismissable) close(null);
+    });
+    // The browser can force a modal dialog closed (Chrome does it after Escape is pressed twice, even when
+    // 'cancel' is prevented). A dialog that needs a choice opens again; any other one counts as Escape.
+    dialog.addEventListener('close', () => {
+      if (closing || done) return;
+      if (dismissable) finish();
+      else dialog.showModal();
     });
     scene.events.once('shutdown', onShutdown);
 

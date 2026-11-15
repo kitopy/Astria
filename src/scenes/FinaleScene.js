@@ -5,13 +5,13 @@ import { COLORS, CSS } from '../ui/palette.js';
 
 // What the player did, and which real job does that work.
 const ACHIEVEMENTS = [
-  { title: 'DISEÑASTE', text: 'Elegiste las piezas de tu satélite,\ncomo una ingeniera espacial.' },
+  { title: 'DISEÑASTE', text: 'Elegiste las piezas de tu satélite,\ncomo un equipo de ingeniería espacial.' },
   { title: 'PROBASTE', text: 'Pusiste tu diseño a prueba\ny cuidaste la energía.' },
-  { title: 'DESCUBRISTE', text: 'Comparaste fotos de la Tierra,\ncomo una científica.' },
+  { title: 'DESCUBRISTE', text: 'Comparaste fotos de la Tierra,\ncomo un equipo de científicos.' },
 ];
 
 const NOAH_LINE =
-  'NOAH // ¡GRACIAS, EXPLORADORA!\nDetrás de cada misión hay personas que diseñan, prueban y descubren.\nVos también podés construir, descubrir y explorar el universo.';
+  'NOAH // ¡GRACIAS, EXPLORADOR!\nDetrás de cada misión hay personas que diseñan, prueban y descubren.\nVos también podés construir, descubrir y explorar el universo.';
 
 // Closing celebration after the Observe scene.
 export class FinaleScene extends Phaser.Scene {

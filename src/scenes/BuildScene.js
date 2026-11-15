@@ -71,8 +71,7 @@ export class BuildScene extends Phaser.Scene {
     this.ui = mount(this, { wizard: true });
     this.ui.bind({
       next: () => this.goTo(this.nextStep()),
-      goto: (button) => this.goTo(button.dataset.kind === 'review' ? REVIEW : kinds.indexOf(button.dataset.kind)),
-      launch: () => this.openPreflight(),
+      goto: (button) => this.goTo(kinds.indexOf(button.dataset.kind)),
       reset: () => {
         this.design = { ...initialDesign };
         this.persist();
@@ -217,7 +216,7 @@ export class BuildScene extends Phaser.Scene {
 
     const kind = this.kind;
 
-    this.swapTitle(kind ? catalog[kind].label.toUpperCase() : '¿LISTA PARA DESPEGAR?');
+    this.swapTitle(kind ? catalog[kind].label.toUpperCase() : '¿LISTO PARA DESPEGAR?');
 
     if (kind) {
       catalog[kind].options.forEach((part, i) => {
@@ -444,7 +443,6 @@ export class BuildScene extends Phaser.Scene {
         return `<button class="ws-slot ${current}" data-action="goto" data-kind="${kind}" ${i > this.maxStep ? 'disabled' : ''} aria-label="${catalog[kind].label}">${content}</button>`;
       })
       .join('');
-    const review = `<button class="ws-slot ws-slot-review ${this.step === REVIEW ? 'current' : ''}" data-action="goto" data-kind="review" ${REVIEW > this.maxStep ? 'disabled' : ''}>Revisar</button>`;
 
     let next = '';
     if (this.advancing) {
@@ -452,14 +450,13 @@ export class BuildScene extends Phaser.Scene {
     } else if (this.kind && this.placed.has(this.kind)) {
       const target = this.nextStep();
       next = actionButton('next', target === REVIEW ? 'Revisar ›' : `Siguiente: ${catalog[kinds[target]].label} ›`, true);
-    } else if (!this.kind) {
-      next = actionButton('launch', 'Despegar ›', true);
     }
+    // On the review there is no button: the pre-flight dialog opens by itself.
 
     this.ui.area('center').innerHTML = `
       <div class="ws-next">${next}</div>
       <div class="ws-strip">
-        <div class="ws-slots">${slots}${review}</div>
+        <div class="ws-slots">${slots}</div>
         <div class="ws-mini-meters">${meter('Masa', totals.mass, limits.mass, ' kg')}${meter('Presupuesto', totals.cost, limits.budget)}</div>
       </div>`;
   }
@@ -497,11 +494,12 @@ export class BuildScene extends Phaser.Scene {
     }
 
     this.preflightOpen = true;
-    const choice = await showDialog(this, { title: check.rocket && !fix ? '¡Todo listo!' : 'Falta algo', body, actions });
+    // Not closable with Escape: the review screen has no other button, so a choice is needed.
+    const choice = await showDialog(this, { title: check.rocket && !fix ? '¡Todo listo!' : 'Falta algo', body, actions, dismissable: false });
     this.preflightOpen = false;
     if (!this.sys.isActive()) return; // the scene ended while the dialog was open
     if (choice === 'launch') this.scene.start('Test', { design: { ...this.design } });
     else if (kinds.includes(choice)) this.goTo(kinds.indexOf(choice));
-    // 'edit' or Escape: stay on the review; the strip and the satellite lead to each part.
+    else this.goTo(0); // "Cambiar piezas": back to the first part; the strip and the satellite lead to the others
   }
 }

@@ -18,6 +18,7 @@ export class ChacoMap {
       container, center: [-59.2, -23.3], zoom: this.baseZoom, pitch: 18, bearing: -8,
       minZoom: 3.5, maxZoom: 7, maxBounds: [[-75, -35], [-43, -12]],
       attributionControl: false, renderWorldCopies: false,
+      interactive: false, // the camera follows the satellite by itself; dragging would make it stop following
       style: { version: 8, sources: {
         terrain: { type: 'image', url: `${base}data/paraguay-bluemarble.jpg`, coordinates: [[-75, -12], [-43, -12], [-43, -35], [-75, -35]] },
         countries: { type: 'geojson', data: `${base}data/paraguay-region.geojson` },
@@ -30,15 +31,15 @@ export class ChacoMap {
         { id: 'region-fill', type: 'fill', source: 'countries', filter: ['==', ['get', 'code'], 'PRY'], paint: { 'fill-color': '#f0b0f0', 'fill-opacity': .06 } },
         { id: 'borders', type: 'line', source: 'countries', paint: { 'line-color': '#d7e5dd', 'line-opacity': .3, 'line-width': 1 } },
         { id: 'paraguay', type: 'line', source: 'countries', filter: ['==', ['get', 'code'], 'PRY'], paint: { 'line-color': '#d090f0', 'line-width': 2.5 } },
-        { id: 'route', type: 'line', source: 'route', layout: { 'line-join': 'round' }, paint: { 'line-color': '#cfb5ff', 'line-width': 2.5, 'line-dasharray': [3, 2], 'line-opacity': .8 } },
-        { id: 'trail', type: 'line', source: 'trail', layout: { 'line-join': 'round' }, paint: { 'line-color': '#f0b0f0', 'line-width': 3.5 } },
+        // The satellite's path is white and dotted, so it never looks like the country border (orchid).
+        // Planned route: faint dashes. Trail already flown: bright round dots.
+        { id: 'route', type: 'line', source: 'route', layout: { 'line-join': 'round' }, paint: { 'line-color': '#ffffff', 'line-width': 2, 'line-dasharray': [2, 3], 'line-opacity': .35 } },
+        { id: 'trail', type: 'line', source: 'trail', layout: { 'line-join': 'round', 'line-cap': 'round' }, paint: { 'line-color': '#ffffff', 'line-width': 4, 'line-dasharray': [0, 2] } },
         { id: 'downlink', type: 'line', source: 'downlink', paint: { 'line-color': '#f0b0f0', 'line-width': 4, 'line-dasharray': [1, 2], 'line-opacity': 0 } }
       ] }
     });
     this.onResize = () => { this.baseZoom = zoomForSize(); if (this.follow) this.map.jumpTo({ zoom: this.baseZoom }); };
     window.addEventListener('resize', this.onResize);
-    this.map.dragRotate.disable(); this.map.touchZoomRotate.disableRotation();
-    this.map.on('dragstart', () => { this.follow = false; });
     this.map.on('error', event => onError?.(event.error?.message ?? 'No se pudo cargar el mapa.'));
     this.map.on('load', () => {
       this.ready = true;
