@@ -303,3 +303,13 @@
 @keyframes photo-scan{0%{top:0;opacity:1}98%{top:calc(100% - 3px);opacity:1}100%{top:calc(100% - 3px);opacity:0}}
 @keyframes photo-caption{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.photo-pop .rendering .photo-sharp,.photo-pop .rendering .photo-scan,.photo-pop .rendering figcaption{animation:none}}
+
+/* Energy cost of an action: a gold battery icon and the number next to the action's name (no box around it). */
+.energy-cost{display:inline-flex;align-items:center;gap:6px;margin-left:12px;vertical-align:middle;
+  color:#ffd9a8;font-size:.9em;letter-spacing:0;white-space:nowrap}
+.energy-cost i{position:relative;display:inline-block;width:17px;height:9px;border:2px solid currentColor;border-radius:2px}
+.energy-cost i::before{content:'';position:absolute;left:1px;top:1px;bottom:1px;width:55%;background:currentColor} /* charge */
+.energy-cost i::after{content:'';position:absolute;right:-5px;top:1px;width:3px;height:3px;background:currentColor} /* tip */
+/* On buttons that turn pink on hover, the cost turns dark to stay readable. */
+.astrion-dialog button.primary:hover .energy-cost,.astrion-dialog button.primary:focus-visible .energy-cost,.chaco-game button.flight-primary:hover .energy-cost{color:#1c0a33}
+.flight-action-cost{font:inherit}

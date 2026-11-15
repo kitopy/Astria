@@ -24,6 +24,11 @@ function photoLabel(year) {
   return year >= 2020 ? `Hoy · ${year}` : String(year);
 }
 
+// Energy an action uses, shown next to the action (not glued to its name): a battery icon and the number.
+function energyCost(amount) {
+  return `<span class="energy-cost" aria-label="usa ${amount} de batería"><i aria-hidden="true"></i>−${amount}</span>`;
+}
+
 // True when the satellite is stopped over the forest and can take this pass's photo.
 export function canCapture(mission, specs, flight) {
   const phase = flight.gate;
@@ -101,7 +106,7 @@ export function createChacoHUD(scene, design, onAction) {
           <figcaption>${photo.shot?.year ? photoLabel(photo.shot.year) : `Foto ${i + 1}`}</figcaption>
         </figure>`).join('')}
       </div>
-      <div class="astrion-dialog-actions"><button type="button" class="primary" data-send>Enviar · −${specs.antennaPower}</button></div>`;
+      <div class="astrion-dialog-actions"><button type="button" class="primary" data-send>Enviar ${energyCost(specs.antennaPower)}</button></div>`;
     document.body.append(dialog);
     dialog.addEventListener('cancel', (event) => event.preventDefault()); // a choice is needed
     // If the browser forces it closed anyway (Escape twice in Chrome), it opens again.
@@ -217,7 +222,7 @@ export function createChacoHUD(scene, design, onAction) {
       // Fix button of the surprise problem; without energy for it, back to the workshop instead.
       const canFix=mission.energy>=REFRAME_ENERGY, fixButton=root.querySelector('.fix-button'), problem=obstacleInfo(visibility);
       fixButton.dataset.flight=canFix?'reframe':'workshop';
-      fixButton.textContent=canFix?`${problem.action} · −${REFRAME_ENERGY}`:'Volver al taller';
+      fixButton.innerHTML=canFix?`${problem.action} ${energyCost(REFRAME_ENERGY)}`:'Volver al taller';
       get('weather-message').textContent=canFix?problem.short:`${problem.short} No queda energía para arreglarlo.`;
       // The satellite flies by itself (TestScene). Only two moments ask the player to act:
       // over the forest, the photo menu next to the satellite; in Asunción, send and see the results.
@@ -228,7 +233,7 @@ export function createChacoHUD(scene, design, onAction) {
       root.querySelector('.map-satellite')?.classList.toggle('action-ready', actionAvailable);
       if (actionAvailable) {
         get('action-title').textContent = phase === 1 ? 'El Chaco en 1985' : 'El Chaco hoy';
-        get('action-cost').textContent = `−${specs.cameraPower}`;
+        get('action-cost').innerHTML = energyCost(specs.cameraPower);
         this.positionActionMenu();
       }
       // In Asunción: the send dialog opens by itself. Without photos or energy to send, only "Ver resultados".
