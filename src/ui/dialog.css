@@ -1,0 +1,88 @@
+/* Shared modal dialog (ui/dialog.js). Same palette and button style as the workshop (workshop.css). */
+
+.astrion-dialog {
+  width: min(520px, calc(100vw - 32px));
+  padding: 36px 40px 32px;
+  border: 1.5px solid rgba(208, 144, 240, 0.55);
+  border-radius: 26px;
+  color: #ffffff;
+  text-align: center;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  font-weight: 600;
+  background: rgba(40, 22, 62, 0.96);
+  box-shadow: 0 24px 80px rgba(10, 4, 25, 0.6);
+  animation: astrion-dialog-in 0.35s ease-out both;
+}
+.astrion-dialog::backdrop {
+  background: rgba(14, 5, 28, 0.72);
+  backdrop-filter: blur(4px);
+  animation: astrion-dialog-fade 0.35s ease-out both;
+}
+
+.astrion-dialog h2 {
+  margin: 0 0 12px;
+  font-family: 'Audiowide', sans-serif;
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 400;
+  line-height: 1.2;
+  color: #f5c7e7;
+}
+.astrion-dialog p {
+  max-width: 420px;
+  margin: 0 auto;
+  font-size: 18px;
+  line-height: 1.55;
+  color: #f3e6ff;
+}
+
+.astrion-dialog-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 26px;
+}
+.astrion-dialog button {
+  min-width: 160px;
+  min-height: 50px;
+  padding: 12px 26px;
+  font-family: 'Audiowide', sans-serif;
+  font-size: 17px;
+  letter-spacing: 1px;
+  color: #ffffff;
+  border: 2px solid #d090f0;
+  border-radius: 14px;
+  cursor: pointer;
+  /* Neon button: the color fills from the center on hover, like the rest of the game. */
+  background:
+    linear-gradient(#7050b0, #7050b0) center / 0% 100% no-repeat,
+    rgba(20, 8, 45, 0.6);
+  transition: background-size 0.28s ease-out, transform 0.2s ease-out, color 0.2s;
+}
+.astrion-dialog button.primary {
+  color: #f0b0f0;
+  border-color: #f0b0f0;
+  background:
+    linear-gradient(#f0b0f0, #f0b0f0) center / 0% 100% no-repeat,
+    rgba(20, 8, 45, 0.6);
+}
+.astrion-dialog button:hover,
+.astrion-dialog button:focus-visible {
+  background-size: 100% 100%, auto;
+  transform: scale(1.04);
+}
+.astrion-dialog button.primary:hover,
+.astrion-dialog button.primary:focus-visible { color: #1c0a33; }
+.astrion-dialog button:focus-visible { outline: 3px solid #f0b0f0; outline-offset: 4px; }
+
+.astrion-dialog.is-leaving,
+.astrion-dialog.is-leaving::backdrop { animation: astrion-dialog-out 0.26s ease-in forwards; }
+
+@keyframes astrion-dialog-in { from { opacity: 0; transform: translateY(12px) scale(0.98); } }
+@keyframes astrion-dialog-fade { from { opacity: 0; } }
+@keyframes astrion-dialog-out { to { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .astrion-dialog,
+  .astrion-dialog::backdrop { animation-duration: 0.01ms !important; }
+}

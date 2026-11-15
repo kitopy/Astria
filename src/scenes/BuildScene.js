@@ -3,6 +3,7 @@ import { initialDesign, kinds, limits, stats } from '../game/model.js';
 import { catalog, readDesign, saveDesign } from '../game/design.js';
 import { actionButton, addArt, meter, mount, partThumb, preloadArt } from '../ui/mission-ui.js';
 import { centerDesignArea } from '../ui/layout.js';
+import { showDialog } from '../ui/dialog.js';
 import { COLORS, CSS } from '../ui/palette.js';
 import { contentBounds } from '../ui/satellite.js';
 import { mountLine, partIntro, reviewLine } from '../game/noah-lines.js';
@@ -91,43 +92,16 @@ export class BuildScene extends Phaser.Scene {
     });
 
     this.showStep();
-    if (this.showBuildIntroOnStart) this.showBuildIntro();
+    if (this.showBuildIntroOnStart) {
+      showDialog(this, {
+        title: 'Elegí qué pieza llevar',
+        text: 'En cada paso vas a elegir entre dos opciones. Mirá qué aporta cada una y elegí la que prefieras para tu misión.',
+      });
+    }
   }
 
   get kind() {
     return kinds[this.step]; // undefined on the review step
-  }
-
-  showBuildIntro() {
-    const intro = document.createElement('section');
-    intro.className = 'ws-build-intro';
-    intro.setAttribute('role', 'dialog');
-    intro.setAttribute('aria-modal', 'true');
-    intro.setAttribute('aria-labelledby', 'build-intro-title');
-    intro.setAttribute('aria-describedby', 'build-intro-copy');
-    intro.innerHTML = `
-      <div class="ws-build-intro-card">
-        <span class="ws-build-intro-mark" aria-hidden="true">✦</span>
-        <span class="ws-build-intro-kicker">TU SATÉLITE, TUS DECISIONES</span>
-        <h2 id="build-intro-title">Elegí qué pieza llevar</h2>
-        <p id="build-intro-copy">En cada paso vas a elegir entre dos opciones. Mirá qué aporta cada una y elegí la que prefieras para tu misión.</p>
-        <button type="button" class="ws-btn ws-primary" data-build-intro-close>¡Entendido!</button>
-      </div>`;
-    this.ui.root.append(intro);
-
-    let open = true;
-    let timer;
-    const close = () => {
-      if (!open) return;
-      open = false;
-      timer.remove();
-      intro.classList.add('is-leaving');
-      this.time.delayedCall(420, () => intro.remove());
-    };
-    timer = this.time.delayedCall(3000, close);
-    intro.querySelector('[data-build-intro-close]').addEventListener('click', close);
-    intro.querySelector('[data-build-intro-close]').focus({ preventScroll: true });
-    this.events.once('shutdown', () => timer.remove());
   }
 
   goTo(step) {
