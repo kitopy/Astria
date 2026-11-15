@@ -25,14 +25,14 @@ export class ChacoMap {
         trail: { type: 'geojson', data: line([ASUNCION, ASUNCION]) },
         downlink: { type: 'geojson', data: line([ASUNCION, ASUNCION]) }
       }, layers: [
-        { id: 'background', type: 'background', paint: { 'background-color': '#142e30' } },
+        { id: 'background', type: 'background', paint: { 'background-color': '#1c0a33' } },
         { id: 'terrain', type: 'raster', source: 'terrain' },
-        { id: 'region-fill', type: 'fill', source: 'countries', filter: ['==', ['get', 'code'], 'PRY'], paint: { 'fill-color': '#b9f566', 'fill-opacity': .06 } },
+        { id: 'region-fill', type: 'fill', source: 'countries', filter: ['==', ['get', 'code'], 'PRY'], paint: { 'fill-color': '#f0b0f0', 'fill-opacity': .06 } },
         { id: 'borders', type: 'line', source: 'countries', paint: { 'line-color': '#d7e5dd', 'line-opacity': .3, 'line-width': 1 } },
-        { id: 'paraguay', type: 'line', source: 'countries', filter: ['==', ['get', 'code'], 'PRY'], paint: { 'line-color': '#b9f5c1', 'line-width': 2.5 } },
+        { id: 'paraguay', type: 'line', source: 'countries', filter: ['==', ['get', 'code'], 'PRY'], paint: { 'line-color': '#d090f0', 'line-width': 2.5 } },
         { id: 'route', type: 'line', source: 'route', layout: { 'line-join': 'round' }, paint: { 'line-color': '#cfb5ff', 'line-width': 2.5, 'line-dasharray': [3, 2], 'line-opacity': .8 } },
-        { id: 'trail', type: 'line', source: 'trail', layout: { 'line-join': 'round' }, paint: { 'line-color': '#b9f566', 'line-width': 3.5 } },
-        { id: 'downlink', type: 'line', source: 'downlink', paint: { 'line-color': '#b9f566', 'line-width': 4, 'line-dasharray': [1, 2], 'line-opacity': 0 } }
+        { id: 'trail', type: 'line', source: 'trail', layout: { 'line-join': 'round' }, paint: { 'line-color': '#f0b0f0', 'line-width': 3.5 } },
+        { id: 'downlink', type: 'line', source: 'downlink', paint: { 'line-color': '#f0b0f0', 'line-width': 4, 'line-dasharray': [1, 2], 'line-opacity': 0 } }
       ] }
     });
     this.onResize = () => { this.baseZoom = zoomForSize(); if (this.follow) this.map.jumpTo({ zoom: this.baseZoom }); };
