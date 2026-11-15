@@ -246,3 +246,48 @@
 @keyframes photo-pop-in{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
 @keyframes photo-flash{from{filter:brightness(2.4)}to{filter:none}}
 @media(prefers-reduced-motion:reduce){.photo-pop.is-new,.photo-pop.is-new img{animation:none}}
+
+/* ---------- Surprise problems shown on the map, around the satellite ----------
+   --obstacle-strength goes from 0 (far / fixed) to 1 (stopped by the problem); it grows as the satellite
+   approaches, so the problem builds up before the warning dialog, and fades while it's being fixed. */
+
+/* Clouds: puffs drifting over the satellite (on top of the fog over the map). */
+.chaco-game[data-obstacle=clouds] .map-satellite::before{
+  content:'';position:absolute;inset:-46px -70px;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse 38% 30% at 30% 45%,#eef2f8 40%,transparent 70%),
+             radial-gradient(ellipse 34% 26% at 68% 58%,#e4ebf3 40%,transparent 70%),
+             radial-gradient(ellipse 26% 22% at 52% 28%,#f4f7fb 40%,transparent 70%);
+  filter:blur(5px);opacity:calc(var(--cloud-cover,0) * .95);
+  animation:map-cloud-drift 3s ease-in-out infinite alternate
+}
+@keyframes map-cloud-drift{to{transform:translateX(14px)}}
+
+/* Shaky camera: the satellite trembles, stronger as the problem grows, calmer while it's fixed. */
+.chaco-game[data-obstacle=camera]:not([data-visibility=clear]) .map-satellite .flight-satellite{animation:map-shake .14s linear infinite}
+@keyframes map-shake{
+  25%{transform:translate(calc(var(--obstacle-strength,0) * 4px),calc(var(--obstacle-strength,0) * -2px)) rotate(calc(var(--obstacle-strength,0) * 4deg))}
+  75%{transform:translate(calc(var(--obstacle-strength,0) * -4px),calc(var(--obstacle-strength,0) * 2px)) rotate(calc(var(--obstacle-strength,0) * -4deg))}
+}
+
+/* Weak signal: signal bars above Asunción lose strength; while fixing they come back one by one,
+   and the station sends out search rings. */
+.chaco-game[data-obstacle=signal]:not([data-visibility=clear]) .map-station::before{
+  content:'';position:absolute;left:3px;bottom:44px;width:30px;height:26px;pointer-events:none;
+  --s:var(--obstacle-strength,0);
+  background:
+    linear-gradient(rgb(240 176 240 / clamp(.18, calc((1 - var(--s)) * 4), 1)) 0 0) 0 100% / 5px 7px no-repeat,
+    linear-gradient(rgb(240 176 240 / clamp(.18, calc((1 - var(--s)) * 4 - 1), 1)) 0 0) 8px 100% / 5px 13px no-repeat,
+    linear-gradient(rgb(240 176 240 / clamp(.18, calc((1 - var(--s)) * 4 - 2), 1)) 0 0) 16px 100% / 5px 19px no-repeat,
+    linear-gradient(rgb(240 176 240 / clamp(.18, calc((1 - var(--s)) * 4 - 3), 1)) 0 0) 24px 100% / 5px 26px no-repeat;
+  opacity:clamp(0, calc(var(--s) * 4), 1)
+}
+.chaco-game[data-obstacle=signal][data-visibility=blocked] .map-station .station-dot{animation:station-weak 1s steps(2) infinite}
+.chaco-game[data-obstacle=signal][data-visibility=adjusting] .map-station .station-dot{box-shadow:0 0 0 0 #f0b0f0;animation:station-search 1s ease-out infinite}
+@keyframes station-weak{50%{opacity:.35}}
+@keyframes station-search{to{box-shadow:0 0 0 22px #f0b0f000}}
+
+@media(prefers-reduced-motion:reduce){
+  .chaco-game .map-satellite::before,.chaco-game .map-satellite .flight-satellite,.chaco-game .map-station .station-dot{animation:none!important}
+}
+/* While fixing: at the top of the screen, so the effect on the map (satellite, Asunción) stays visible. */
+.chaco-game .visibility-challenge{top:18px;bottom:auto}
