@@ -50,11 +50,30 @@ export class RewardScene extends Phaser.Scene {
     below.className = 'ws-result-below';
     ui.root.append(below);
 
-    if (success) sfx.success();
-    else sfx.almost();
+    if (!success) sfx.almost();
 
     if (success) {
-      art.setPosition(960, 395).setScale(0.8); // a bit higher and smaller, to fit the cards around it
+      // Timing: the title is typed and stays alone on screen for a moment; then the satellite appears
+      // and the cards arrive one by one, with a clear pause between them; the button comes last.
+      const TYPE_MS = 75, HOLD_MS = 1200, CARD_GAP_S = 1.1;
+      const titleText = '¡Misión cumplida!';
+      const title = ui.root.querySelector('.ws-result-title');
+      title.textContent = '';
+      title.classList.add('is-typed');
+      let shown = 0;
+      this.time.addEvent({
+        delay: TYPE_MS,
+        repeat: titleText.length - 1,
+        callback: () => { title.textContent = titleText.slice(0, ++shown); },
+      });
+      const typedAt = (titleText.length * TYPE_MS) / 1000;
+      const revealAt = typedAt + HOLD_MS / 1000; // seconds after the screen opens
+      this.time.delayedCall(typedAt * 1000, () => sfx.success());
+      ui.root.style.setProperty('--reveal-at', `${revealAt}s`);
+      ui.root.style.setProperty('--last-at', `${revealAt + 3 * CARD_GAP_S + 0.3}s`);
+
+      art.setPosition(960, 395).setScale(0.8).setAlpha(0); // a bit higher and smaller, to fit the cards around it
+      this.tweens.add({ targets: art, alpha: 1, duration: 600, delay: revealAt * 1000 });
       // What the player practiced, so they feel proud: one card on each side of the satellite and,
       // below it, the discovery with the two photos of the mission as a trophy. Cards appear one by one.
       const card = (title, text, extra = '', delay = 0, side = '') =>
@@ -65,10 +84,12 @@ export class RewardScene extends Phaser.Scene {
           <figcaption>${shot.year >= 2020 ? 'Hoy' : shot.year}</figcaption>
         </figure>`).join('');
       const sides = document.createElement('div');
-      sides.innerHTML = card('DISEÑASTE', 'Elegiste las piezas<br>de tu satélite', '', 0.4, 'ws-achievement-left')
-        + card('PROBASTE', 'Cuidaste la energía<br>en el viaje', '', 0.75, 'ws-achievement-right');
+      const first = revealAt + 0.5;
+      sides.innerHTML = card('DISEÑASTE', 'Elegiste las piezas<br>de tu satélite', '', first, 'ws-achievement-left')
+        + card('PROBASTE', 'Cuidaste la energía<br>en el viaje', '', first + CARD_GAP_S, 'ws-achievement-right');
       ui.root.append(...sides.children);
-      below.innerHTML = card('DESCUBRISTE', 'Encontraste cómo cambió el bosque', photos ? `<div class="ws-result-photos">${photos}</div>` : '', 1.1);
+      below.innerHTML = card('DESCUBRISTE', 'Encontraste cómo cambió el bosque', photos ? `<div class="ws-result-photos">${photos}</div>` : '', first + 2 * CARD_GAP_S);
+      ui.root.classList.add('ws--success');
       // Credits of the real data used in the mission, small, at the very end (not during play).
       const credits = document.createElement('p');
       credits.className = 'ws-credits';
