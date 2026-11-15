@@ -1,115 +1,114 @@
-# ASTRION · Misión Chaco
+# ASTRION · Chaco Mission
 
-**Diseñá un satélite, volá sobre Paraguay y descubrí con imágenes reales de la NASA cómo cambió el bosque
-del Chaco en 40 años.**
+**Design a satellite, fly it over Paraguay and use real NASA images to discover how the Chaco forest
+changed in 40 years.**
 
-Juego web educativo creado para el **NASA Space Apps Challenge 2026**, desafío
+An educational web game made for the **NASA Space Apps Challenge 2026**, challenge
 [Space Mission Design Game](https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/).
-Pensado para chicas y chicos de **9 a 12 años**.
+Made for kids aged **9 to 12**. The game is in Spanish, with a voiced AI guide called NOAH.
 
-> **English summary.** ASTRION is a web game for kids aged 9–12, made for the NASA Space Apps Challenge 2026
-> (Space Mission Design Game). Players build a satellite by choosing real trade-offs (camera, solar panels,
-> battery, antenna), fly it over a real map of Paraguay, deal with a surprise problem, send their photos to
-> a ground station and finally compare real NASA Landsat images of the Gran Chaco from 1985 and today to
-> discover the deforestation. The game is in Spanish, with a voiced AI guide (NOAH).
-
-## El problema
-
-El Gran Chaco paraguayo es uno de los bosques que más rápido desaparecieron en las últimas décadas. Los
-satélites Landsat de la NASA lo fotografían desde hace más de 40 años, y comparando esas fotos se ve el
-cambio. ASTRION lleva a los chicos a vivir ese trabajo: diseñar la misión, hacerla volar y descubrir el
-cambio con sus propios ojos.
-
-## Cómo se juega
-
-1. **Armá tu satélite.** En el taller se elige, pieza por pieza, entre dos opciones de cámara, paneles
-   solares, batería y antena, y se arrastra cada una al satélite. Cada elección tiene un costo: más
-   detalle gasta más batería, más batería pesa más, y todo tiene que entrar en el cohete.
-2. **Revisá antes de despegar.** NOAH revisa si alcanzan la energía, el envío de fotos y el cohete, y lleva
-   directo a la pieza que hay que cambiar.
-3. **Volá sobre el Chaco.** El satélite vuela solo sobre un mapa real de Paraguay. Al pasar sobre el bosque
-   se toman dos fotos: el Chaco en **1985** y **hoy**.
-4. **Resolvé un imprevisto.** En cada vuelo aparece uno al azar: nubes, cámara inestable o señal débil.
-   Arreglarlo gasta batería.
-5. **Enviá las fotos a la Tierra.** Desde la estación de Asunción, las fotos viajan por la antena. Si la
-   antena es chica, no llegan todas.
-6. **Investigá.** Con una lupa sobre la imagen de hoy se ve el mismo lugar en 1985. Hay que encontrar dos
-   cambios y responder qué le pasó al bosque.
-7. **Misión cumplida.** El final muestra lo que se practicó: diseñaste, probaste, descubriste. Si algo
-   falló, el juego dice qué faltó y lleva a la pieza para intentarlo otra vez.
-
-## Qué se aprende
-
-- **Diseño de misiones espaciales:** cada pieza resuelve algo y cuesta algo (energía, masa, presupuesto,
-  capacidad de envío). No hay una única respuesta correcta.
-- **Cómo trabaja un satélite de observación:** fotografía con energía del Sol y de la batería, pasa por
-  la sombra, y necesita una estación en Tierra para enviar sus datos.
-- **Observación de la Tierra:** comparar imágenes de distintos años permite ver cambios que desde el
-  suelo no se notan.
-- **Probar y mejorar:** fallar es parte del diseño; el juego explica qué falló y cómo mejorarlo.
-
-## Pensado para chicos
-
-- Una tarea por pantalla, pocas palabras y el juego avanza solo cuando no hay nada que decidir.
-- **NOAH**, la inteligencia de la nave, guía con voz en español (grabada) y nunca habla encima de un aviso.
-- Respuesta inmediata a cada acción: animaciones, sonidos y la foto que se "revela" línea por línea.
-- Se juega con mouse o pantalla táctil, sin cuentas ni datos personales.
-
-## Datos reales de la NASA
-
-| Dato | Fuente |
+| | |
 | --- | --- |
-| Imágenes del Chaco, 1985 y 2025 | NASA Scientific Visualization Studio, [*Deforestation in Paraguay's Gran Chaco*](https://svs.gsfc.nasa.gov/15026/) (Landsat). NASA Goddard Space Flight Center · Ross K. Walter (SSAI) |
-| Mapa base del vuelo | NASA GIBS, Blue Marble |
-| Tierra 3D del taller | NASA Blue Marble (SVS) |
-| Límites de países | Natural Earth (dominio público) |
+| ![Title screen](docs/screenshots/01-menu.jpg) | ![Building the satellite](docs/screenshots/02-workshop.jpg) |
+| Title screen | Building the satellite, part by part |
 
-El satélite, el recorrido, los imprevistos y la estación de Asunción son **simulados** con fines
-didácticos. Fuentes, licencias y hashes en [`public/FUENTES.md`](public/FUENTES.md) y
+## The problem
+
+Paraguay's Gran Chaco is one of the forests that has disappeared fastest in recent decades. NASA's Landsat
+satellites have photographed it for more than 40 years, and comparing those photos makes the change
+visible. ASTRION lets kids live that work: design the mission, fly it and discover the change with their
+own eyes.
+
+## How to play
+
+1. **Build your satellite.** In the workshop, players choose between two options for each part (camera,
+   solar panels, battery, antenna) and drag it onto the satellite. Every choice has a cost: more detail
+   uses more battery, more battery weighs more, and everything has to fit in the rocket.
+2. **Check before launch.** NOAH checks whether energy, photo sending and the rocket are enough, and takes
+   the player straight to the part that needs changing.
+3. **Fly over the Chaco.** The satellite flies by itself over a real map of Paraguay. Over the forest it
+   takes two photos: the Chaco in **1985** and **today**.
+4. **Fix a surprise problem.** Every flight draws one at random: clouds, a shaky camera or a weak signal.
+   Fixing it costs battery.
+5. **Send the photos to Earth.** From the Asunción ground station, the photos travel through the antenna.
+   With a small antenna, not all of them arrive.
+6. **Investigate.** A lens over today's image shows the same place in 1985. Players find two changes and
+   answer what happened to the forest.
+7. **Mission accomplished.** The end screen shows what the player practiced: designing, testing and
+   discovering. If something failed, the game says what was missing and leads to the part to try again.
+
+## What kids learn
+
+- **Space mission design:** every part solves something and costs something (energy, mass, budget, data
+  capacity). There is no single right answer.
+- **How an Earth observation satellite works:** it takes photos with energy from the Sun and its battery,
+  goes through the Earth's shadow, and needs a ground station to send its data.
+- **Earth observation:** comparing images from different years reveals changes that are hard to see from
+  the ground.
+- **Test and improve:** failing is part of design; the game explains what failed and how to fix it.
+
+## Made for kids
+
+- One task per screen, few words, and the game moves on by itself when there is nothing to decide.
+- **NOAH**, the ship's AI, guides with a recorded Spanish voice and never talks over a message on screen.
+- Instant feedback for every action: animations, sound effects and photos that "render" line by line.
+- Works with mouse or touch, with no accounts and no personal data.
+
+## Real NASA data
+
+| Data | Source |
+| --- | --- |
+| Chaco images, 1985 and 2025 | NASA Scientific Visualization Studio, [*Deforestation in Paraguay's Gran Chaco*](https://svs.gsfc.nasa.gov/15026/) (Landsat). NASA Goddard Space Flight Center · Ross K. Walter (SSAI) |
+| Flight map | NASA GIBS, Blue Marble |
+| 3D Earth in the workshop | NASA Blue Marble (SVS) |
+| Country borders | Natural Earth (public domain) |
+
+The satellite, the route, the surprise problems and the Asunción station are **simulated** for teaching
+purposes. Sources, licenses and file hashes are in [`public/FUENTES.md`](public/FUENTES.md) and
 [`public/data/sources.json`](public/data/sources.json).
 
-## Tecnología
+## Technology
 
-- [Phaser 4](https://phaser.io/) para las escenas del juego y [Vite](https://vite.dev/) para el desarrollo.
-- [Three.js](https://threejs.org/) para la Tierra en 3D y [MapLibre GL JS](https://maplibre.org/) para el mapa de Paraguay.
-- Voz de NOAH grabada con ElevenLabs; sonidos generados con la Web Audio API.
-- Reglas del juego en JavaScript puro, con pruebas automáticas (`node --test`).
+- [Phaser 4](https://phaser.io/) for the game scenes and [Vite](https://vite.dev/) for development.
+- [Three.js](https://threejs.org/) for the 3D Earth and [MapLibre GL JS](https://maplibre.org/) for the map of Paraguay.
+- NOAH's voice recorded with ElevenLabs; sound effects generated with the Web Audio API.
+- Game rules in plain JavaScript, with automated tests (`node --test`).
 
-## Ejecutar en local
+## Run it locally
 
-Requiere Node.js 22.12 o superior.
+Requires Node.js 22.12 or newer.
 
 ```sh
 npm ci
-npm run dev        # juego en http://localhost:5173
-npm test           # pruebas de las reglas
-npm run build      # versión para publicar (carpeta dist/)
+npm run dev        # game at http://localhost:5173
+npm test           # tests for the game rules
+npm run build      # production build (dist/ folder)
 ```
 
-En `localhost`, agregar `?dev=1` a la dirección abre un selector para saltar a cualquier parte del juego:
-una pieza del taller, un momento del vuelo, la investigación o el final.
+On `localhost`, adding `?dev=1` to the address opens a picker to jump to any part of the game: a workshop
+part, a moment of the flight, the investigation or the end screen.
 
-### Organización del código
+### Code layout
 
-- `src/game/`: reglas sin Phaser ni navegador (energía, datos, vuelo, imprevistos, comparación). Pruebas en
-  `tests/`. Catálogo de piezas en `parts.json`.
-- `src/scenes/`: una escena por pantalla (Menú, Estación, Taller, Vuelo, Investigación, Final).
-- `src/ui/`: interfaz compartida y diálogos, satélite, Tierra 3D, mapa, voz de NOAH y sonidos.
-- `public/`: imágenes, fuentes, voz grabada y datos de NASA.
+- `src/game/`: rules with no Phaser or browser code (energy, data, flight, surprise problems, image
+  comparison). Tests in `tests/`. Part catalog in `parts.json`.
+- `src/scenes/`: one scene per screen (menu, briefing, workshop, flight, investigation, results).
+- `src/ui/`: shared interface and dialogs, satellite, 3D Earth, map, NOAH's voice and sound effects.
+- `public/`: images, fonts, recorded voice and NASA data.
 
-### Voz de NOAH
+### NOAH's voice
 
-Las frases están en `public/assets/voice/`. Si cambia un texto de NOAH, actualizar
-`src/game/noah-lines.js` o `scripts/noah-other-lines.mjs` y correr `npm run voice -- --prune` (necesita
-`ELEVENLABS_API_KEY` en `.env.local`, que no se sube al repositorio).
+The recorded lines are in `public/assets/voice/`. If a NOAH text changes, update `src/game/noah-lines.js`
+or `scripts/noah-other-lines.mjs` and run `npm run voice -- --prune` (requires `ELEVENLABS_API_KEY` in
+`.env.local`, which is never committed).
 
-### Colaborar
+### Contributing
 
-Leer [`AGENTS.md`](AGENTS.md): dirección de diseño, estilo de código y uso de Git para el equipo y para
-cualquier asistente de IA.
+Read [`AGENTS.md`](AGENTS.md): design direction, code style and Git workflow for the team and for any AI
+assistant.
 
-## Equipo
+## Team
 
-- **Lucas Azevedo:** desarrollo, diseño de la experiencia y pulido del juego.
-- **Cesar Goiburu:** misión sobre el Chaco, vuelo e investigación con imágenes.
-- **Jona:** contenido educativo.
+- **Lucas Azevedo:** development, experience design and polish.
+- **Cesar Goiburu:** Chaco mission, flight and image investigation.
+- **Jona:** educational content.
