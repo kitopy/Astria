@@ -106,9 +106,9 @@ export function createChacoHUD(scene, design, onAction) {
     onAction(choice);
   }
 
-  // Sending the photos in Asunción: a dialog with the photos and their data blocks.
-  // The player presses "Enviar" and watches the blocks travel one by one; the antenna can only send
-  // `specs.rate` blocks, so with a small antenna some photos stay incomplete (same rule as model.js).
+  // Sending the photos in Asunción: a dialog with the photos and a send bar under each one.
+  // The player presses "Enviar" and the bars fill one after the other. The antenna can only send
+  // `specs.rate` data blocks, so with a small antenna a bar stops halfway (same rule as model.js).
   let sendOpen = false, shotsShown = [];
   function openSend(mission, specs) {
     sendOpen = true;
@@ -117,11 +117,10 @@ export function createChacoHUD(scene, design, onAction) {
     dialog.className = 'astrion-dialog send-dialog';
     dialog.innerHTML = `
       <h2>Enviar a la Tierra</h2>
-      <p>La antena envía ${specs.rate} ${specs.rate === 1 ? 'bloque' : 'bloques'}.</p>
       <div class="send-photos">${photos.map((photo, i) => `
         <figure>
           ${photo.shot?.image ? `<img src="${photo.shot.image}" alt="Foto ${i + 1}">` : `<span class="send-placeholder">Foto ${i + 1}</span>`}
-          <div class="send-blocks">${'<i></i>'.repeat(photo.blocks)}</div>
+          <div class="send-bar"><i></i></div>
           <figcaption>${photo.shot?.year ? photoLabel(photo.shot.year) : `Foto ${i + 1}`}</figcaption>
         </figure>`).join('')}
       </div>
@@ -143,20 +142,24 @@ export function createChacoHUD(scene, design, onAction) {
       }
       button.disabled = true;
       onAction('transmit');
-      // Light the blocks in order, as many as the antenna can send.
+      // Fill the bars in order, as far as the antenna's blocks reach.
       const figures = [...dialog.querySelectorAll('.send-photos figure')];
-      let budget = specs.rate, step = 0;
-      figures.forEach((figure) => {
-        for (const block of figure.querySelectorAll('.send-blocks i')) {
-          if (budget <= 0) break;
-          budget--;
-          setTimeout(() => block.classList.add('sent'), 300 + step++ * 260);
-        }
+      const FILL_MS = 900;
+      let budget = specs.rate, start = 300;
+      const results = figures.map((figure, i) => {
+        const sent = Math.min(budget, photos[i].blocks);
+        budget -= sent;
+        const share = photos[i].blocks ? sent / photos[i].blocks : 0;
+        const fill = figure.querySelector('.send-bar i');
+        fill.style.transitionDuration = `${FILL_MS * share}ms`;
+        setTimeout(() => { fill.style.width = `${share * 100}%`; }, start);
+        start += FILL_MS * share;
+        return share === 1;
       });
       setTimeout(() => {
         if (!dialog.isConnected) return;
-        figures.forEach((figure) => {
-          const complete = [...figure.querySelectorAll('.send-blocks i')].every((block) => block.classList.contains('sent'));
+        figures.forEach((figure, i) => {
+          const complete = results[i];
           figure.classList.add(complete ? 'arrived' : 'missing');
           figure.querySelector('figcaption').textContent = complete ? '¡Llegó!' : 'No llegó completa';
         });
@@ -164,7 +167,7 @@ export function createChacoHUD(scene, design, onAction) {
         button.dataset.done = 'yes';
         button.disabled = false;
         button.focus({ preventScroll: true });
-      }, 300 + step * 260 + 400);
+      }, start + 400); // after the last bar stops
     });
   }
 
