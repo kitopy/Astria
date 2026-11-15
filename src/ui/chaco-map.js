@@ -31,8 +31,10 @@ export class ChacoMap {
         { id: 'region-fill', type: 'fill', source: 'countries', filter: ['==', ['get', 'code'], 'PRY'], paint: { 'fill-color': '#f0b0f0', 'fill-opacity': .06 } },
         { id: 'borders', type: 'line', source: 'countries', paint: { 'line-color': '#d7e5dd', 'line-opacity': .3, 'line-width': 1 } },
         { id: 'paraguay', type: 'line', source: 'countries', filter: ['==', ['get', 'code'], 'PRY'], paint: { 'line-color': '#d090f0', 'line-width': 2.5 } },
-        { id: 'route', type: 'line', source: 'route', layout: { 'line-join': 'round' }, paint: { 'line-color': '#cfb5ff', 'line-width': 2.5, 'line-dasharray': [3, 2], 'line-opacity': .8 } },
-        { id: 'trail', type: 'line', source: 'trail', layout: { 'line-join': 'round' }, paint: { 'line-color': '#f0b0f0', 'line-width': 3.5 } },
+        // The satellite's path is white and dotted, so it never looks like the country border (orchid).
+        // Planned route: faint dashes. Trail already flown: bright round dots.
+        { id: 'route', type: 'line', source: 'route', layout: { 'line-join': 'round' }, paint: { 'line-color': '#ffffff', 'line-width': 2, 'line-dasharray': [2, 3], 'line-opacity': .35 } },
+        { id: 'trail', type: 'line', source: 'trail', layout: { 'line-join': 'round', 'line-cap': 'round' }, paint: { 'line-color': '#ffffff', 'line-width': 4, 'line-dasharray': [0, 2] } },
         { id: 'downlink', type: 'line', source: 'downlink', paint: { 'line-color': '#f0b0f0', 'line-width': 4, 'line-dasharray': [1, 2], 'line-opacity': 0 } }
       ] }
     });
