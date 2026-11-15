@@ -2,39 +2,33 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { answerComparison, comparisonCase, initialComparison, markComparisonChange, requestComparisonHint, setComparisonSplit, startComparisonSearch } from '../src/game/chaco-comparison.js';
+import { answerComparison, comparisonCase, initialComparison, markComparisonChange, MIN_BRUSH_LENGTH } from '../src/game/chaco-comparison.js';
 
-const searching = () => startComparisonSearch(setComparisonSplit(initialComparison(),0));
-test('Primero se explora la comparación; la barra tiene límites y no adelanta las respuestas', () => {
+test('The brush needs two separate findings before the question opens', () => {
   const start = initialComparison();
-  assert.deepEqual(startComparisonSearch(start),start);
-  assert.equal(setComparisonSplit(start,1000).split,100);
-  assert.equal(setComparisonSplit(start,-5).split,0);
-  assert.deepEqual(setComparisonSplit(start,NaN),start);
-  assert.equal(searching().phase,'select');
-  assert.equal(markComparisonChange(start,.35,.42).phase,'explore');
-  assert.equal(answerComparison(start,'vegetation').phase,'explore');
+  assert.deepEqual(markComparisonChange(start, { x: .35, y: .42 }, .01), start);
+  const first = markComparisonChange(start, { x: .35, y: .42 }, MIN_BRUSH_LENGTH);
+  assert.equal(first.phase, 'explore');
+  assert.equal(first.findings.length, 1);
+  const close = markComparisonChange(first, { x: .38, y: .45 }, .2);
+  assert.equal(close.misses, 1);
+  assert.equal(close.findings.length, 1);
+  const second = markComparisonChange(close, { x: .27, y: .66 }, .2);
+  assert.equal(second.phase, 'interpret');
+  assert.equal(second.findings.length, 2);
+  assert.deepEqual(markComparisonChange(second, { x: .9, y: .9 }, .2), second);
 });
-test('Se puede reintentar y pedir pistas sin bloquear la investigación', () => {
-  let state = markComparisonChange(searching(),.96,.94);
-  assert.equal(state.phase,'select'); assert.equal(state.misses,1);
-  for (let i=0;i<8;i++) state=requestComparisonHint(state);
-  assert.equal(state.hints,3);
-  state=markComparisonChange(state,comparisonCase.focus.x,comparisonCase.focus.y);
-  assert.equal(state.phase,'interpret');
-  assert.deepEqual(state.point,comparisonCase.focus);
-  const wrong=answerComparison(state,'water');
-  assert.equal(wrong.phase,'interpret');
-  const complete=answerComparison(wrong,'vegetation');
-  assert.equal(complete.phase,'complete');
-  assert.equal(complete.misses,1);
-  assert.deepEqual(answerComparison(complete,'growth'),complete);
-});
-test('Las áreas didácticas aceptan más de un claro y rechazan puntos inválidos', () => {
-  assert.equal(markComparisonChange(searching(),.35,.42).phase,'interpret');
-  assert.equal(markComparisonChange(searching(),.27,.60).phase,'interpret');
-  assert.equal(markComparisonChange(searching(),-.1,.4).phase,'select');
-  const start=searching(); assert.deepEqual(markComparisonChange(start,Infinity,.4),start);
+test('Invalid points do not create findings and interpretation can be retried', () => {
+  const start = initialComparison();
+  assert.deepEqual(markComparisonChange(start, { x: -1, y: .5 }, .2), start);
+  assert.deepEqual(markComparisonChange(start, { x: Infinity, y: .5 }, .2), start);
+  const first = markComparisonChange(start, { x: .35, y: .42 }, .2);
+  const ready = markComparisonChange(first, { x: .27, y: .66 }, .2);
+  const wrong = answerComparison(ready, 'water');
+  assert.equal(wrong.phase, 'interpret');
+  const complete = answerComparison(wrong, 'vegetation');
+  assert.equal(complete.phase, 'complete');
+  assert.deepEqual(answerComparison(complete, 'growth'), complete);
 });
 test('Los fotogramas conservan su procedencia, fechas y hashes de archivo', () => {
   const meta=JSON.parse(readFileSync(new URL('../public/data/sources.json',import.meta.url),'utf8')).comparison;

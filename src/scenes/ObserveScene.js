@@ -1,5 +1,5 @@
 ﻿import Phaser from 'phaser';
-import { createChacoComparison } from '../ui/chaco-comparison.js';
+import { createChacoComparison } from '../ui/chaco-brush.js';
 
 // Investigate the historical NASA pair recreated during the mission.
 export class ObserveScene extends Phaser.Scene {

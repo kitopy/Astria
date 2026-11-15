@@ -73,12 +73,16 @@ const reward = [
   'Los resultados nos ayudan a diseñar mejor. Guardé tus piezas para que puedas ajustar tu satélite.',
 ];
 
-// ObserveScene (the "NOAH // TITLE" line is a label and isn't spoken)
+// ObserveScene brush investigation
 const observe = [
-  'NOAH // ANÁLISIS EN CURSO\nEsta comparación representa dos observaciones. Las imágenes son simuladas.\n¿Qué cambió? Tocá el lugar donde veas la diferencia.',
-  'NOAH // SIGAMOS BUSCANDO\nCasi... Mirá con calma el bosque en las dos fotos.\nHay una zona que se ve distinta en la imagen B.',
-  'NOAH // ¡CAMBIO ENCONTRADO!\n¡Buen ojo, explorador! El río y la montaña quedaron iguales,\npero en la imagen B falta una parte del bosque.',
-  'NOAH // ASÍ TRABAJAN LOS SATÉLITES\nLos satélites Landsat de la NASA fotografían el mismo lugar\nde la Tierra cada 16 días. Comparando fotos, se ven los cambios.',
+  'Podés pintar sin apuro. Elegí un sector que te llame la atención.',
+  'Ya podés marcar este lugar como hallazgo.',
+  'Buscá otro sector, más lejos del primero.',
+  'Primer hallazgo marcado. Explorá otra parte de la imagen.',
+  'Los dos lugares están listos. ¿Qué cambió entre 1985 y 2025?',
+  'Mirá otra vez: ¿en qué año se ve más bosque continuo?',
+  'El bosque de 1985 se ve más continuo. En 2025 aparecen claros y parcelas.',
+  'No se pudieron cargar las imágenes. Volvé a resultados y probá otra vez.',
 ];
 
 // FinaleScene

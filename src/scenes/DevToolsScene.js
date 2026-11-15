@@ -30,6 +30,8 @@ export class DevToolsScene extends Phaser.Scene {
         <div class="ws-devtools-buttons">${PARTS.map(([part, label]) => `<button data-dev-part="${part}">${label}</button>`).join('')}</div>
         <h2>Probar un momento del viaje</h2>
         <div class="ws-devtools-buttons">${FLIGHT_STAGES.map(([stage, label]) => `<button data-dev-stage="${stage}">${label}</button>`).join('')}</div>
+        <h2>Investigar el Chaco</h2>
+        <div class="ws-devtools-buttons"><button data-dev-observe>Comparación de imágenes</button></div>
         <button class="ws-devtools-normal" data-dev-normal>Ir al juego normal</button>
       </section>`;
     document.body.append(root);
@@ -39,6 +41,10 @@ export class DevToolsScene extends Phaser.Scene {
       if (!button) return;
       if (button.hasAttribute('data-dev-normal')) {
         this.scene.start('Menu');
+        return;
+      }
+      if (button.hasAttribute('data-dev-observe')) {
+        this.scene.start('Observe');
         return;
       }
       const design = readDesign();
