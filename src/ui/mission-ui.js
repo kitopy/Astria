@@ -1,5 +1,6 @@
 import { SatelliteAssembly, frames } from './satellite.js';
 import { hideEarth, showEarth } from './earth3d.js';
+import { noahSpeak, noahStop } from './noahVoice.js';
 
 // Shared screen layout for the three mission steps (Build, Test, Reward).
 // Phaser draws the background and the satellite; this module puts an HTML layer on top
@@ -112,12 +113,7 @@ export function mount(scene, step, options = {}) {
     },
 
     speak() {
-      if (!hasSpeech) return;
-      speechSynthesis.cancel();
-      const line = new SpeechSynthesisUtterance(this.message);
-      line.lang = 'es-ES';
-      line.rate = 0.95;
-      speechSynthesis.speak(line);
+      if (hasSpeech) noahSpeak(this.message);
     },
 
     updateVoiceButton() {
@@ -136,7 +132,7 @@ export function mount(scene, step, options = {}) {
           scene.registry.set('noahVoice', this.voice);
           this.updateVoiceButton();
           if (this.voice) this.speak();
-          else window.speechSynthesis?.cancel();
+          else noahStop();
         } else if (action === 'listen') {
           this.speak();
         } else {
@@ -150,7 +146,7 @@ export function mount(scene, step, options = {}) {
   if (!hasSpeech) root.querySelectorAll('[data-action="voice"], [data-action="listen"]').forEach((el) => (el.disabled = true));
 
   scene.events.once('shutdown', () => {
-    window.speechSynthesis?.cancel();
+    noahStop();
     dom.destroy();
   });
   return ui;

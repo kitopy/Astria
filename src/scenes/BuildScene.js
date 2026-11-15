@@ -5,15 +5,15 @@ import { actionButton, addArt, meter, mount, partThumb, preloadArt } from '../ui
 import { centerDesignArea } from '../ui/layout.js';
 import { COLORS, CSS } from '../ui/palette.js';
 import { contentBounds } from '../ui/satellite.js';
+import { mountLine, partIntro, reviewLine } from '../game/noah-lines.js';
 import { REFRAME_ENERGY } from '../game/chaco-visibility.js';
 
-// What each part does in a space mission, with the name engineers use for it.
-// The role is the subtitle on screen; the text is NOAH's one-line explanation.
-const PART_INFO = {
-  camera: { role: 'Carga útil', text: 'La cámara es la que toma las fotos del bosque.' },
-  solar: { role: 'Sistema de energía', text: 'Los paneles dan energía con la luz del Sol.' },
-  battery: { role: 'Almacenamiento de energía', text: 'La batería guarda energía para cuando no hay sol.' },
-  antenna: { role: 'Comunicaciones', text: 'La antena envía las fotos a la Tierra.' },
+// The name engineers use for each part (subtitle on screen). NOAH's lines are in game/noah-lines.js.
+const PART_ROLE = {
+  camera: 'Carga útil',
+  solar: 'Sistema de energía',
+  battery: 'Almacenamiento de energía',
+  antenna: 'Comunicaciones',
 };
 
 const REVIEW = kinds.length; // step index of the final review (after the 4 parts)
@@ -131,15 +131,13 @@ export class BuildScene extends Phaser.Scene {
 
     if (kind) {
       this.title.setText(catalog[kind].label.toUpperCase());
-      this.subtitle.setText(PART_INFO[kind].role);
+      this.subtitle.setText(PART_ROLE[kind]);
       catalog[kind].options.forEach((part, i) => this.options.push(this.addOption(kind, part, OPTION_X[i], SATELLITE.y)));
-      this.ui.say(`${PART_INFO[kind].text} ${this.placed.has(kind) ? 'Podés cambiarla por la otra.' : 'Arrastrá una al satélite.'}`);
+      this.ui.say(partIntro(kind, this.placed.has(kind)));
     } else {
       this.title.setText('¿LISTA PARA DESPEGAR?');
       this.subtitle.setText('Revisá la cuenta antes del lanzamiento');
-      this.ui.say(stats(catalog, this.design).valid
-        ? `Hacé la cuenta: ¿alcanza para dos fotos, resolver un imprevisto (−${REFRAME_ENERGY}) y el envío?`
-        : 'Supera el límite del cohete. Tocá una pieza abajo para cambiarla.');
+      this.ui.say(reviewLine(stats(catalog, this.design).valid, REFRAME_ENERGY));
     }
 
     // The title rises in on every new step, so the change of part is noticed.
@@ -258,7 +256,7 @@ export class BuildScene extends Phaser.Scene {
         // Changing a part that was already mounted doesn't advance, so the player can compare calmly.
         // When it advances, this line stays silent: the next part's spoken intro would cut it anyway.
         const autoNext = !wasPlaced;
-        this.ui.say(`${wasPlaced ? '¡Cambiada!' : '¡Montada!'} ${part.name}: ${part.benefit.toLowerCase()}, pero ${part.tradeoff.toLowerCase()}.`, { silent: autoNext });
+        this.ui.say(mountLine(part, wasPlaced), { silent: autoNext });
         if (autoNext) {
           const stepAtMount = this.step;
           this.time.delayedCall(AUTO_NEXT_MS, () => {

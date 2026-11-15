@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { addCoverBackground, centerDesignArea } from '../ui/layout.js';
-import { speakIfEnabled } from '../ui/noahVoice.js';
+import { noahStop, speakIfEnabled } from '../ui/noahVoice.js';
 import { addNeonButton } from '../ui/neonButton.js';
 import { CSS } from '../ui/palette.js';
 
@@ -79,7 +79,7 @@ export class StationScene extends Phaser.Scene {
       this.registry.set('noahVoice', on);
       toggle.setText(label());
       if (on) speakIfEnabled(this, BRIEFING);
-      else window.speechSynthesis?.cancel();
+      else noahStop();
     });
   }
 }

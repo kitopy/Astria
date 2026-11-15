@@ -1,3 +1,6 @@
 node_modules/
 dist/
 .DS_Store
+
+# Local secrets (e.g. ELEVENLABS_API_KEY). Never commit.
+.env*

@@ -1,4 +1,5 @@
 import { catalog } from '../game/design.js';
+import { noahSpeak, noahStop } from './noahVoice.js';
 import { phases } from '../game/model.js';
 import { atGate } from '../game/chaco-flight.js';
 import { cloudCover, obstacleInfo, obstacleIntensity, REFRAME_ENERGY } from '../game/chaco-visibility.js';
@@ -43,13 +44,13 @@ export function createChacoHUD(scene, design, onAction) {
   document.body.append(root);
   const get = key => root.querySelector(`[data-hud="${key}"]`);
   let voice = !!scene.registry.get('noahVoice'), message = '';
-  function speak() { if (!window.speechSynthesis) return; speechSynthesis.cancel();const line=new SpeechSynthesisUtterance(message);line.lang='es-ES';line.rate=.95;speechSynthesis.speak(line); }
+  function speak() { noahSpeak(message); } // same voice as the rest of the game (ui/noahVoice.js)
   function voiceLabel() { const button=root.querySelector('[data-flight="voice"]');button.textContent=`Voz de NOAH: ${voice?'activada':'apagada'}`;button.setAttribute('aria-pressed',String(voice)); }
   voiceLabel();
   root.addEventListener('click', event => {
     const button=event.target.closest('button[data-flight]');if(!button||button.disabled)return;
     const action=button.dataset.flight;
-    if(action==='voice'){voice=!voice;scene.registry.set('noahVoice',voice);voiceLabel();if(voice)speak();else window.speechSynthesis?.cancel();}
+    if(action==='voice'){voice=!voice;scene.registry.set('noahVoice',voice);voiceLabel();if(voice)speak();else noahStop();}
     else if(action==='listen')speak();
     else onAction(action);
   });
@@ -106,6 +107,6 @@ export function createChacoHUD(scene, design, onAction) {
       control('speed').textContent=`Velocidad ×${flight.speed}`;
       root.querySelectorAll('.chaco-timeline li').forEach((item,i)=>{item.classList.toggle('active',i===phase);item.classList.toggle('done',i<phase);});
     },
-    destroy(){window.speechSynthesis?.cancel();root.querySelector('video').pause();root.remove();}
+    destroy(){noahStop();root.querySelector('video').pause();root.remove();}
   };
 }

@@ -1,0 +1,86 @@
+// NOAH's lines outside the workshop, for the voice generator (scripts/generate-noah-voice.mjs).
+//
+// These texts live in the scenes (which need Phaser and the browser, so Node can't import them).
+// They are copied here: fixed lines as they are, and the ones that change with the satellite design
+// or the random obstacle are expanded for every possible case (16 designs × 3 obstacles).
+// If a scene changes a text, that line just falls back to the browser voice until this list is
+// updated and `npm run voice` is run again — nothing breaks.
+import { readFileSync } from 'node:fs';
+import { kinds, stats } from '../src/game/model.js';
+import { OBSTACLES, REFRAME_ENERGY } from '../src/game/chaco-visibility.js';
+
+const catalog = JSON.parse(readFileSync(new URL('../src/game/parts.json', import.meta.url), 'utf8'));
+
+// Every satellite design: one option per part type (2 × 2 × 2 × 2 = 16).
+function allDesigns() {
+  let designs = [{}];
+  for (const kind of kinds) {
+    designs = designs.flatMap((d) => catalog[kind].options.map((part) => ({ ...d, [kind]: part.id })));
+  }
+  return designs;
+}
+
+// StationScene (mission briefing)
+const station = [
+  'Hola, exploradora. Soy NOAH. El bosque del Chaco paraguayo está cambiando: vamos a construir un satélite para fotografiarlo desde el espacio.',
+];
+
+// TestScene + game logic errors (Cesar's flight over the Chaco)
+const flight = [
+  'Estamos en Paraguay. Prepará tu misión para observar dos veces una zona del Chaco. Al llegar al bosque, el vuelo se pausará para que puedas decidir.',
+  'No se pudo preparar una parte del mapa. Podés volver al taller o recargar la página.',
+  '¡En marcha! Seguí tu satélite hasta el bosque del Chaco paraguayo.',
+  'Seguimos el recorrido. Las observaciones se obtienen en pasos separados, con el tiempo acelerado para este juego.',
+  'Vuelo en pausa. Podés revisar la batería y los datos con calma. Reanudá cuando quieras.',
+  'Llegamos al bosque del Chaco. El recorrido se detuvo: activá Observar para obtener la primera imagen.',
+  'Segunda pasada. En este paso ilustramos al satélite en sombra: no hay recarga solar. La cámara funciona con la batería.',
+  'Llegamos a la segunda pasada, pero la batería no alcanza para esta cámara. Podés continuar hasta la estación y revisar el diseño al terminar.',
+  'Estamos en la ventana de comunicación con nuestra estación ficticia de Asunción. Transmití las imágenes antes de ver los resultados.',
+  'Llegamos al contacto terrestre, pero falta energía para la antena. Los resultados te ayudarán a mejorar el diseño.',
+  'Este imprevisto ya está resuelto o todavía no necesita un ajuste.',
+  'Falta energía para el ajuste. Volvé al taller y revisá la batería.',
+  'Esta observación ya terminó o todavía no está disponible.',
+  'Falta energía para la cámara. Podés avanzar y revisar tu diseño al terminar.',
+  'La ventana de transmisión no está disponible.',
+  'Todavía no hay imágenes para transmitir. Podés cerrar la misión y volver al taller.',
+  'Falta energía para transmitir. Cerrá la misión para revisar qué mejorar.',
+];
+for (const info of Object.values(OBSTACLES)) {
+  flight.push(
+    `${info.explanation} El ajuste usa ${REFRAME_ENERGY} de energía.`,
+    `${info.label}. ${info.message} Resolverlo cuesta ${REFRAME_ENERGY} de energía.`,
+    `${info.resolved} El ajuste consumió ${REFRAME_ENERGY} de energía. Cuidá la reserva que queda.`,
+  );
+}
+for (const design of allDesigns()) {
+  const s = stats(catalog, design);
+  flight.push(`¡Imagen obtenida! La cámara usó ${s.cameraPower} de energía y generó ${s.data} ${s.data === 1 ? 'bloque' : 'bloques'} de datos. Ahora necesitamos llevar esa información a la Tierra.`);
+}
+for (const delivered of [0, 1, 2]) {
+  flight.push(
+    `En Asunción recibimos ${delivered} imágenes completas. Quedaron datos a bordo. Una antena de mayor capacidad puede ayudar en otro intento.`,
+    `En Asunción recibimos ${delivered} imágenes completas. ¡Lograste entregar tus observaciones!`,
+  );
+}
+
+// RewardScene
+const reward = [
+  '¡Lo lograste! Las dos fotos llegaron a la Tierra. Revisalas y después practicá cómo comparar imágenes.',
+  '¡Lo lograste! Tu satélite tomó y envió las dos fotos. Vamos a ver qué descubriste.',
+  'Los resultados nos ayudan a diseñar mejor. Guardé tus piezas para que puedas ajustar tu satélite.',
+];
+
+// ObserveScene (the "NOAH // TITLE" line is a label and isn't spoken)
+const observe = [
+  'NOAH // ANÁLISIS EN CURSO\nEsta comparación representa dos observaciones. Las imágenes son simuladas.\n¿Qué cambió? Tocá el lugar donde veas la diferencia.',
+  'NOAH // SIGAMOS BUSCANDO\nCasi... Mirá con calma el bosque en las dos fotos.\nHay una zona que se ve distinta en la imagen B.',
+  'NOAH // ¡CAMBIO ENCONTRADO!\n¡Buen ojo, exploradora! El río y la montaña quedaron iguales,\npero en la imagen B falta una parte del bosque.',
+  'NOAH // ASÍ TRABAJAN LOS SATÉLITES\nLos satélites Landsat de la NASA fotografían el mismo lugar\nde la Tierra cada 16 días. Comparando fotos, se ven los cambios.',
+];
+
+// FinaleScene
+const finale = [
+  'NOAH // ¡GRACIAS, EXPLORADORA!\nDetrás de cada misión hay personas que diseñan, prueban y descubren.\nVos también podés construir, descubrir y explorar el universo.',
+];
+
+export const otherLines = [...station, ...flight, ...reward, ...observe, ...finale];
