@@ -3,20 +3,37 @@
 .astrion-dialog {
   width: min(520px, calc(100vw - 32px));
   padding: 36px 40px 32px;
-  border: 1.5px solid rgba(208, 144, 240, 0.55);
-  border-radius: 26px;
+  border: 2px solid transparent;
+  /* Longhands on purpose: the border-image shorthand with var() is not applied reliably. */
+  border-image-source: var(--hud-panel);
+  border-image-slice: 40 fill;
+  border-image-width: 40px;
+  border-image-repeat: stretch;
+  overflow: visible;
   color: #ffffff;
   text-align: center;
   font-family: 'Quicksand', system-ui, sans-serif;
   font-weight: 600;
-  background: rgba(40, 22, 62, 0.96);
-  box-shadow: 0 24px 80px rgba(10, 4, 25, 0.6);
+  background: none;
   animation: astrion-dialog-in 0.35s ease-out both;
 }
 .astrion-dialog::backdrop {
   background: rgba(14, 5, 28, 0.72);
   backdrop-filter: blur(4px);
   animation: astrion-dialog-fade 0.35s ease-out both;
+}
+
+/* Star on the top line, like the one on the original dialog art. */
+.astrion-dialog::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translateX(-50%);
+  background: #fff0ff;
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
 }
 
 .astrion-dialog h2 {
@@ -50,8 +67,12 @@
   font-size: 17px;
   letter-spacing: 1px;
   color: #ffffff;
-  border: 2px solid #d090f0;
-  border-radius: 14px;
+  border: 2px solid transparent;
+  border-image-source: var(--hud-line);
+  border-image-slice: 12;
+  border-image-width: 12px;
+  border-image-repeat: stretch;
+  clip-path: var(--hud-cut);
   cursor: pointer;
   /* Neon button: the color fills from the center on hover, like the rest of the game. */
   background:
@@ -61,7 +82,7 @@
 }
 .astrion-dialog button.primary {
   color: #f0b0f0;
-  border-color: #f0b0f0;
+  border-image-source: var(--hud-line-bright);
   background:
     linear-gradient(#f0b0f0, #f0b0f0) center / 0% 100% no-repeat,
     rgba(20, 8, 45, 0.6);
@@ -73,7 +94,7 @@
 }
 .astrion-dialog button.primary:hover,
 .astrion-dialog button.primary:focus-visible { color: #1c0a33; }
-.astrion-dialog button:focus-visible { outline: 3px solid #f0b0f0; outline-offset: 4px; }
+.astrion-dialog button:focus-visible { outline: 3px solid #f0b0f0; outline-offset: -7px; } /* inside: the cut corners clip outside */
 
 /* Checklist (pre-flight review): each line appears after the previous one. */
 .astrion-checks {

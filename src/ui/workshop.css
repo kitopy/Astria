@@ -31,6 +31,18 @@
 .ws button { font: inherit; cursor: pointer; }
 .ws :focus-visible { outline: 3px solid var(--glow); outline-offset: 4px; }
 
+/* ---------- High-tech frames (same look as the GDevelop art: panel-dialog.png, neon buttons) ----------
+   Drawn as small SVGs and stretched with border-image (9-slice), so they stay sharp at any size.
+   Corners are cut like the original art; the panel has the double neon line and the "///" marks. */
+:root {
+  --hud-panel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpolygon points='21,3 99,3 117,21 117,99 99,117 21,117 3,99 3,21' fill='rgba(38,18,66,0.9)' stroke='rgba(208,144,240,0.35)' stroke-width='6'/%3E%3Cpolygon points='21,3 99,3 117,21 117,99 99,117 21,117 3,99 3,21' fill='none' stroke='rgb(240,176,240)' stroke-width='1.6'/%3E%3Cpolygon points='24,10 96,10 110,24 110,96 96,110 24,110 10,96 10,24' fill='none' stroke='rgba(240,176,240,0.28)' stroke-width='1'/%3E%3Cg fill='rgb(240,176,240)'%3E%3Cpolygon points='24,15 28,15 25,20 21,20'/%3E%3Cpolygon points='30,15 34,15 31,20 27,20'/%3E%3Cpolygon points='36,15 40,15 37,20 33,20'/%3E%3C/g%3E%3C/svg%3E");
+  --hud-slim: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpolygon points='11,2 49,2 58,11 58,49 49,58 11,58 2,49 2,11' fill='rgba(38,18,66,0.9)' stroke='rgba(208,144,240,0.35)' stroke-width='4'/%3E%3Cpolygon points='11,2 49,2 58,11 58,49 49,58 11,58 2,49 2,11' fill='none' stroke='rgb(240,176,240)' stroke-width='1.4'/%3E%3Cg fill='rgb(240,176,240)'%3E%3Cpolygon points='8,7 11,7 9,10 6,10'/%3E%3Cpolygon points='12,7 15,7 13,10 10,10'/%3E%3Cpolygon points='16,7 19,7 17,10 14,10'/%3E%3C/g%3E%3C/svg%3E");
+  --hud-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpolygon points='11,1.5 25,1.5 34.5,11 34.5,25 25,34.5 11,34.5 1.5,25 1.5,11' fill='none' stroke='rgb(208,144,240)' stroke-width='2'/%3E%3C/svg%3E");
+  --hud-line-bright: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpolygon points='11,1.5 25,1.5 34.5,11 34.5,25 25,34.5 11,34.5 1.5,25 1.5,11' fill='none' stroke='rgb(240,176,240)' stroke-width='2'/%3E%3C/svg%3E");
+  --hud-line-gold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpolygon points='11,1.5 25,1.5 34.5,11 34.5,25 25,34.5 11,34.5 1.5,25 1.5,11' fill='none' stroke='rgb(255,217,168)' stroke-width='2'/%3E%3C/svg%3E");
+  --hud-cut: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+}
+
 /* ---------- Shared pieces ---------- */
 
 .ws-panel,
@@ -359,3 +371,67 @@
   .ws-devtools-buttons { display: grid; grid-template-columns: 1fr 1fr; }
   .ws-devtools button { padding: 9px 10px; font-size: 14px; }
 }
+
+/* ---------- High-tech frames applied to the mission screens ----------
+   Longhand border-image properties on purpose: the shorthand with var() is not applied reliably. */
+
+/* Panels: the full frame (double line, "///" marks). */
+.ws .ws-panel,
+.ws .ws-meters,
+.ws .ws-caption {
+  border: 2px solid transparent;
+  border-radius: 0;
+  border-image-source: var(--hud-panel);
+  border-image-slice: 40 fill;
+  border-image-width: 40px;
+  border-image-repeat: stretch;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* Low bars (NOAH, the parts strip): a slimmer version of the same frame, so it fits their height. */
+.ws .ws-noah,
+.ws .ws-strip {
+  border: 2px solid transparent;
+  border-radius: 0;
+  border-image-source: var(--hud-slim);
+  border-image-slice: 20 fill;
+  border-image-width: 20px;
+  border-image-repeat: stretch;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.ws .ws-noah { padding-left: 24px; }
+
+/* Buttons and small boxes: cut corners and a single neon line. */
+.ws .ws-btn,
+.ws .ws-listen,
+.ws .ws-slot,
+.ws .ws-stats div,
+.ws .ws-part-tip {
+  border: 2px solid transparent;
+  border-radius: 0;
+  border-image-source: var(--hud-line);
+  border-image-slice: 12;
+  border-image-width: 12px;
+  border-image-repeat: stretch;
+  clip-path: var(--hud-cut);
+}
+.ws .ws-btn.ws-primary,
+.ws .ws-slot.current,
+.ws .ws-slot.linked {
+  border: 2px solid transparent; /* older rules set a plain border on these states */
+  border-image-source: var(--hud-line-bright);
+  border-image-slice: 12;
+  border-image-width: 12px;
+  border-image-repeat: stretch;
+}
+.ws .ws-slot.linked { border-image-source: var(--hud-line-gold); }
+.ws .ws-slot:not(:has(.ws-thumb)) { opacity: 0.75; }
+
+/* Keyboard focus drawn inside: the cut corners would clip an outline drawn outside. */
+.ws-btn:focus-visible,
+.ws-listen:focus-visible,
+.ws-slot:focus-visible { outline-offset: -7px; }
