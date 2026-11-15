@@ -1,6 +1,7 @@
 import { answerComparison, comparisonCase, initialComparison, markComparisonChange, MIN_BRUSH_LENGTH } from '../game/chaco-comparison.js';
 import { speakIfEnabled } from './noahVoice.js';
 import { showDialog } from './dialog.js';
+import { sfx } from './sfx.js';
 import './chaco-brush.css';
 
 const base = import.meta.env.BASE_URL;
@@ -231,27 +232,36 @@ export function createChacoComparison(scene, onAction) {
         actions: [{ label: 'OK', value: 'ok', primary: true }],
       });
       if (acknowledged !== 'ok' || !root.isConnected) return;
+      // A wrong answer is removed from the options and the title says so: the question never repeats
+      // the same way, and after two tries only the right answer is left.
+      const answers = [
+        { label: 'Ahora hay más bosque', value: 'growth' },
+        { label: 'Antes había más bosque', value: 'vegetation' },
+        { label: 'Apareció un lago', value: 'water' },
+      ];
+      const wrong = new Set();
       while (state.phase === 'interpret' && root.isConnected) {
         const choice = await showDialog(scene, {
-          title: '¿Qué descubriste?',
-          text: state.answer ? 'Mirá otra vez: ¿cuándo había más bosque?' : '¿Qué le pasó al bosque?',
+          title: wrong.size ? '¡Casi! Probá otra vez' : '¿Qué descubriste?',
+          text: wrong.size ? 'Mirá las dos fotos: ¿cuándo había más bosque?' : '¿Qué le pasó al bosque?',
           body: `<div class="chaco-analysis-preview" aria-label="Comparación del mismo sector en dos fechas">
             <figure><img src="${base}${comparisonCase.before}" alt="Bosque del Chaco en 1985"><figcaption>1985</figcaption></figure>
             <figure><img src="${base}${comparisonCase.after}" alt="El mismo sector del Chaco en 2025"><figcaption>Hoy</figcaption></figure>
           </div>`,
           dismissable: false,
-          actions: [
-            // All answers look the same: highlighting one would give the answer away.
-            { label: 'Ahora hay más bosque', value: 'growth' },
-            { label: 'Antes había más bosque', value: 'vegetation' },
-            { label: 'Apareció un lago', value: 'water' },
-          ],
+          // All answers look the same: highlighting one would give the answer away.
+          actions: answers.filter((answer) => !wrong.has(answer.value)),
         });
         if (!choice || !root.isConnected) return;
         state = answerComparison(state, choice);
+        if (state.phase === 'interpret') {
+          wrong.add(choice);
+          sfx.almost();
+        }
       }
       if (root.isConnected && state.phase === 'complete') {
         render();
+        sfx.done();
         showDiscoveryImpact();
       }
     }
