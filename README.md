@@ -84,6 +84,20 @@ purposes. Sources, licenses and file hashes are in [`public/FUENTES.md`](public/
 - NOAH's voice recorded with ElevenLabs; sound effects generated with the Web Audio API.
 - Game rules in plain JavaScript, with automated tests (`node --test`).
 
+## Use of AI
+
+AI tools were used to make this project. Everything they produced was reviewed by the team.
+
+- **Code:** written with help from Claude Code (Anthropic) for programming, interface design, debugging and
+  code review.
+- **Images:** the satellite art and the ASTRION logo were generated with AI (ChatGPT). The game's end
+  screen says so.
+- **Audio:** NOAH's voice is AI-generated speech made with ElevenLabs text-to-speech, from lines written by
+  the team. The recordings are in `public/assets/voice/`.
+- **Text:** this README and the submission texts were drafted with AI help and edited by the team.
+- **NASA data was not generated or changed by AI.** The Landsat, GIBS and Blue Marble images are only
+  cropped and resized. No NASA logos or branding were generated.
+
 ## Run it locally
 
 Requires Node.js 22.12 or newer.

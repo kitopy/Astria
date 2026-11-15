@@ -93,7 +93,7 @@ export class RewardScene extends Phaser.Scene {
       // Credits of the real data used in the mission, small, at the very end (not during play).
       const credits = document.createElement('p');
       credits.className = 'ws-credits';
-      credits.textContent = 'Imágenes: NASA Landsat · Mapa: NASA GIBS y Natural Earth (MapLibre) · Recorrido simulado';
+      credits.textContent = 'Imágenes: NASA Landsat · Mapa: NASA GIBS y Natural Earth (MapLibre) · Recorrido simulado · Arte del satélite, logo y voz de NOAH generados con IA';
       ui.root.append(credits);
       ui.area('actions').innerHTML = actionButton('again', 'Jugar de nuevo', true);
       ui.bind({ again: () => this.scene.start('Menu') });
