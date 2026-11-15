@@ -83,11 +83,17 @@ export class BuildScene extends Phaser.Scene {
       },
     });
 
+    // With the welcome dialog open, the first title waits and is typed once the dialog closes.
+    this.titleOnHold = this.showBuildIntroOnStart;
     this.showStep();
     if (this.showBuildIntroOnStart) {
       showDialog(this, {
         title: 'Elegí qué pieza llevar',
         text: 'En cada paso vas a elegir entre dos opciones. Mirá qué aporta cada una y elegí la que prefieras para tu misión.',
+      }).then(() => {
+        if (!this.sys.isActive()) return; // the scene ended while the dialog was open
+        this.titleOnHold = false;
+        this.typeTitle(this.titleTarget);
       });
     }
   }
@@ -180,19 +186,40 @@ export class BuildScene extends Phaser.Scene {
     return option.home.x < SATELLITE.x ? -1 : 1;
   }
 
-  // The current title fades up and out, then the new one rises in, so the change of part is noticed.
+  // The current title fades up and out, then the new one is typed letter by letter,
+  // so each new part gets a moment of its own.
   swapTitle(text) {
     const title = this.title;
+    const previous = this.titleTarget;
+    this.titleTarget = text;
     this.tweens.killTweensOf(title);
-    const riseIn = () => {
-      title.setText(text).setAlpha(0).setY(188);
-      this.tweens.add({ targets: title, alpha: 1, y: 168, duration: 420, ease: 'Cubic.out' });
-    };
-    if (!title.text || title.text === text) {
-      riseIn();
-      return;
+    this.titleTyping?.remove();
+    if (this.titleOnHold) return; // typed when the welcome dialog closes
+    if (previous && previous !== text) {
+      this.tweens.add({ targets: title, alpha: 0, y: 150, duration: 200, ease: 'Cubic.in', onComplete: () => this.typeTitle(text) });
+    } else {
+      this.typeTitle(text);
     }
-    this.tweens.add({ targets: title, alpha: 0, y: 150, duration: 200, ease: 'Cubic.in', onComplete: riseIn });
+  }
+
+  typeTitle(text) {
+    const title = this.title;
+    // Anchor the text by its left edge where the full title will start, so it grows to the right
+    // instead of shifting while it's typed, and ends up centered.
+    title.setOrigin(0.5).setText(text);
+    const left = 960 - title.width / 2;
+    title.setOrigin(0, 0.5).setPosition(left, 168).setAlpha(1).setText('');
+
+    const letters = [...text]; // keeps accented letters (Á, Í) whole
+    let shown = 0;
+    this.titleTyping = this.time.addEvent({
+      delay: Math.min(75, 900 / letters.length), // short titles type at a steady pace, long ones still finish in ~1 s
+      repeat: letters.length - 1,
+      callback: () => {
+        shown++;
+        title.setText(letters.slice(0, shown).join(''));
+      },
+    });
   }
 
   // Pulsing outline where the current part goes, until it's mounted.
