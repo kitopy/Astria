@@ -71,10 +71,6 @@
 .brush-panel { padding: 18px; border: 1px solid #b789ce; border-radius: 17px; background: linear-gradient(150deg, #3c2454, #241536); box-shadow: 0 16px 45px #0005; }
 .brush-panel-head { display: flex; justify-content: space-between; gap: 6px; color: #d090f0; font: 9px Audiowide, sans-serif; }
 
-.brush-country { fill: #7050b033; }
-.brush-chaco { fill: #d090f0b0; }
-.brush-outline { fill: none; stroke: #f5c7e7; stroke-width: 1.6; }
-
 .brush-panel h2 { margin: 16px 0 7px; color: #f5c7e7; font: 19px/1.2 Audiowide, sans-serif; }
 .brush-panel>p { margin: 0; color: #eadcef; font-size: 12px; line-height: 1.45; }
 .brush-findings { display: grid; gap: 6px; margin: 11px 0; }
@@ -164,9 +160,7 @@
 @media (prefers-reduced-motion: reduce) {
   .astrion-dialog:has(.chaco-found-notice) button.primary { animation: none; filter: drop-shadow(0 0 4px #f0b0f066); }
 }
-.chaco-discovery-lock { display: flex; justify-content: center; gap: 14px; margin: 20px 0; }
-.chaco-discovery-lock span { display: grid; place-items: center; width: 58px; height: 58px; border: 2px solid #ffd9a8; border-radius: 50%; color: #ffd9a8; font: 17px Audiowide, sans-serif; background: #ffd9a817; animation: finding-arrive .45s ease-out both; }
-.chaco-discovery-lock span:last-child { animation-delay: .12s; }
+
 .astrion-dialog:has(.chaco-analysis-preview) { width: min(680px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; padding: 26px 30px; }
 .astrion-dialog:has(.chaco-analysis-preview)>p { font-size: 15px; }
 .chaco-analysis-preview { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; overflow: hidden; }
@@ -187,7 +181,7 @@
   .astrion-dialog:has(.chaco-analysis-preview) button { font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .chaco-discovery-lock span, .chaco-analysis-preview figure, .astrion-dialog:has(.chaco-analysis-preview) button { animation: none; }
+   .chaco-analysis-preview figure, .astrion-dialog:has(.chaco-analysis-preview) button { animation: none; }
   .chaco-analysis-preview::after { display: none; }
 }
 .astrion-dialog:has(.chaco-impact) {

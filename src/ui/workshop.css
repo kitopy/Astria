@@ -46,24 +46,12 @@
 /* ---------- Shared pieces ---------- */
 
 .ws-panel,
-.ws-noah,
-.ws-meters,
-.ws-caption {
+.ws-noah{
   background: var(--panel);
   border: 1.5px solid var(--line);
   border-radius: 26px;
   box-shadow: 0 12px 40px rgba(10, 4, 25, 0.45);
   backdrop-filter: blur(6px);
-}
-
-.ws-title {
-  font-family: 'Audiowide', sans-serif;
-  font-weight: 400;
-  font-size: 26px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--pink);
-  margin: 0 0 18px;
 }
 
 /* Neon button: transparent, purple fills from the center on hover (like the menu button). */
@@ -90,7 +78,6 @@
 }
 .ws-btn.ws-primary:hover:not(:disabled) { color: var(--deep); }
 .ws-btn.ws-small { font-size: 18px; padding: 12px 22px; }
-.ws-btn.ws-wide { width: 100%; margin-top: 18px; }
 
 .ws-meter + .ws-meter { margin-top: 18px; }
 .ws-meter-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
@@ -101,11 +88,6 @@
 .ws-meter-bar i { display: block; height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--fill), var(--orchid), var(--glow)); transition: width 0.35s ease-out; }
 .ws-meter.over strong { color: var(--warn); }
 .ws-meter.over .ws-meter-bar i { background: var(--warn); }
-
-.ws-details { margin-top: 18px; font-size: 17px; line-height: 1.5; color: var(--muted); }
-.ws-details summary { cursor: pointer; color: var(--lilac); pointer-events: auto; }
-.ws-details a { color: var(--glow); }
-.ws-details ol { padding-left: 22px; margin: 10px 0 0; }
 
 /* ---------- Layout ---------- */
 
@@ -118,7 +100,6 @@
   align-items: center;
   justify-content: flex-end; /* only the voice switch, on the right */
 }
-
 
 .ws-left,
 .ws-right {
@@ -171,54 +152,16 @@
 
 /* ---------- Build: part cards ---------- */
 
-.ws-part { border: 0; margin: 0; padding: 0; min-width: 0; }
-.ws-part + .ws-part { margin-top: 22px; }
-.ws-part legend { font-family: 'Audiowide', sans-serif; font-size: 22px; letter-spacing: 2px; text-transform: uppercase; color: var(--pink); margin-bottom: 12px; padding: 0; }
-
-.ws-plus { font-size: 16px; color: var(--glow); line-height: 1.3; }
-.ws-minus { font-size: 16px; color: var(--pink); line-height: 1.3; }
 .ws-thumb { display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)); }
 .ws-thumb i { display: block; background-repeat: no-repeat; }
-.ws-sr { position: absolute; opacity: 0; width: 1px; height: 1px; }
-
-.ws-meters { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; padding: 18px 26px; }
-.ws-meters .ws-meter + .ws-meter { margin-top: 0; }
 
 /* ---------- Test: flight plan ---------- */
-
-.ws-phases { list-style: none; margin: 0 0 22px; padding: 0; display: grid; gap: 14px; }
-.ws-phases li { display: flex; align-items: center; gap: 14px; font-size: 20px; color: var(--muted); }
-.ws-phases span { display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid currentColor; font-family: 'Audiowide', sans-serif; font-size: 16px; }
-.ws-phases li.done { color: var(--lilac); }
-.ws-phases li.current { color: var(--glow); font-weight: 700; }
-.ws-phases li.current span { background: var(--glow); color: var(--deep); border-color: var(--glow); }
-
-.ws-task { border-top: 1px solid var(--line); padding-top: 20px; }
-.ws-task p { font-size: 21px; line-height: 1.45; margin: 12px 0 0; }
-.ws-chip { display: inline-block; font-size: 17px; padding: 6px 14px; border-radius: 20px; background: rgba(208, 144, 240, 0.18); color: var(--soft); }
-.ws-hint { font-size: 17px !important; color: var(--muted); }
-
-.ws-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 26px 0 8px; }
-.ws-photo { text-align: center; padding: 16px 8px; border-radius: 18px; border: 1.5px dashed rgba(208, 144, 240, 0.45); color: var(--muted); font-size: 17px; }
-.ws-photo b { display: block; font-family: 'Audiowide', sans-serif; font-weight: 400; font-size: 18px; color: var(--ink); margin-bottom: 4px; }
-.ws-photo.taken { border-style: solid; border-color: var(--lilac); color: var(--soft); background: rgba(208, 144, 240, 0.1); }
-.ws-photo.sent { border-style: solid; border-color: var(--gold); color: var(--gold); background: rgba(255, 217, 168, 0.1); }
-
-
-.ws-caption { text-align: center; padding: 18px 24px; font-size: 20px; color: var(--soft); }
-.ws-caption strong { display: block; font-family: 'Audiowide', sans-serif; font-weight: 400; font-size: 28px; color: var(--ink); margin-bottom: 4px; }
 
 /* ---------- Reward ---------- */
 
 .ws-headline { text-align: center; font-family: 'Cinzel', serif; font-weight: 700; font-size: 64px; color: var(--pink); margin: 0; text-shadow: 0 0 6px #1a0b33, 0 4px 24px #1a0b33, 0 0 40px rgba(26, 11, 51, 0.9); }
 .ws-headline + p { text-align: center; font-size: 22px; margin: 6px 0 0; text-shadow: 0 2px 8px #000; }
-.ws-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
-.ws-stats div { text-align: center; padding: 20px 8px; border-radius: 18px; background: rgba(208, 144, 240, 0.12); border: 1.5px solid var(--line); }
-.ws-stats strong { display: block; font-family: 'Audiowide', sans-serif; font-weight: 400; font-size: 44px; color: var(--gold); }
-.ws-stats span { font-size: 17px; color: var(--soft); }
-.ws-feedback { padding-left: 22px; margin: 0; font-size: 19px; line-height: 1.5; }
-.ws-feedback li + li { margin-top: 12px; }
-.ws-story { font-size: 20px; line-height: 1.55; margin: 0 0 18px; }
+
 .ws-panel h3 { font-family: 'Audiowide', sans-serif; font-weight: 400; font-size: 20px; color: var(--pink); letter-spacing: 1px; margin: 0 0 10px; }
 
 /* ---------- Build: assemble the satellite (ws--wizard) ---------- */
@@ -298,31 +241,6 @@
 .ws-part-tip[hidden] { display: none; }
 
 /* Subtle cue that the Chaco comparison is the next step after a successful flight. */
-.ws-next-comparison {
-  animation: ws-next-glow 5s ease-in-out infinite;
-  border-color: rgba(208, 144, 240, 0.72);
-}
-.ws-next-label {
-  display: inline-block;
-  margin: 0 0 10px;
-  color: #eadbff;
-  font-family: 'Audiowide', sans-serif;
-  font-size: 13px;
-  letter-spacing: 2px;
-  animation: ws-next-label-glow 5s ease-in-out infinite;
-}
-.ws-next-comparison > .ws-title { text-shadow: 0 0 10px rgba(240, 176, 240, 0.22); }
-@keyframes ws-next-glow {
-  0%, 100% { box-shadow: 0 12px 40px rgba(10, 4, 25, 0.45); border-color: rgba(208, 144, 240, 0.55); }
-  50% { box-shadow: 0 12px 46px rgba(10, 4, 25, 0.45), 0 0 18px rgba(208, 144, 240, 0.2); border-color: rgba(232, 199, 255, 0.78); }
-}
-@keyframes ws-next-label-glow {
-  0%, 100% { opacity: 0.82; }
-  50% { opacity: 1; text-shadow: 0 0 12px rgba(232, 199, 255, 0.34); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ws-next-comparison, .ws-next-label { animation: none; }
-}
 
 .ws-devtools {
   position: fixed;
@@ -375,9 +293,7 @@
    Longhand border-image properties on purpose: the shorthand with var() is not applied reliably. */
 
 /* Panels: the full frame (double line, "///" marks). */
-.ws .ws-panel,
-.ws .ws-meters,
-.ws .ws-caption {
+.ws .ws-panel{
   border: 2px solid transparent;
   border-radius: 0;
   border-image-source: var(--hud-panel);
@@ -408,7 +324,6 @@
 .ws .ws-btn,
 .ws .ws-listen,
 .ws .ws-slot,
-.ws .ws-stats div,
 .ws .ws-part-tip {
   border: 2px solid transparent;
   border-radius: 0;
