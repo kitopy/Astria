@@ -1,7 +1,7 @@
 {
   "camera": { "label": "Cámara", "options": [
-    { "id": "simple", "name": "Esencial", "benefit": "Menor consumo", "tradeoff": "Menos detalle", "cost": 16, "mass": 2, "power": 12, "quality": 1, "data": 1 },
-    { "id": "detail", "name": "Exploradora", "benefit": "Más detalle del bosque", "tradeoff": "Usa más energía y datos", "cost": 30, "mass": 3, "power": 24, "quality": 2, "data": 3 }
+    { "id": "simple", "name": "Esencial", "benefit": "Gasta menos batería", "tradeoff": "Muestra menos detalles", "cost": 16, "mass": 2, "power": 12, "quality": 1, "data": 1 },
+    { "id": "detail", "name": "Exploradora", "benefit": "Muestra más detalles del bosque", "tradeoff": "Gasta más batería y espacio", "cost": 30, "mass": 3, "power": 24, "quality": 2, "data": 3 }
   ]},
   "solar": { "label": "Paneles solares", "options": [
     { "id": "small", "name": "Compactos", "benefit": "Livianos y económicos", "tradeoff": "Recargan menos", "cost": 12, "mass": 2, "generation": 12 },

@@ -10,7 +10,7 @@ import { REFRAME_ENERGY } from '../game/chaco-visibility.js';
 // What each part does in a space mission, with the name engineers use for it.
 // The role is the subtitle on screen; the text is NOAH's one-line explanation.
 const PART_INFO = {
-  camera: { role: 'Carga útil', text: 'La cámara es la que toma las fotos del bosque.' },
+  camera: { role: 'Los ojos del satélite', text: 'Esta cámara fotografía el Chaco desde el espacio. Sus imágenes nos ayudan a descubrir cómo cambia el bosque.' },
   solar: { role: 'Sistema de energía', text: 'Los paneles dan energía con la luz del Sol.' },
   battery: { role: 'Almacenamiento de energía', text: 'La batería guarda energía para cuando no hay sol.' },
   antenna: { role: 'Comunicaciones', text: 'La antena envía las fotos a la Tierra.' },
