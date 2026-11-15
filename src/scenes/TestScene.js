@@ -129,7 +129,7 @@ export class TestScene extends Phaser.Scene {
       this.updateSensor();
       const phase = this.flight.gate;
       const message = phase === 1
-        ? 'Llegamos al bosque del Chaco. El recorrido se detuvo: activá Observar para obtener la primera imagen.'
+        ? 'Llegamos al bosque del Chaco. Tocá Tomar foto para obtener la primera imagen.'
         : phase === 2
           ? this.mission.energy >= this.specs.cameraPower
             ? 'Segunda pasada. En este paso ilustramos al satélite en sombra: no hay recarga solar. La cámara funciona con la batería.'

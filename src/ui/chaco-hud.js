@@ -48,7 +48,14 @@ export function createChacoHUD(scene, design, onAction) {
     </div>
   </div></section>
   <footer class="chaco-sources"><span>Mapa real · recorrido simulado</span><span>NASA GIBS · Natural Earth · MapLibre</span></footer>
-  <dialog class="chaco-case" aria-labelledby="chaco-case-title"><button data-flight="close-case" class="close-case">Cerrar</button><h2 id="chaco-case-title">Un caso real de nuestro país</h2><p>NASA documentó cambios del bosque en el Chaco paraguayo con imágenes Landsat de <strong>1985 a 2025</strong>.</p><video controls playsinline preload="metadata" src="${base}data/chaco-landsat-nasa.mp4" aria-label="Serie histórica Landsat del Chaco paraguayo"></video><p class="case-credit">NASA’s Goddard Space Flight Center · Ross K. Walter (SSAI).</p><p>Este video es real y de archivo. Tu satélite, el recorrido, las observaciones que obtenés jugando y la estación terrestre son simulados. La imagen base del mapa es un mosaico Blue Marble; no es una imagen en vivo.</p><a href="https://svs.gsfc.nasa.gov/15026/" target="_blank" rel="noopener">Ver la fuente de NASA</a></dialog>`;
+  <dialog class="chaco-case" aria-labelledby="chaco-case-title">
+    <button data-flight="close-case" class="close-case">Cerrar</button>
+    <h2 id="chaco-case-title">Un caso real de nuestro país</h2>
+    <p>NASA fotografió este bosque desde 1985 hasta 2025.</p>
+    <video muted loop playsinline preload="metadata" src="${base}data/chaco-landsat-nasa.mp4" aria-label="Serie histórica Landsat del Chaco paraguayo, 1985 a 2025"></video>
+    <p>El video es real. Tu viaje en el juego es simulado.</p>
+    <p class="case-credit">NASA’s Goddard Space Flight Center · Ross K. Walter (SSAI) · <a href="https://svs.gsfc.nasa.gov/15026/" target="_blank" rel="noopener">Ver en NASA</a></p>
+  </dialog>`;
   document.body.append(root);
   const get = key => root.querySelector(`[data-hud="${key}"]`);
   // Welcome: the shared game dialog (ui/dialog.js). The flight waits until it's closed.
@@ -111,7 +118,7 @@ export function createChacoHUD(scene, design, onAction) {
     setSensorYear(year){get('sensor-year').textContent=`ARCHIVO · ${year}`;},
     showShots(shots){const tray=root.querySelector('.sensor-thumbnails');tray.replaceChildren();for(const [i,shot]of shots.entries()){const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=shot.image;img.alt=`Vista de archivo del Chaco, ${shot.year??`foto ${i+1}`}`;caption.textContent=`${shot.year??`Foto ${i+1}`}${shot.delivered?' · enviada':' · a bordo'}`;figure.append(img,caption);tray.append(figure);}},
     say(text){message=text;get('noah').textContent=text;if(voice)speak();},
-    showCase(){dialog.showModal();}, closeCase(){dialog.close();},
+    showCase(){dialog.showModal();const video=root.querySelector('video');video.currentTime=0;video.play().catch(()=>{});}, closeCase(){dialog.close();},
     updateWeather(flight,visibility){
       const cover=cloudCover(flight,visibility), status=visibility.status;
       const info=obstacleInfo(visibility), intensity=obstacleIntensity(flight,visibility);

@@ -180,3 +180,11 @@
 .chaco-game .visibility-challenge h2{font-size:18px;margin:0 0 12px;color:#f5c7e7}
 .chaco-game .visibility-challenge progress{display:block;width:100%;height:8px;margin:0;accent-color:#f0b0f0}
 .chaco-game .signal-bars span{background:#f0b0f0}
+
+/* NASA case: fits the screen without scrolling, the video plays by itself (muted, in a loop). */
+.chaco-game .chaco-case{width:min(720px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:hidden;padding:30px 30px 22px;text-align:center;color:#f3e6ff}
+.chaco-case h2{margin:0 0 6px;font-size:24px;color:#f5c7e7}
+.chaco-case p{margin:8px 0}
+.chaco-case video{max-height:calc(100dvh - 260px);object-fit:contain;border:1px solid #d090f0}
+.chaco-case .close-case{position:absolute;top:22px;right:24px;float:none}
+.chaco-case .case-credit{font-size:11px;color:#c4a9e4}
