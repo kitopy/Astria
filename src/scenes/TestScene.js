@@ -64,6 +64,7 @@ export class TestScene extends Phaser.Scene {
     this.render();
   }
   handleAction(action) {
+    if (action === 'intro-closed') { this.render(); return; }
     if (action === 'travel' && this.hud.ready && !['blocked','adjusting'].includes(this.visibility.status)) {
       const gate = this.flight.gate;
       this.flight = startFlight(this.flight);
