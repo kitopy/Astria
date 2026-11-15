@@ -31,19 +31,13 @@ export function createChacoHUD(scene, design, onAction) {
   </aside>
   <aside class="sensor-panel hud-panel" aria-label="Visor de la cámara"><div class="sensor-heading"><h2>Cámara del satélite</h2><span data-hud="sensor-state">Preparando</span></div><div class="sensor-window"><canvas aria-label="Vista recreada del Chaco con imágenes de archivo"></canvas><div class="sensor-crosshair"></div><div class="sensor-scan"></div><span class="sensor-record" data-hud="sensor-year">ARCHIVO · 1985</span></div><p>Archivo Landsat / NASA · observación recreada</p><div class="sensor-thumbnails" aria-label="Capturas guardadas"></div></aside>
   <div class="chaco-map-tools"><button data-flight="recenter" aria-label="Volver a centrar Paraguay">Centrar Paraguay</button><button data-flight="speed">Velocidad ×1</button><button data-flight="workshop">Volver al taller</button></div>
-  <section class="flight-action-menu hud-panel" aria-label="Elegí una acción de observación" hidden>
-    <span class="flight-action-eyebrow">VENTANA DE OBSERVACIÓN</span>
+  <section class="flight-action-menu hud-panel" aria-label="Ventana de observación" hidden>
     <h2 data-hud="action-title">El Chaco está a la vista</h2>
-    <p data-hud="action-prompt">Elegí qué hacer con la cámara.</p>
     <div class="flight-action-choices">
       <button data-flight-choice="capture" class="flight-action-choice primary">
         <span class="flight-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l1.5-2h7L17 8h3v10H4V8Z"/><circle cx="12" cy="13" r="3"/></svg></span>
-        <span class="flight-action-copy"><strong>Tomar foto</strong><small data-hud="action-capture-detail">Guardar una imagen del Chaco</small></span>
+        <span class="flight-action-copy"><strong>Tomar foto</strong></span>
         <span class="flight-action-cost" data-hud="action-cost"></span>
-      </button>
-      <button data-flight-choice="travel" class="flight-action-choice">
-        <span class="flight-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
-        <span class="flight-action-copy"><strong>Seguir sin foto</strong><small>Perdés esta vista y cuidás la batería</small></span>
       </button>
     </div>
   </section>
@@ -169,23 +163,15 @@ export function createChacoHUD(scene, design, onAction) {
       control('capture').disabled=!this.ready||!gate||![1,2].includes(phase)||mission.captured.includes(phase)||mission.energy<specs.cameraPower;
       control('capture').hidden=!gate||![1,2].includes(phase)||mission.captured.includes(phase);
       control('capture').querySelector('.console-label').textContent=`Tomar foto · −${specs.cameraPower}`;
-      const actionAvailable = this.ready && !this.introOpen && gate && [1, 2].includes(phase) && !mission.captured.includes(phase) && !obstructed;
+      // Only when the photo can be taken: with too little battery, the console offers to keep flying instead.
+      const actionAvailable = this.ready && !this.introOpen && gate && [1, 2].includes(phase) && !mission.captured.includes(phase) && !obstructed && !control('capture').disabled;
       const actionMenu = root.querySelector('.flight-action-menu');
       actionMenu.hidden = !actionAvailable;
       root.classList.toggle('action-menu-open', actionAvailable);
       root.querySelector('.map-satellite')?.classList.toggle('action-ready', actionAvailable);
       if (actionAvailable) {
         get('action-title').textContent = phase === 1 ? 'Primera vista del Chaco' : 'Segunda vista del Chaco';
-        get('action-prompt').textContent = phase === 1
-          ? 'El bosque entra en el visor. ¿Tomamos la primera imagen?'
-          : 'El satélite vuelve a cruzar la zona. ¿Hacemos otra captura?';
-        get('action-capture-detail').textContent = phase === 1 ? 'Guardar esta vista del bosque' : 'Registrar una segunda vista';
-        get('action-cost').textContent = `−${specs.cameraPower} energía`;
-        const captureChoice = actionMenu.querySelector('[data-flight-choice="capture"]');
-        const travelChoice = actionMenu.querySelector('[data-flight-choice="travel"]');
-        captureChoice.disabled = control('capture').disabled;
-        captureChoice.classList.toggle('primary', !captureChoice.disabled);
-        travelChoice.classList.toggle('primary', captureChoice.disabled);
+        get('action-cost').textContent = `−${specs.cameraPower}`;
         this.positionActionMenu();
       }
       control('transmit').disabled=!this.ready||!gate||phase!==3||mission.sent||!mission.photos.length||mission.energy<specs.antennaPower;

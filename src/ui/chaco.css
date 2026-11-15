@@ -60,9 +60,7 @@
 
 /* Observation choices follow the satellite when the flight reaches a camera stop. */
 .flight-action-menu{position:absolute;z-index:7;width:350px;padding:17px 18px;background:#1c0a33f2;border:1px solid #d090f0;border-radius:17px;box-shadow:0 16px 38px #1c0a33b8;animation:flight-action-enter .28s ease-out both}
-.flight-action-eyebrow{font:9px Audiowide,sans-serif;letter-spacing:1.1px;color:#d090f0}
 .flight-action-menu h2{margin:9px 0 5px;font:17px Audiowide,sans-serif;color:#f5c7e7}
-.flight-action-menu p{margin:0 0 13px;color:#f8f1ff;font:12px/1.4 Quicksand,sans-serif}
 .flight-action-choices{display:grid;gap:8px}
 .chaco-game .flight-action-choice{display:flex;align-items:center;gap:10px;width:100%;min-height:59px;padding:8px 10px;border:1px solid #a783ca;border-radius:11px;background:#3c2454;color:#f8f1ff;text-align:left;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s}
 .chaco-game .flight-action-choice:hover:not(:disabled){background:#7050b0;border-color:#f0b0f0;transform:translateX(3px)}
@@ -212,3 +210,10 @@
 .chaco-case video{max-height:calc(100dvh - 260px);object-fit:contain;border:1px solid #d090f0}
 .chaco-case .close-case{position:absolute;top:22px;right:24px;float:none}
 .chaco-case .case-credit{font-size:11px;color:#c4a9e4}
+
+/* Observation menu, trimmed: a title and two buttons. */
+.chaco-game .flight-action-menu{width:280px;padding:26px 18px 16px}
+.flight-action-menu h2{margin:0 0 12px}
+.chaco-game .flight-action-choice{min-height:48px}
+.flight-action-copy strong{font-size:13px}
+.flight-action-cost{font-size:13px}
